@@ -3,17 +3,26 @@ const canvas = document.getElementById("scoreChart");
 const ctx = canvas.getContext("2d");
 
 // 获取动画、图表、队伍及 Y 轴配置
-const { animation, chart, teams: teamConfig, yAxis } = APP_CONFIG;
+const { animation, chart, teams: teamConfigs, yAxis } = APP_CONFIG;
 
 // 播放点保持在窗口中心附近
 const centerMatch = chart.windowSize / 2;
 
 // 初始化队伍数据
-const teams = teamConfig.colors.map((color, index) => ({
-  color,
+const teams = teamConfigs.map((teamConfig, index) => ({
+  color: teamConfig.color,
   index,
   values: [teamConfig.initialScore]
 }));
+
+// 根据各队伍初始分数计算 Y 轴初始显示范围
+const initialDisplayedRange = rangeForPeak(
+    Math.max(
+        ...teamConfigs.map(
+            teamConfig => Math.abs(teamConfig.initialScore)
+        )
+    )
+);
 
 // 动画起始时间
 let startTime = performance.now();
@@ -22,10 +31,7 @@ let startTime = performance.now();
 let lastFrame = startTime;
 
 // 当前 Y 轴显示范围
-let displayedRange = yAxis.initialRange;
-
-// 记录 Y 轴是否曾经扩张
-let hasExpandedYAxis = false;
+let displayedRange = initialDisplayedRange;
 
 
 /**
@@ -380,7 +386,6 @@ function draw(now) {
 
   // 找到当前最大绝对分数
   const peak = Math.max(
-      yAxis.minimumPeak,
       ...visibleValues.map(
           Math.abs
       )
@@ -403,19 +408,9 @@ function draw(now) {
       displayedRange;
 
 
-  // 超过初始范围后开启动态缩放
-  if (
-      targetRange >
-      yAxis.initialRange
-  ) {
-    hasExpandedYAxis = true;
-  }
-
-
   // 平滑调整 Y 轴范围
   if (
-      isExpanding ||
-      hasExpandedYAxis
+      isExpanding
   ) {
     const scaleRate =
         isExpanding
