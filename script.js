@@ -33,9 +33,6 @@ let lastFrame = startTime;
 // 当前 Y 轴显示范围
 let displayedRange = initialDisplayedRange;
 
-// 记录 Y 轴是否曾经扩张
-let hasExpandedYAxis = false;
-
 
 /**
  * 生成某支队伍下一场比赛后的分数
@@ -411,19 +408,9 @@ function draw(now) {
       displayedRange;
 
 
-  // 超过初始范围后开启动态缩放
-  if (
-      targetRange >
-      initialDisplayedRange
-  ) {
-    hasExpandedYAxis = true;
-  }
-
-
   // 平滑调整 Y 轴范围
   if (
-      isExpanding ||
-      hasExpandedYAxis
+      isExpanding
   ) {
     const scaleRate =
         isExpanding
