@@ -2,29 +2,17 @@
 const canvas = document.getElementById("scoreChart");
 const ctx = canvas.getContext("2d");
 
-// 每场比赛对应的动画时长
-const MATCH_DURATION = 1150;
-
-// X 轴可见比赛数量
-const WINDOW_SIZE = 12;
+// 获取动画、图表、队伍及 Y 轴配置
+const { animation, chart, teams: teamConfig, yAxis } = APP_CONFIG;
 
 // 播放点保持在窗口中心附近
-const CENTER_MATCH = WINDOW_SIZE / 2;
-
-// Y 轴初始显示范围
-const INITIAL_DISPLAYED_RANGE = 60;
-
-// 各队伍曲线颜色
-const COLORS = [
-  "#cf3f27", "#126783", "#ce9215", "#39714e", "#745087",
-  "#db655d", "#59666e", "#718a31", "#30467d", "#ae6220"
-];
+const centerMatch = chart.windowSize / 2;
 
 // 初始化队伍数据
-const teams = COLORS.map((color, index) => ({
+const teams = teamConfig.colors.map((color, index) => ({
   color,
   index,
-  values: [0]
+  values: [teamConfig.initialScore]
 }));
 
 // 动画起始时间
@@ -34,7 +22,7 @@ let startTime = performance.now();
 let lastFrame = startTime;
 
 // 当前 Y 轴显示范围
-let displayedRange = INITIAL_DISPLAYED_RANGE;
+let displayedRange = yAxis.initialRange;
 
 // 记录 Y 轴是否曾经扩张
 let hasExpandedYAxis = false;
@@ -279,8 +267,8 @@ function niceStep(rawStep) {
 function rangeForPeak(peak) {
   // 保留约 12% 的上下边距
   return Math.max(
-      20,
-      peak * 1.12
+      yAxis.minimumRange,
+      peak * yAxis.paddingFactor
   );
 }
 
@@ -326,7 +314,7 @@ function draw(now) {
   const playhead = Math.max(
       0,
       (now - startTime) /
-      MATCH_DURATION
+      animation.matchDuration
   );
 
   // 当前所在的整数区间
@@ -342,18 +330,18 @@ function draw(now) {
   // 播放点到达中心后开始滚动画面
   const viewStart = Math.max(
       0,
-      playhead - CENTER_MATCH
+      playhead - centerMatch
   );
 
   const viewEnd =
-      viewStart + WINDOW_SIZE;
+      viewStart + chart.windowSize;
 
   // 将比赛编号映射到 X 坐标
   const xAt = match =>
       margin.left +
       (
           (match - viewStart) /
-          WINDOW_SIZE
+          chart.windowSize
       ) *
       plotWidth;
 
@@ -392,7 +380,7 @@ function draw(now) {
 
   // 找到当前最大绝对分数
   const peak = Math.max(
-      8,
+      yAxis.minimumPeak,
       ...visibleValues.map(
           Math.abs
       )
@@ -405,7 +393,7 @@ function draw(now) {
   // 计算当前帧时间间隔
   const frameSeconds =
       Math.min(
-          0.05,
+          animation.maximumFrameDelta,
           (now - lastFrame) /
           1000
       );
@@ -418,7 +406,7 @@ function draw(now) {
   // 超过初始范围后开启动态缩放
   if (
       targetRange >
-      INITIAL_DISPLAYED_RANGE
+      yAxis.initialRange
   ) {
     hasExpandedYAxis = true;
   }
@@ -430,7 +418,9 @@ function draw(now) {
       hasExpandedYAxis
   ) {
     const scaleRate =
-        isExpanding ? 6 : 1.8;
+        isExpanding
+            ? yAxis.expansionRate
+            : yAxis.contractionRate;
 
     displayedRange +=
         (
@@ -491,7 +481,7 @@ function draw(now) {
   const contourStep =
       niceStep(
           (displayedRange * 2) /
-          8
+          yAxis.targetMajorTickCount
       );
 
   // 次刻度为主刻度的一半
