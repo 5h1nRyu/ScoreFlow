@@ -1,6 +1,6 @@
 :root {
   color-scheme: light;
-  background: #e9e3d2;
+  --background-color: #ffffff;
 }
 
 * {
@@ -16,20 +16,7 @@ body {
 }
 
 body {
-  background:
-    repeating-radial-gradient(circle at 0 0, rgba(28, 29, 24, 0.1) 0 0.55px, transparent 0.8px 4px),
-    linear-gradient(105deg, #ddd5bf 0%, #f5f0e2 46%, #e4dcc7 100%);
-}
-
-body::after {
-  position: fixed;
-  inset: 0;
-  content: "";
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(0deg, transparent 0 3px, rgba(38, 36, 28, 0.025) 4px),
-    linear-gradient(95deg, transparent 25%, rgba(255, 255, 255, 0.3) 48%, transparent 70%);
-  mix-blend-mode: multiply;
+  background-color: var(--background-color);
 }
 
 canvas {
