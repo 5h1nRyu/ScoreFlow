@@ -19,6 +19,19 @@ const APP_CONFIG = Object.freeze({
     windowSize: 12
   }),
 
+  lineLabels: Object.freeze({
+    // 是否在每条折线末端显示 CSV 中的 name。
+    enabled: true,
+    // 标签字号（CSS 像素）。
+    fontSize: 16,
+    // 标签追赶折线目标位置的速率，数值越大跟随越快。
+    acceleration: 9,
+    // 标签与折线末端的水平间距。
+    horizontalGap: 12,
+    // 标签之间额外保留的最小竖直间距。
+    minimumGap: 4
+  }),
+
   yAxis: Object.freeze({
     // 动态计算出的 Y 轴范围下限。
     minimumRange: 20,

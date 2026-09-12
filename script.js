@@ -2,8 +2,8 @@
 const canvas = document.getElementById("scoreChart");
 const ctx = canvas.getContext("2d");
 
-// 获取动画、图表及 Y 轴配置
-const { animation, chart, dataUrl, yAxis } = APP_CONFIG;
+// 获取动画、图表、末端标签及 Y 轴配置
+const { animation, chart, dataUrl, lineLabels, yAxis } = APP_CONFIG;
 
 // 播放点保持在窗口中心附近
 const centerMatch = chart.windowSize / 2;
@@ -21,6 +21,56 @@ let lastFrame = startTime;
 
 // 当前 Y 轴显示范围
 let displayedRange = initialDisplayedRange;
+
+// 记录每支队伍标签的当前 Y 坐标，用于平滑跟随与排名交换。
+const labelPositions = new Map();
+
+
+/**
+ * 在绘图区内为标签计算不重叠的目标位置
+ */
+function layoutLineLabels(labels, top, bottom, spacing) {
+  const ordered = [...labels].sort((first, second) => {
+    if (first.tipY !== second.tipY) {
+      return first.tipY - second.tipY;
+    }
+
+    return first.index - second.index;
+  });
+
+  // 先向下推开距离过近的标签。
+  ordered.forEach((label, index) => {
+    label.targetY = Math.max(
+        label.tipY,
+        index === 0
+            ? top
+            : ordered[index - 1].targetY + spacing
+    );
+  });
+
+  // 底部超出时整体上移，再反向收紧以保持间距。
+  if (ordered.length > 0) {
+    ordered[ordered.length - 1].targetY = Math.min(
+        ordered[ordered.length - 1].targetY,
+        bottom
+    );
+
+    for (let index = ordered.length - 2; index >= 0; index -= 1) {
+      ordered[index].targetY = Math.min(
+          ordered[index].targetY,
+          ordered[index + 1].targetY - spacing
+      );
+    }
+
+    // 极窄窗口中优先确保顶部标签仍在绘图区内。
+    const topCorrection = Math.max(0, top - ordered[0].targetY);
+    ordered.forEach((label) => {
+      label.targetY += topCorrection;
+    });
+  }
+
+  return ordered;
+}
 
 
 /**
@@ -264,6 +314,7 @@ function draw(now) {
   // 每轮重新开始时同时还原坐标范围，确保整个图表真正从头播放。
   if (cycleElapsed < now - lastFrame && elapsed >= cycleDuration) {
     displayedRange = initialDisplayedRange;
+    labelPositions.clear();
   }
 
   // 当前所在的整数区间
@@ -607,8 +658,21 @@ function draw(now) {
   );
 
 
+  const lineTips = teams.map((team, index) => {
+    const value = valueOnFixedCurve(team, playhead);
+
+    return {
+      index,
+      team,
+      value,
+      tipX: xAt(playhead),
+      tipY: yAt(value)
+    };
+  });
+
+
   // 绘制每支队伍的分数曲线
-  teams.forEach((team) => {
+  lineTips.forEach(({ team, tipX, tipY }) => {
     const points = [];
 
     // 多取一个左侧点保证边缘曲线连续
@@ -688,20 +752,6 @@ function draw(now) {
     ctx.restore();
 
 
-    // 计算播放头在固定曲线上的真实位置
-    const tipValue =
-        valueOnFixedCurve(
-            team,
-            playhead
-        );
-
-    const tipX =
-        xAt(playhead);
-
-    const tipY =
-        yAt(tipValue);
-
-
     // 绘制曲线末端圆点
     if (
         tipX >= margin.left &&
@@ -727,6 +777,55 @@ function draw(now) {
       ctx.fill();
     }
   });
+
+
+  // 标签按当前分数的上下顺序排列，交叉时会切换目标位置。
+  if (lineLabels.enabled) {
+    const fontSize = Math.max(1, lineLabels.fontSize);
+    const spacing = fontSize + Math.max(0, lineLabels.minimumGap);
+    const labels = layoutLineLabels(
+        lineTips,
+        margin.top + fontSize / 2,
+        height - margin.bottom - fontSize / 2,
+        spacing
+    );
+    const followAmount = 1 - Math.exp(
+        -Math.max(0, lineLabels.acceleration) * frameSeconds
+    );
+
+    ctx.save();
+    ctx.font = `700 ${fontSize}px "Courier New", monospace`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 1.25;
+    ctx.setLineDash([]);
+
+    labels.forEach((label) => {
+      const previousY = labelPositions.get(label.team);
+      const labelY = previousY === undefined
+          ? label.targetY
+          : previousY + (label.targetY - previousY) * followAmount;
+      const labelX = label.tipX + Math.max(0, lineLabels.horizontalGap);
+
+      labelPositions.set(label.team, labelY);
+
+      // 偏移后用引导线标明标签所属的折线。
+      if (Math.abs(labelY - label.tipY) > 0.5) {
+        ctx.globalAlpha = 0.45;
+        ctx.strokeStyle = label.team.color;
+        ctx.beginPath();
+        ctx.moveTo(label.tipX + 3, label.tipY);
+        ctx.lineTo(labelX - 3, labelY);
+        ctx.stroke();
+      }
+
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = label.team.color;
+      ctx.fillText(label.team.name, labelX, labelY);
+    });
+
+    ctx.restore();
+  }
 
 
   // 请求下一帧动画
