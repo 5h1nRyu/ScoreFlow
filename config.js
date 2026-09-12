@@ -6,76 +6,18 @@ const APP_CONFIG = Object.freeze({
     // 每场比赛对应的动画时长（毫秒）。
     matchDuration: 1150,
     // 单帧参与缩放计算的最大时间间隔（秒）。
-    maximumFrameDelta: 0.05
+    maximumFrameDelta: 0.05,
+    // 最后一场结束后停留多久，再从 match0 重新播放（毫秒）。
+    restartDelay: 3000
   }),
+
+  // 队伍属性和每场比赛的累计总分都从此 CSV 读取。
+  dataUrl: "scores.csv",
 
   chart: Object.freeze({
     // X 轴同时显示的比赛数量。
     windowSize: 12
   }),
-
-  teams: Object.freeze([
-    Object.freeze({
-      // 第一支队伍曲线使用的颜色。
-      color: "#cf3f27",
-      // 第一支队伍的初始分数。
-      initialScore: 18
-    }),
-    Object.freeze({
-      // 第二支队伍曲线使用的颜色。
-      color: "#126783",
-      // 第二支队伍的初始分数。
-      initialScore: -12
-    }),
-    Object.freeze({
-      // 第三支队伍曲线使用的颜色。
-      color: "#ce9215",
-      // 第三支队伍的初始分数。
-      initialScore: 25
-    }),
-    Object.freeze({
-      // 第四支队伍曲线使用的颜色。
-      color: "#39714e",
-      // 第四支队伍的初始分数。
-      initialScore: -20
-    }),
-    Object.freeze({
-      // 第五支队伍曲线使用的颜色。
-      color: "#745087",
-      // 第五支队伍的初始分数。
-      initialScore: 8
-    }),
-    Object.freeze({
-      // 第六支队伍曲线使用的颜色。
-      color: "#db655d",
-      // 第六支队伍的初始分数。
-      initialScore: -5
-    }),
-    Object.freeze({
-      // 第七支队伍曲线使用的颜色。
-      color: "#59666e",
-      // 第七支队伍的初始分数。
-      initialScore: 30
-    }),
-    Object.freeze({
-      // 第八支队伍曲线使用的颜色。
-      color: "#718a31",
-      // 第八支队伍的初始分数。
-      initialScore: -28
-    }),
-    Object.freeze({
-      // 第九支队伍曲线使用的颜色。
-      color: "#30467d",
-      // 第九支队伍的初始分数。
-      initialScore: 14
-    }),
-    Object.freeze({
-      // 第十支队伍曲线使用的颜色。
-      color: "#ae6220",
-      // 第十支队伍的初始分数。
-      initialScore: -16
-    })
-  ]),
 
   yAxis: Object.freeze({
     // 动态计算出的 Y 轴范围下限。
