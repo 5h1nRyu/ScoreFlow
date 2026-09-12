@@ -24,3 +24,17 @@ canvas {
   width: 100%;
   height: 100%;
 }
+
+#dataError {
+  position: fixed;
+  inset: 50% auto auto 50%;
+  width: min(90vw, 680px);
+  margin: 0;
+  padding: 1rem 1.25rem;
+  color: #8b1e13;
+  font: 600 16px/1.6 "Courier New", monospace;
+  text-align: center;
+  background: #fff3f0;
+  border: 2px solid #cf3f27;
+  transform: translate(-50%, -50%);
+}

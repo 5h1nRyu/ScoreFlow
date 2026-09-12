@@ -2,27 +2,16 @@
 const canvas = document.getElementById("scoreChart");
 const ctx = canvas.getContext("2d");
 
-// 获取动画、图表、队伍及 Y 轴配置
-const { animation, chart, teams: teamConfigs, yAxis } = APP_CONFIG;
+// 获取动画、图表及 Y 轴配置
+const { animation, chart, dataUrl, yAxis } = APP_CONFIG;
 
 // 播放点保持在窗口中心附近
 const centerMatch = chart.windowSize / 2;
 
-// 初始化队伍数据
-const teams = teamConfigs.map((teamConfig, index) => ({
-  color: teamConfig.color,
-  index,
-  values: [teamConfig.initialScore]
-}));
-
-// 根据各队伍初始分数计算 Y 轴初始显示范围
-const initialDisplayedRange = rangeForPeak(
-    Math.max(
-        ...teamConfigs.map(
-            teamConfig => Math.abs(teamConfig.initialScore)
-        )
-    )
-);
+// CSV 加载完成后填充队伍和比赛数据
+let teams = [];
+let finalMatch = 0;
+let initialDisplayedRange = yAxis.minimumRange;
 
 // 动画起始时间
 let startTime = performance.now();
@@ -32,60 +21,6 @@ let lastFrame = startTime;
 
 // 当前 Y 轴显示范围
 let displayedRange = initialDisplayedRange;
-
-
-/**
- * 生成某支队伍下一场比赛后的分数
- */
-function scoreForMatch(team, match, previous) {
-  // 不同队伍设置不同基础方向
-  const direction = team % 2 === 0 ? 1 : -1;
-
-  // 随比赛进程变化的波动幅度
-  const volatility =
-      10 + 34 * (0.5 + 0.5 * Math.sin(match * 0.14 - 1.2));
-
-  // 主要分数波动
-  const swing =
-      Math.sin(match * 0.82 + team * 1.73) * volatility;
-
-  // 高频波动
-  const shock =
-      Math.sin(match * 2.37 + team * 4.11) *
-      volatility *
-      0.45;
-
-  // 将过大的分数轻微拉回零点
-  const pullToZero = -previous * 0.13;
-
-  return Math.round(
-      previous +
-      direction * 5 +
-      swing +
-      shock +
-      pullToZero
-  );
-}
-
-
-/**
- * 确保所有队伍已有足够的数据
- */
-function ensureData(lastMatch) {
-  teams.forEach((team) => {
-    while (team.values.length <= lastMatch + 1) {
-      const match = team.values.length;
-
-      team.values.push(
-          scoreForMatch(
-              team.index,
-              match,
-              team.values.at(-1)
-          )
-      );
-    }
-  });
-}
 
 
 /**
@@ -176,7 +111,7 @@ function valueOnFixedCurve(team, time) {
   const progress = time - match;
 
   const from = team.values[match];
-  const to = team.values[match + 1];
+  const to = team.values[Math.min(match + 1, finalMatch)];
 
   // 整数点直接返回原始数据
   if (progress <= 0) {
@@ -317,21 +252,23 @@ function draw(now) {
       margin.bottom;
 
   // 当前播放到的比赛位置
-  const playhead = Math.max(
-      0,
-      (now - startTime) /
-      animation.matchDuration
+  const animationDuration = finalMatch * animation.matchDuration;
+  const cycleDuration = animationDuration + animation.restartDelay;
+  const elapsed = Math.max(0, now - startTime);
+  const cycleElapsed = cycleDuration > 0 ? elapsed % cycleDuration : 0;
+  const playhead = Math.min(
+      finalMatch,
+      cycleElapsed / animation.matchDuration
   );
+
+  // 每轮重新开始时同时还原坐标范围，确保整个图表真正从头播放。
+  if (cycleElapsed < now - lastFrame && elapsed >= cycleDuration) {
+    displayedRange = initialDisplayedRange;
+  }
 
   // 当前所在的整数区间
   const completedMatch =
       Math.floor(playhead);
-
-  // 提前生成下一个完整整数点
-  ensureData(
-      completedMatch + 1
-  );
-
 
   // 播放点到达中心后开始滚动画面
   const viewStart = Math.max(
@@ -684,8 +621,10 @@ function draw(now) {
         );
 
     // 必须加入当前区间完整的终点 B
-    const lastMatch =
-        completedMatch + 1;
+    const lastMatch = Math.min(
+        finalMatch,
+        completedMatch + 1
+    );
 
 
     // 所有点均为固定整数数据点
@@ -801,8 +740,38 @@ window.addEventListener(
     resizeCanvas
 );
 
-// 初始化画布
-resizeCanvas();
+async function start() {
+  try {
+    const response = await fetch(dataUrl, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`读取 ${dataUrl} 失败（HTTP ${response.status}）`);
+    }
 
-// 启动动画
-requestAnimationFrame(draw);
+    const data = ScoreData.parseScoreCsv(await response.text());
+    data.teams.forEach((team, index) => {
+      if (!CSS.supports("color", team.color)) {
+        throw new Error(`第 ${index + 1} 支队伍的 color“${team.color}”无效`);
+      }
+    });
+
+    teams = data.teams;
+    finalMatch = data.matches.length - 1;
+    initialDisplayedRange = rangeForPeak(
+        Math.max(...data.matches[0].map(Math.abs))
+    );
+    displayedRange = initialDisplayedRange;
+    startTime = performance.now();
+    lastFrame = startTime;
+
+    resizeCanvas();
+    requestAnimationFrame(draw);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const errorElement = document.getElementById("dataError");
+    errorElement.textContent = `无法加载积分数据：${message}`;
+    errorElement.hidden = false;
+    console.error(error);
+  }
+}
+
+start();
