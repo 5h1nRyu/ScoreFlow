@@ -19,6 +19,19 @@ const APP_CONFIG = Object.freeze({
     windowSize: 12
   }),
 
+  labels: Object.freeze({
+    // 是否在每条折线的末端显示队伍名称。
+    enabled: true,
+    // 标签字号（CSS 像素）。
+    fontSize: 16,
+    // 标签字重，可使用 100–900 或 "bold" 等 Canvas 字体权重。
+    fontWeight: 700,
+    // 标签与折线末端圆点的水平间距。
+    horizontalGap: 10,
+    // 标签之间的额外垂直间距。
+    verticalGap: 4
+  }),
+
   yAxis: Object.freeze({
     // 动态计算出的 Y 轴范围下限。
     minimumRange: 20,

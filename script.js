@@ -2,8 +2,8 @@
 const canvas = document.getElementById("scoreChart");
 const ctx = canvas.getContext("2d");
 
-// 获取动画、图表及 Y 轴配置
-const { animation, chart, dataUrl, yAxis } = APP_CONFIG;
+// 获取动画、图表、标签及 Y 轴配置
+const { animation, chart, dataUrl, labels, yAxis } = APP_CONFIG;
 
 // 播放点保持在窗口中心附近
 const centerMatch = chart.windowSize / 2;
@@ -211,6 +211,48 @@ function rangeForPeak(peak) {
       yAxis.minimumRange,
       peak * yAxis.paddingFactor
   );
+}
+
+
+/**
+ * 按当前分数排序并为折线标签分配不重叠的纵坐标
+ */
+function layoutLabels(items, top, bottom) {
+  if (items.length === 0) {
+    return [];
+  }
+
+  const minimumGap = labels.fontSize + labels.verticalGap;
+  const availableHeight = bottom - top;
+  const effectiveGap = items.length > 1
+      ? Math.min(minimumGap, availableHeight / (items.length - 1))
+      : 0;
+
+  const arranged = [...items].sort((first, second) =>
+    second.value - first.value || first.index - second.index
+  );
+
+  arranged[0].labelY = Math.max(top, arranged[0].tipY);
+
+  for (let index = 1; index < arranged.length; index += 1) {
+    arranged[index].labelY = Math.max(
+        arranged[index].tipY,
+        arranged[index - 1].labelY + effectiveGap
+    );
+  }
+
+  if (arranged.at(-1).labelY > bottom) {
+    arranged.at(-1).labelY = bottom;
+
+    for (let index = arranged.length - 2; index >= 0; index -= 1) {
+      arranged[index].labelY = Math.min(
+          arranged[index].labelY,
+          arranged[index + 1].labelY - effectiveGap
+      );
+    }
+  }
+
+  return arranged;
 }
 
 
@@ -607,8 +649,10 @@ function draw(now) {
   );
 
 
+  const labelItems = [];
+
   // 绘制每支队伍的分数曲线
-  teams.forEach((team) => {
+  teams.forEach((team, index) => {
     const points = [];
 
     // 多取一个左侧点保证边缘曲线连续
@@ -701,6 +745,15 @@ function draw(now) {
     const tipY =
         yAt(tipValue);
 
+    labelItems.push({
+      color: team.color,
+      index,
+      name: team.name,
+      tipX,
+      tipY,
+      value: tipValue
+    });
+
 
     // 绘制曲线末端圆点
     if (
@@ -727,6 +780,32 @@ function draw(now) {
       ctx.fill();
     }
   });
+
+
+  if (labels.enabled) {
+    const halfLabelHeight = labels.fontSize / 2;
+    const arrangedLabels = layoutLabels(
+        labelItems,
+        margin.top + halfLabelHeight,
+        height - margin.bottom - halfLabelHeight
+    );
+
+    ctx.save();
+    ctx.font = `${labels.fontWeight} ${labels.fontSize}px "Courier New", monospace`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+
+    arrangedLabels.forEach((label) => {
+      ctx.fillStyle = label.color;
+      ctx.fillText(
+          label.name,
+          label.tipX + labels.horizontalGap,
+          label.labelY
+      );
+    });
+
+    ctx.restore();
+  }
 
 
   // 请求下一帧动画
