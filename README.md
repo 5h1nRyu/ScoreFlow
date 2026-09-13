@@ -2,7 +2,7 @@
 
 ## 页面布局
 
-页面由横、纵两个分割位置划分为四个区域，积分折线图位于左上区域，其余区域预留给后续组件。可在 `config.js` 的 `layout` 中调整：
+页面由横、纵两个分割位置划分为四个区域，积分折线图位于左上区域，其余区域预留给后续组件。可在 `src/config/config.js` 的 `layout` 中调整：
 
 - `verticalSplit`：纵向分割位置，取值须在 `0` 到 `1` 之间；默认 `0.7`，即左侧占页面宽度的 70%。
 - `horizontalSplit`：横向分割位置，取值须在 `0` 到 `1` 之间；默认 `0.7`，即上方占页面高度的 70%。
@@ -10,11 +10,58 @@
 - `divider.thickness`：分隔线粗细，单位为 CSS 像素。
 - `divider.color`：分隔线颜色。
 
-`timeline.js` 提供页面级公共时间轴并统一驱动已注册组件，`score-chart.js` 只负责折线图本身的尺寸和绘制，`app.js` 负责数据加载与模块装配。新增依托比赛进度的组件时，可通过 `timeline.subscribe()` 订阅同一份时间状态。
+`src/core/timeline.js` 提供页面级公共时间轴并统一驱动已注册组件，`src/components/score-chart.js` 只负责折线图本身的尺寸和绘制，`src/app.js` 负责数据加载与模块装配。新增依托比赛进度的组件时，可通过 `timeline.subscribe()` 订阅同一份时间状态。
+
+## 文件结构
+
+```text
+ScoreFlow/
+├── assets/
+│   └── css/
+│       └── styles.css              # 页面布局和组件样式
+├── data/
+│   └── scores.csv                  # 队伍属性和累计积分
+├── src/
+│   ├── components/
+│   │   └── score-chart.js          # 折线图计算与 Canvas 绘制
+│   ├── config/
+│   │   └── config.js               # 页面、动画和图表配置
+│   ├── core/
+│   │   └── timeline.js             # 公共动画时间轴
+│   ├── data/
+│   │   └── score-data.js           # CSV 解析和业务数据转换
+│   └── app.js                      # 应用入口与模块装配
+├── index.html                      # 页面结构和资源入口
+└── README.md                       # 使用与架构说明
+```
+
+文件按职责分为静态资源、业务数据和源代码三类。`src` 内再按配置、数据处理、核心能力和可视化组件拆分，新增功能时应放入职责最接近的目录。
+
+## 项目逻辑架构
+
+项目采用无构建工具的浏览器端分层结构，各脚本按依赖顺序由 `index.html` 加载：
+
+1. **配置层**：`src/config/config.js` 创建只读的 `APP_CONFIG`，集中提供布局比例、动画速度、数据地址和图表参数
+2. **数据层**：`src/data/score-data.js` 读取入口传入的 CSV 文本，处理引号转义、校验属性与比赛行，并生成队伍时间序列
+3. **时间轴层**：`src/core/timeline.js` 根据配置计算播放头、帧间隔和循环状态，通过订阅机制向组件广播统一状态
+4. **组件层**：`src/components/score-chart.js` 负责 Canvas 尺寸适配、坐标映射、曲线插值、标签避让和逐帧绘制
+5. **装配层**：`src/app.js` 应用布局配置，加载 `data/scores.csv`，创建时间轴和图表并连接订阅关系，同时集中处理初始化错误
+
+核心数据流如下：
+
+```text
+APP_CONFIG ──> 应用入口 ──> 页面布局
+                    │
+scores.csv ──> CSV 解析器 ──> 队伍时间序列 ──> 积分图表
+                    │                         ↑
+                    └──> 公共时间轴 ──────────┘
+```
+
+模块通过 `globalThis` 暴露只读入口，避免跨层访问内部状态。时间轴只发布状态而不负责绘图，因此后续组件可以订阅同一时间轴，与积分图表保持同步。
 
 ## 数据文件
 
-所有队伍属性和累计分数均从 `scores.csv` 读取。CSV 的第一列是行属性名，而不是传统的列标题：
+所有队伍属性和累计分数均从 `data/scores.csv` 读取。CSV 的第一列是行属性名，而不是传统的列标题：
 
 ```csv
 name,team1,team2,team3
@@ -33,7 +80,7 @@ match1,10,-10,0
 
 每条折线的末端会显示 CSV `name` 属性中的队伍名称。标签会跟随当前分数，并在分数接近时自动上下偏移以避免重叠；当队伍的分数大小关系互换时，标签的上下顺序也会互换。
 
-可在 `config.js` 的 `labels` 中调整：
+可在 `src/config/config.js` 的 `labels` 中调整：
 
 - `enabled`：标签显示开关。
 - `fontSize`：标签字号。

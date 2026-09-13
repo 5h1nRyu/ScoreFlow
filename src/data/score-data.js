@@ -1,6 +1,7 @@
 (function exposeScoreData(global) {
   "use strict";
 
+  // 将 CSV 文本解析为支持引号转义的二维数组
   function parseCsvRows(text) {
     const rows = [];
     let row = [];
@@ -43,9 +44,11 @@
       rows.push(row);
     }
 
+    // 忽略不包含有效字段的空行
     return rows.filter(cells => cells.some(cell => cell.trim() !== ""));
   }
 
+  // 校验积分数据并转换为按队伍组织的结构
   function parseScoreCsv(text) {
     const rows = parseCsvRows(text.replace(/^\uFEFF/, ""));
 
@@ -62,6 +65,7 @@
     const matches = [];
     let reachedMatches = false;
 
+    // 属性行必须位于连续的比赛行之前
     rows.forEach((cells, rowIndex) => {
       const line = rowIndex + 1;
       if (cells.length !== teamCount + 1) {
@@ -113,6 +117,7 @@
       throw new Error("CSV 至少需要 match0 行");
     }
 
+    // 将按行存储的数据转换为每支队伍的时间序列
     const teams = Array.from({ length: teamCount }, (_, index) => {
       const attributes = Object.fromEntries(
           Object.entries(properties).map(([key, values]) => [key, values[index]])
