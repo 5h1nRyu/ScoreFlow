@@ -3,6 +3,7 @@
   --background-color: #ffffff;
 }
 
+/* 统一使用边框盒模型计算元素尺寸 */
 * {
   box-sizing: border-box;
 }
@@ -19,6 +20,7 @@ body {
   background-color: var(--background-color);
 }
 
+/* 使用可配置分割比例构建四区域网格 */
 .dashboard {
   --vertical-split: 70%;
   --horizontal-split: 70%;
@@ -53,6 +55,7 @@ body {
   background: var(--divider-color);
 }
 
+/* 仅在配置开启时显示布局分隔线 */
 .dashboard--dividers-visible .dashboard__divider {
   display: block;
 }
