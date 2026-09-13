@@ -2,6 +2,20 @@
 const APP_CONFIG = Object.freeze({
   backgroundColor: "#ffffff",
 
+  layout: Object.freeze({
+    // 纵向分隔位置：0.7 表示左侧占页面宽度的 70%。
+    verticalSplit: 0.7,
+    // 横向分隔位置：0.7 表示上方占页面高度的 70%。
+    horizontalSplit: 0.8,
+    divider: Object.freeze({
+      // 默认隐藏分隔线；布局仍然保持四区域结构。
+      visible: true,
+      // 分隔线粗细（CSS 像素）。
+      thickness: 1,
+      color: "rgba(28, 30, 25, 0.35)"
+    })
+  }),
+
   animation: Object.freeze({
     // 每场比赛对应的动画时长（毫秒）。
     matchDuration: 1150,
@@ -16,7 +30,7 @@ const APP_CONFIG = Object.freeze({
 
   chart: Object.freeze({
     // X 轴同时显示的比赛数量。
-    windowSize: 12
+    windowSize: 10
   }),
 
   labels: Object.freeze({
@@ -40,7 +54,7 @@ const APP_CONFIG = Object.freeze({
     // Y 轴期望显示的主刻度数量。
     targetMajorTickCount: 8,
     // Y 轴扩张时的平滑调整速率。
-    expansionRate: 6,
+    expansionRate: 10,
     // Y 轴收缩时的平滑调整速率。
     contractionRate: 1.8
   })
