@@ -21,6 +21,8 @@ const APP_CONFIG = Object.freeze({
     matchDuration: 1150,
     // 限制单帧参与缩放计算的最大秒数
     maximumFrameDelta: 0.05,
+    // 设置结束时将 X 轴展开至完整比赛范围的动画毫秒数
+    overviewDuration: 1500,
     // 设置最后一场结束后重新播放前的停留毫秒数
     restartDelay: 3000
   }),

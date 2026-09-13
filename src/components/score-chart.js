@@ -16,6 +16,12 @@ let width = 0;
 let height = 0;
 
 
+// 为全景展开提供起止平滑的缓动进度
+function easeInOut(progress) {
+  return progress * progress * (3 - 2 * progress);
+}
+
+
 // 根据窗口大小调整 Canvas 分辨率
 function resizeCanvas() {
   // 限制最高设备像素比
@@ -235,7 +241,14 @@ function layoutLabels(items, top, bottom) {
 
 // 绘制当前动画帧
 function render(timelineState) {
-  const { completedMatch, deltaSeconds, didRestart, playhead } = timelineState;
+  const {
+    completedMatch,
+    deltaSeconds,
+    didRestart,
+    overviewProgress,
+    phase,
+    playhead
+  } = timelineState;
   if (width <= 0 || height <= 0) return;
 
   // 根据窗口尺寸动态设置边距
@@ -273,20 +286,24 @@ function render(timelineState) {
   }
 
   // 播放点到达中心后开始滚动画面
-  const viewStart = Math.max(
+  const movingViewStart = Math.max(
       0,
       playhead - centerMatch
   );
 
-  const viewEnd =
-      viewStart + chart.windowSize;
+  const movingViewEnd =
+      movingViewStart + chart.windowSize;
+
+  const overviewEase = easeInOut(overviewProgress);
+  const viewStart = movingViewStart * (1 - overviewEase);
+  const viewEnd = movingViewEnd + (finalMatch - movingViewEnd) * overviewEase;
+  const viewSpan = viewEnd - viewStart;
 
   // 将比赛编号映射到 X 坐标
   const xAt = match =>
       margin.left +
       (
-          (match - viewStart) /
-          chart.windowSize
+          (viewSpan > 0 ? (match - viewStart) / viewSpan : 0)
       ) *
       plotWidth;
 
@@ -731,7 +748,7 @@ function render(timelineState) {
   });
 
 
-  if (labels.enabled) {
+  if (labels.enabled && phase !== "overview" && phase !== "restart-hold") {
     const halfLabelHeight = labels.fontSize / 2;
     const arrangedLabels = layoutLabels(
         labelItems,
