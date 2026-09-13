@@ -2,6 +2,20 @@
 const APP_CONFIG = Object.freeze({
   backgroundColor: "#ffffff",
 
+  layout: Object.freeze({
+    // 纵向分隔位置：0.7 表示左侧占页面宽度的 70%。
+    verticalSplit: 0.7,
+    // 横向分隔位置：0.7 表示上方占页面高度的 70%。
+    horizontalSplit: 0.7,
+    divider: Object.freeze({
+      // 默认隐藏分隔线；布局仍然保持四区域结构。
+      visible: false,
+      // 分隔线粗细（CSS 像素）。
+      thickness: 1,
+      color: "rgba(28, 30, 25, 0.35)"
+    })
+  }),
+
   animation: Object.freeze({
     // 每场比赛对应的动画时长（毫秒）。
     matchDuration: 1150,

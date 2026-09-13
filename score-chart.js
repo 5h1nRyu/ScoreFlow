@@ -1,26 +1,19 @@
-// 获取画布和绘图上下文
-const canvas = document.getElementById("scoreChart");
-const ctx = canvas.getContext("2d");
+(function exposeScoreChart(global) {
+  "use strict";
 
-// 获取动画、图表、标签及 Y 轴配置
-const { animation, chart, dataUrl, labels, yAxis } = APP_CONFIG;
+function createScoreChart(canvas, teams, finalMatch, config) {
+const ctx = canvas.getContext("2d");
+const { chart, labels, yAxis } = config;
 
 // 播放点保持在窗口中心附近
 const centerMatch = chart.windowSize / 2;
 
-// CSV 加载完成后填充队伍和比赛数据
-let teams = [];
-let finalMatch = 0;
-let initialDisplayedRange = yAxis.minimumRange;
-
-// 动画起始时间
-let startTime = performance.now();
-
-// 上一帧时间
-let lastFrame = startTime;
-
-// 当前 Y 轴显示范围
+const initialDisplayedRange = rangeForPeak(
+    Math.max(...teams.map(team => Math.abs(team.values[0])))
+);
 let displayedRange = initialDisplayedRange;
+let width = 0;
+let height = 0;
 
 
 /**
@@ -33,8 +26,8 @@ function resizeCanvas() {
       2
   );
 
-  const width = window.innerWidth;
-  const height = window.innerHeight;
+  width = canvas.clientWidth;
+  height = canvas.clientHeight;
 
   canvas.width = Math.round(width * dpr);
   canvas.height = Math.round(height * dpr);
@@ -259,9 +252,9 @@ function layoutLabels(items, top, bottom) {
 /**
  * 绘制当前动画帧
  */
-function draw(now) {
-  const width = window.innerWidth;
-  const height = window.innerHeight;
+function render(timelineState) {
+  const { completedMatch, deltaSeconds, didRestart, playhead } = timelineState;
+  if (width <= 0 || height <= 0) return;
 
   // 根据窗口尺寸动态设置边距
   const margin = {
@@ -293,24 +286,9 @@ function draw(now) {
       margin.top -
       margin.bottom;
 
-  // 当前播放到的比赛位置
-  const animationDuration = finalMatch * animation.matchDuration;
-  const cycleDuration = animationDuration + animation.restartDelay;
-  const elapsed = Math.max(0, now - startTime);
-  const cycleElapsed = cycleDuration > 0 ? elapsed % cycleDuration : 0;
-  const playhead = Math.min(
-      finalMatch,
-      cycleElapsed / animation.matchDuration
-  );
-
-  // 每轮重新开始时同时还原坐标范围，确保整个图表真正从头播放。
-  if (cycleElapsed < now - lastFrame && elapsed >= cycleDuration) {
+  if (didRestart) {
     displayedRange = initialDisplayedRange;
   }
-
-  // 当前所在的整数区间
-  const completedMatch =
-      Math.floor(playhead);
 
   // 播放点到达中心后开始滚动画面
   const viewStart = Math.max(
@@ -374,13 +352,7 @@ function draw(now) {
   const targetRange =
       rangeForPeak(peak);
 
-  // 计算当前帧时间间隔
-  const frameSeconds =
-      Math.min(
-          animation.maximumFrameDelta,
-          (now - lastFrame) /
-          1000
-      );
+  const frameSeconds = deltaSeconds;
 
   const isExpanding =
       targetRange >
@@ -410,7 +382,6 @@ function draw(now) {
         );
   }
 
-  lastFrame = now;
 
 
   // 将分数映射到 Y 坐标
@@ -807,50 +778,17 @@ function draw(now) {
     ctx.restore();
   }
 
-
-  // 请求下一帧动画
-  requestAnimationFrame(draw);
 }
 
+const resizeObserver = new ResizeObserver(resizeCanvas);
+resizeObserver.observe(canvas);
+resizeCanvas();
 
-// 窗口尺寸变化时重新设置画布
-window.addEventListener(
-    "resize",
-    resizeCanvas
-);
-
-async function start() {
-  try {
-    const response = await fetch(dataUrl, { cache: "no-store" });
-    if (!response.ok) {
-      throw new Error(`读取 ${dataUrl} 失败（HTTP ${response.status}）`);
-    }
-
-    const data = ScoreData.parseScoreCsv(await response.text());
-    data.teams.forEach((team, index) => {
-      if (!CSS.supports("color", team.color)) {
-        throw new Error(`第 ${index + 1} 支队伍的 color“${team.color}”无效`);
-      }
-    });
-
-    teams = data.teams;
-    finalMatch = data.matches.length - 1;
-    initialDisplayedRange = rangeForPeak(
-        Math.max(...data.matches[0].map(Math.abs))
-    );
-    displayedRange = initialDisplayedRange;
-    startTime = performance.now();
-    lastFrame = startTime;
-
-    resizeCanvas();
-    requestAnimationFrame(draw);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    const errorElement = document.getElementById("dataError");
-    errorElement.textContent = `无法加载积分数据：${message}`;
-    errorElement.hidden = false;
-    console.error(error);
-  }
+return Object.freeze({
+  destroy() { resizeObserver.disconnect(); },
+  render
+});
 }
 
-start();
+global.ScoreChart = Object.freeze({ createScoreChart });
+}(globalThis));
