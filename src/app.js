@@ -1,7 +1,7 @@
 (function startApplication() {
   "use strict";
 
-  const { animation, dataUrl, layout } = APP_CONFIG;
+  const { animation, backgroundColor, dataUrl, layout } = APP_CONFIG;
 
   // 将布局比例转换为 CSS 百分比
   function percentage(value, name) {
@@ -9,6 +9,14 @@
       throw new Error(`${name} 必须是大于 0 且小于 1 的数字`);
     }
     return `${value * 100}%`;
+  }
+
+  // 校验并将页面外观配置写入样式表
+  function applyAppearance() {
+    if (!CSS.supports("color", backgroundColor)) {
+      throw new Error(`背景颜色“${backgroundColor}”无效`);
+    }
+    document.documentElement.style.setProperty("--background-color", backgroundColor);
   }
 
   // 校验配置并把布局参数写入页面
@@ -32,6 +40,7 @@
   // 加载数据并装配图表与公共时间轴
   async function start() {
     try {
+      applyAppearance();
       applyLayout();
       const response = await fetch(dataUrl, { cache: "no-store" });
       if (!response.ok) throw new Error(`读取 ${dataUrl} 失败（HTTP ${response.status}）`);

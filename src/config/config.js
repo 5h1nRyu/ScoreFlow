@@ -59,9 +59,3 @@ const APP_CONFIG = Object.freeze({
     contractionRate: 1.8
   })
 });
-
-// 将背景颜色提供给样式表使用
-document.documentElement.style.setProperty(
-    "--background-color",
-    APP_CONFIG.backgroundColor
-);
