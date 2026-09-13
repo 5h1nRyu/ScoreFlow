@@ -16,9 +16,7 @@ let width = 0;
 let height = 0;
 
 
-/**
- * 根据窗口大小调整 Canvas 分辨率
- */
+// 根据窗口大小调整 Canvas 分辨率
 function resizeCanvas() {
   // 限制最高设备像素比
   const dpr = Math.min(
@@ -44,9 +42,7 @@ function resizeCanvas() {
 }
 
 
-/**
- * 计算三次 Bezier 的一维坐标
- */
+// 计算三次 Bezier 的一维坐标
 function cubicBezierValue(p0, p1, p2, p3, t) {
   const oneMinusT = 1 - t;
 
@@ -59,9 +55,7 @@ function cubicBezierValue(p0, p1, p2, p3, t) {
 }
 
 
-/**
- * 根据 X 轴进度反求 Bezier 参数
- */
+// 根据 X 轴进度反求 Bezier 参数
 function parameterForXProgress(progress) {
   // 两个 X 控制点都位于区间中点
   const xAtParameter = t =>
@@ -96,9 +90,7 @@ function parameterForXProgress(progress) {
 }
 
 
-/**
- * 获取固定 Bezier 曲线在指定时间位置上的分数
- */
+// 获取固定 Bezier 曲线在指定时间位置上的分数
 function valueOnFixedCurve(team, time) {
   const match = Math.floor(time);
   const progress = time - match;
@@ -129,9 +121,7 @@ function valueOnFixedCurve(team, time) {
 }
 
 
-/**
- * 使用固定整数数据点生成 Bezier 曲线
- */
+// 使用固定整数数据点生成 Bezier 曲线
 function appendSmoothCurve(points) {
   if (points.length === 0) {
     return;
@@ -166,9 +156,7 @@ function appendSmoothCurve(points) {
 }
 
 
-/**
- * 计算适合显示的刻度间隔
- */
+// 计算适合显示的刻度间隔
 function niceStep(rawStep) {
   // 获取数量级
   const magnitude =
@@ -195,9 +183,7 @@ function niceStep(rawStep) {
 }
 
 
-/**
- * 根据最大分数计算 Y 轴范围
- */
+// 根据最大分数计算 Y 轴范围
 function rangeForPeak(peak) {
   // 保留约 12% 的上下边距
   return Math.max(
@@ -207,9 +193,7 @@ function rangeForPeak(peak) {
 }
 
 
-/**
- * 按当前分数排序并为折线标签分配不重叠的纵坐标
- */
+// 按当前分数排序并为折线标签分配不重叠的纵坐标
 function layoutLabels(items, top, bottom) {
   if (items.length === 0) {
     return [];
@@ -249,9 +233,7 @@ function layoutLabels(items, top, bottom) {
 }
 
 
-/**
- * 绘制当前动画帧
- */
+// 绘制当前动画帧
 function render(timelineState) {
   const { completedMatch, deltaSeconds, didRestart, playhead } = timelineState;
   if (width <= 0 || height <= 0) return;

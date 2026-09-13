@@ -1,6 +1,7 @@
 (function exposeTimeline(global) {
   "use strict";
 
+  // 创建可被多个可视化组件订阅的公共时间轴
   function createTimeline(options) {
     const { matchDuration, maximumFrameDelta, restartDelay } = options.animation;
     const finalMatch = options.finalMatch;
@@ -10,6 +11,7 @@
     let lastFrameTime = 0;
     let previousCycleElapsed = 0;
 
+    // 计算当前播放状态并通知所有订阅者
     function frame(now) {
       const animationDuration = finalMatch * matchDuration;
       const cycleDuration = animationDuration + restartDelay;
@@ -32,6 +34,7 @@
       animationFrame = requestAnimationFrame(frame);
     }
 
+    // 仅暴露订阅和播放控制能力
     return Object.freeze({
       subscribe(subscriber) {
         subscribers.add(subscriber);
