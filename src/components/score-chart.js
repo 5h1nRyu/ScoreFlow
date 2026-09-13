@@ -341,28 +341,24 @@ function render(timelineState) {
       displayedRange;
 
 
-  // 平滑调整 Y 轴范围
-  if (
+  // 扩张与收缩分别使用各自的速率平滑调整 Y 轴范围
+  const scaleRate =
       isExpanding
-  ) {
-    const scaleRate =
-        isExpanding
-            ? yAxis.expansionRate
-            : yAxis.contractionRate;
+          ? yAxis.expansionRate
+          : yAxis.contractionRate;
 
-    displayedRange +=
-        (
-            targetRange -
-            displayedRange
-        ) *
-        (
-            1 -
-            Math.exp(
-                -scaleRate *
-                frameSeconds
-            )
-        );
-  }
+  displayedRange +=
+      (
+          targetRange -
+          displayedRange
+      ) *
+      (
+          1 -
+          Math.exp(
+              -scaleRate *
+              frameSeconds
+          )
+      );
 
 
 
