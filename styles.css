@@ -19,10 +19,58 @@ body {
   background-color: var(--background-color);
 }
 
-canvas {
+.dashboard {
+  --vertical-split: 70%;
+  --horizontal-split: 70%;
+  --divider-thickness: 1px;
+  --divider-color: rgba(28, 30, 25, 0.35);
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--vertical-split) minmax(0, 1fr);
+  grid-template-rows: var(--horizontal-split) minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+}
+
+.dashboard__region {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#scoreChart {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+.dashboard__divider {
+  position: absolute;
+  z-index: 1;
+  display: none;
+  pointer-events: none;
+  background: var(--divider-color);
+}
+
+.dashboard--dividers-visible .dashboard__divider {
+  display: block;
+}
+
+.dashboard__divider--vertical {
+  top: 0;
+  bottom: 0;
+  left: var(--vertical-split);
+  width: var(--divider-thickness);
+  transform: translateX(-50%);
+}
+
+.dashboard__divider--horizontal {
+  right: 0;
+  bottom: calc(100% - var(--horizontal-split));
+  left: 0;
+  height: var(--divider-thickness);
+  transform: translateY(50%);
 }
 
 #dataError {

@@ -9,9 +9,20 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <canvas id="scoreChart" role="img" aria-label="各队伍随比赛场次连续变化的积分折线图"></canvas>
+    <main id="dashboard" class="dashboard">
+      <section class="dashboard__region dashboard__region--top-left" aria-label="积分走势区域">
+        <canvas id="scoreChart" role="img" aria-label="各队伍随比赛场次连续变化的积分折线图"></canvas>
+      </section>
+      <section class="dashboard__region dashboard__region--top-right" aria-label="右上区域"></section>
+      <section class="dashboard__region dashboard__region--bottom-left" aria-label="左下区域"></section>
+      <section class="dashboard__region dashboard__region--bottom-right" aria-label="右下区域"></section>
+      <span class="dashboard__divider dashboard__divider--vertical" aria-hidden="true"></span>
+      <span class="dashboard__divider dashboard__divider--horizontal" aria-hidden="true"></span>
+    </main>
     <p id="dataError" role="alert" hidden></p>
     <script src="data.js"></script>
-    <script src="script.js"></script>
+    <script src="timeline.js"></script>
+    <script src="score-chart.js"></script>
+    <script src="app.js"></script>
   </body>
 </html>
