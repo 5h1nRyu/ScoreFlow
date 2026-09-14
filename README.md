@@ -30,18 +30,24 @@
 ```text
 ScoreFlow/
 ├── assets/
-│   └── css/
-│       └── styles.css              # 页面布局和组件样式
+│   ├── css/
+│   │   └── styles.css              # 页面布局和组件样式
+│   └── images/game-table/
+│       ├── players/                # 以选手 name 命名的 PNG 头像
+│       └── teams/                  # 以 team 命名的 PNG 队标
 ├── data/
+│   ├── matches.json                # 每场两桌比赛的选手详情
 │   └── scores.csv                  # 队伍属性和累计积分
 ├── src/
 │   ├── components/
+│   │   ├── game-table.js           # 比赛详情表及逐项切换动画
 │   │   └── score-chart.js          # 折线图计算与 Canvas 绘制
 │   ├── config/
 │   │   └── config.js               # 页面、动画和图表配置
 │   ├── core/
 │   │   └── timeline.js             # 公共动画时间轴
 │   ├── data/
+│   │   ├── match-data.js           # 比赛 JSON 校验与转换
 │   │   └── score-data.js           # CSV 解析和业务数据转换
 │   └── app.js                      # 应用入口与模块装配
 ├── index.html                      # 页面结构和资源入口
@@ -71,6 +77,17 @@ scores.csv ──> CSV 解析器 ──> 队伍时间序列 ──> 积分图表
 ```
 
 模块通过 `globalThis` 暴露只读入口，避免跨层访问内部状态。时间轴只发布状态而不负责绘图，因此后续组件可以订阅同一时间轴，与积分图表保持同步。
+
+## 比赛详情表
+
+右上区域的 `game-table` 从 `data/matches.json` 读取每场 `gameA`、`gameB` 各四名选手的数据，并与折线图订阅同一条公共时间轴。进入下一场时，旧的八个条目按照 A 桌、B 桌各自从上到下的顺序向左滑出，新条目随后从右滑入。时间轴进入 `overview` 后会隐藏比赛详情并启用预留的 `team-table` 容器，循环重启时恢复第一场比赛。
+
+人物头像和队标不存储在 JSON 中，按以下固定约定添加 PNG 文件：
+
+- 人物头像：`assets/images/game-table/players/<name>.png`
+- 队标：`assets/images/game-table/teams/<team>.png`
+
+例如 `name` 为 `player04`、`team` 为 `team04` 时，对应文件分别为 `players/player04.png` 和 `teams/team04.png`。资源尚未添加或加载失败时，组件会保留排版空间并隐藏破损图片。
 
 ## 数据文件
 

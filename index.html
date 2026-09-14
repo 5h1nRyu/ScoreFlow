@@ -13,7 +13,12 @@
       <section class="dashboard__region dashboard__region--top-left" aria-label="积分走势区域">
         <canvas id="scoreChart" role="img" aria-label="各队伍随比赛场次连续变化的积分折线图"></canvas>
       </section>
-      <section class="dashboard__region dashboard__region--top-right" aria-label="右上区域"></section>
+      <section class="dashboard__region dashboard__region--top-right" aria-label="比赛详情区域">
+        <div id="tableStage" class="table-stage">
+          <section id="gameTable" class="game-table" aria-label="当前场次比赛详情"></section>
+          <section id="teamTableSlot" class="team-table-slot" aria-label="队伍总览" hidden></section>
+        </div>
+      </section>
       <section class="dashboard__region dashboard__region--bottom-left" aria-label="左下区域"></section>
       <section class="dashboard__region dashboard__region--bottom-right" aria-label="右下区域"></section>
       <span class="dashboard__divider dashboard__divider--vertical" aria-hidden="true"></span>
@@ -21,8 +26,10 @@
     </main>
     <p id="dataError" role="alert" hidden></p>
     <script src="src/data/score-data.js"></script>
+    <script src="src/data/match-data.js"></script>
     <script src="src/core/timeline.js"></script>
     <script src="src/components/score-chart.js"></script>
+    <script src="src/components/game-table.js"></script>
     <script src="src/app.js"></script>
   </body>
 </html>
