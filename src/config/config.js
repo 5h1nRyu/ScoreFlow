@@ -53,6 +53,8 @@ const APP_CONFIG = Object.freeze({
   }),
 
   xAxis: Object.freeze({
+    // 全景阶段期望显示的竖直网格线数量
+    overviewTargetGridLineCount: 12,
     gridLine: Object.freeze({
       // 设置竖直网格虚线的粗细、线段长度和间隔长度
       thickness: 1.3,

@@ -16,9 +16,10 @@
 
 可在 `src/config/config.js` 中调整折线及坐标网格线样式，数值单位均为 Canvas 使用的 CSS 像素：
 
-- `chart.lineThickness`：所有屏幕尺寸下的积分折线粗细。
+- `chart.lineThickness`：所有屏幕尺寸下的积分折线粗细；折线末端圆点会随该值等比例缩放。
 - `xAxis.gridLine.thickness`：与 X 轴刻度对应的竖直网格虚线粗细。
 - `xAxis.gridLine.dashLength`、`dashGap`：竖直网格虚线的线段长度和间隔长度。
+- `xAxis.overviewTargetGridLineCount`：全景展开阶段期望显示的竖直网格线数量；实际间隔会从 `1、2、4、8、16...` 中选择最接近目标数量的一档，并在整个展开阶段保持稳定。
 - `yAxis.gridLines.zero`：零分水平线的样式。
 - `yAxis.gridLines.major`：主刻度水平虚线的样式。
 - `yAxis.gridLines.minor`：次刻度水平虚线的样式。
