@@ -2,6 +2,7 @@
   "games": [
     {
       "gameId": 0,
+      "info": "game0",
       "players": [
         {
           "name": "player04",
@@ -43,6 +44,7 @@
     },
     {
       "gameId": 1,
+      "info": "game1",
       "players": [
         {
           "name": "player06",
@@ -84,6 +86,7 @@
     },
     {
       "gameId": 2,
+      "info": "game2",
       "players": [
         {
           "name": "player07",
@@ -125,6 +128,7 @@
     },
     {
       "gameId": 3,
+      "info": "game3",
       "players": [
         {
           "name": "player01",
@@ -166,6 +170,7 @@
     },
     {
       "gameId": 4,
+      "info": "game4",
       "players": [
         {
           "name": "player02",
@@ -207,6 +212,7 @@
     },
     {
       "gameId": 5,
+      "info": "game5",
       "players": [
         {
           "name": "player04",
@@ -248,6 +254,7 @@
     },
     {
       "gameId": 6,
+      "info": "game6",
       "players": [
         {
           "name": "player05",
@@ -289,6 +296,7 @@
     },
     {
       "gameId": 7,
+      "info": "game7",
       "players": [
         {
           "name": "player07",
@@ -330,6 +338,7 @@
     },
     {
       "gameId": 8,
+      "info": "game8",
       "players": [
         {
           "name": "player08",
@@ -371,6 +380,7 @@
     },
     {
       "gameId": 9,
+      "info": "game9",
       "players": [
         {
           "name": "player02",
@@ -412,6 +422,7 @@
     },
     {
       "gameId": 10,
+      "info": "game10",
       "players": [
         {
           "name": "player03",
@@ -453,6 +464,7 @@
     },
     {
       "gameId": 11,
+      "info": "game11",
       "players": [
         {
           "name": "player05",
@@ -494,6 +506,7 @@
     },
     {
       "gameId": 12,
+      "info": "game12",
       "players": [
         {
           "name": "player06",
@@ -535,6 +548,7 @@
     },
     {
       "gameId": 13,
+      "info": "game13",
       "players": [
         {
           "name": "player08",
@@ -576,6 +590,7 @@
     },
     {
       "gameId": 14,
+      "info": "game14",
       "players": [
         {
           "name": "player01",
@@ -617,6 +632,7 @@
     },
     {
       "gameId": 15,
+      "info": "game15",
       "players": [
         {
           "name": "player03",
@@ -658,6 +674,7 @@
     },
     {
       "gameId": 16,
+      "info": "game16",
       "players": [
         {
           "name": "player04",
@@ -699,6 +716,7 @@
     },
     {
       "gameId": 17,
+      "info": "game17",
       "players": [
         {
           "name": "player06",
@@ -740,6 +758,7 @@
     },
     {
       "gameId": 18,
+      "info": "game18",
       "players": [
         {
           "name": "player07",
@@ -781,6 +800,7 @@
     },
     {
       "gameId": 19,
+      "info": "game19",
       "players": [
         {
           "name": "player01",
@@ -822,6 +842,7 @@
     },
     {
       "gameId": 20,
+      "info": "game20",
       "players": [
         {
           "name": "player02",
@@ -863,6 +884,7 @@
     },
     {
       "gameId": 21,
+      "info": "game21",
       "players": [
         {
           "name": "player04",
@@ -904,6 +926,7 @@
     },
     {
       "gameId": 22,
+      "info": "game22",
       "players": [
         {
           "name": "player05",
@@ -945,6 +968,7 @@
     },
     {
       "gameId": 23,
+      "info": "game23",
       "players": [
         {
           "name": "player07",
@@ -986,6 +1010,7 @@
     },
     {
       "gameId": 24,
+      "info": "game24",
       "players": [
         {
           "name": "player08",
@@ -1027,6 +1052,7 @@
     },
     {
       "gameId": 25,
+      "info": "game25",
       "players": [
         {
           "name": "player02",
@@ -1068,6 +1094,7 @@
     },
     {
       "gameId": 26,
+      "info": "game26",
       "players": [
         {
           "name": "player03",
@@ -1109,6 +1136,7 @@
     },
     {
       "gameId": 27,
+      "info": "game27",
       "players": [
         {
           "name": "player05",
@@ -1150,6 +1178,7 @@
     },
     {
       "gameId": 28,
+      "info": "game28",
       "players": [
         {
           "name": "player06",
@@ -1191,6 +1220,7 @@
     },
     {
       "gameId": 29,
+      "info": "game29",
       "players": [
         {
           "name": "player08",
@@ -1232,6 +1262,7 @@
     },
     {
       "gameId": 30,
+      "info": "game30",
       "players": [
         {
           "name": "player01",
@@ -1273,6 +1304,7 @@
     },
     {
       "gameId": 31,
+      "info": "game31",
       "players": [
         {
           "name": "player03",
@@ -1314,6 +1346,7 @@
     },
     {
       "gameId": 32,
+      "info": "game32",
       "players": [
         {
           "name": "player04",
@@ -1355,6 +1388,7 @@
     },
     {
       "gameId": 33,
+      "info": "game33",
       "players": [
         {
           "name": "player06",
@@ -1396,6 +1430,7 @@
     },
     {
       "gameId": 34,
+      "info": "game34",
       "players": [
         {
           "name": "player07",
@@ -1437,6 +1472,7 @@
     },
     {
       "gameId": 35,
+      "info": "game35",
       "players": [
         {
           "name": "player01",
@@ -1478,6 +1514,7 @@
     },
     {
       "gameId": 36,
+      "info": "game36",
       "players": [
         {
           "name": "player02",
@@ -1519,6 +1556,7 @@
     },
     {
       "gameId": 37,
+      "info": "game37",
       "players": [
         {
           "name": "player04",
@@ -1560,6 +1598,7 @@
     },
     {
       "gameId": 38,
+      "info": "game38",
       "players": [
         {
           "name": "player05",
@@ -1601,6 +1640,7 @@
     },
     {
       "gameId": 39,
+      "info": "game39",
       "players": [
         {
           "name": "player07",
@@ -1642,6 +1682,7 @@
     },
     {
       "gameId": 40,
+      "info": "game40",
       "players": [
         {
           "name": "player08",
@@ -1683,6 +1724,7 @@
     },
     {
       "gameId": 41,
+      "info": "game41",
       "players": [
         {
           "name": "player02",
@@ -1724,6 +1766,7 @@
     },
     {
       "gameId": 42,
+      "info": "game42",
       "players": [
         {
           "name": "player03",
@@ -1765,6 +1808,7 @@
     },
     {
       "gameId": 43,
+      "info": "game43",
       "players": [
         {
           "name": "player05",
@@ -1806,6 +1850,7 @@
     },
     {
       "gameId": 44,
+      "info": "game44",
       "players": [
         {
           "name": "player06",
@@ -1847,6 +1892,7 @@
     },
     {
       "gameId": 45,
+      "info": "game45",
       "players": [
         {
           "name": "player08",
@@ -1888,6 +1934,7 @@
     },
     {
       "gameId": 46,
+      "info": "game46",
       "players": [
         {
           "name": "player01",
@@ -1929,6 +1976,7 @@
     },
     {
       "gameId": 47,
+      "info": "game47",
       "players": [
         {
           "name": "player03",
@@ -1970,6 +2018,7 @@
     },
     {
       "gameId": 48,
+      "info": "game48",
       "players": [
         {
           "name": "player04",
@@ -2011,6 +2060,7 @@
     },
     {
       "gameId": 49,
+      "info": "game49",
       "players": [
         {
           "name": "player06",
