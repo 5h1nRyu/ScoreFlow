@@ -1,4 +1,4 @@
-(function exposeMatchData(global) {
+(function exposeGameData(global) {
   "use strict";
 
   const REQUIRED_PLAYER_FIELDS = Object.freeze([
@@ -54,31 +54,30 @@
     });
   }
 
-  function parseMatchesJson(text) {
+  function parseGamesJson(text) {
     let source;
     try {
       source = JSON.parse(text);
     } catch (error) {
       throw new Error(`比赛数据不是有效 JSON：${error.message}`);
     }
-    if (!source || !Array.isArray(source.matches) || !source.matches.length) {
-      throw new Error("比赛数据必须包含非空的 matches 数组");
+    if (!source || !Array.isArray(source.games) || !source.games.length) {
+      throw new Error("比赛数据必须包含非空的 games 数组");
     }
 
-    const matches = source.matches.map((match, index) => {
-      const path = `matches[${index}]`;
-      if (!match || typeof match !== "object" || !Number.isInteger(match.matchId)) {
-        throw new Error(`${path}.matchId 必须是整数`);
+    const games = source.games.map((game, index) => {
+      const path = `games[${index}]`;
+      if (!game || typeof game !== "object" || game.gameId !== index) {
+        throw new Error(`${path}.gameId 必须是从 0 开始连续排列的整数`);
       }
       return Object.freeze({
-        matchId: match.matchId,
-        gameA: validateGame(match.gameA, `${path}.gameA`),
-        gameB: validateGame(match.gameB, `${path}.gameB`)
+        gameId: game.gameId,
+        ...validateGame(game, path)
       });
     });
 
-    return Object.freeze({ matches: Object.freeze(matches) });
+    return Object.freeze({ games: Object.freeze(games) });
   }
 
-  global.MatchData = Object.freeze({ parseMatchesJson });
+  global.GameData = Object.freeze({ parseGamesJson });
 }(globalThis));

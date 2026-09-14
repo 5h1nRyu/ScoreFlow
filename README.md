@@ -36,7 +36,7 @@ ScoreFlow/
 │       ├── players/                # 以选手 name 命名的 PNG 头像
 │       └── teams/                  # 以 team 命名的 PNG 队标
 ├── data/
-│   ├── matches.json                # 每场两桌比赛的选手详情
+│   ├── games.json                  # 按顺序存储的单个 game 选手详情
 │   └── scores.csv                  # 队伍属性和累计积分
 ├── src/
 │   ├── components/
@@ -47,7 +47,7 @@ ScoreFlow/
 │   ├── core/
 │   │   └── timeline.js             # 公共动画时间轴
 │   ├── data/
-│   │   ├── match-data.js           # 比赛 JSON 校验与转换
+│   │   ├── game-data.js            # game JSON 校验与转换
 │   │   └── score-data.js           # CSV 解析和业务数据转换
 │   └── app.js                      # 应用入口与模块装配
 ├── index.html                      # 页面结构和资源入口
@@ -61,8 +61,8 @@ ScoreFlow/
 项目采用无构建工具的浏览器端分层结构，各脚本按依赖顺序由 `index.html` 加载：
 
 1. **配置层**：`src/config/config.js` 创建只读的 `APP_CONFIG`，集中提供布局比例、动画速度、数据地址和图表参数
-2. **数据层**：`src/data/score-data.js` 读取入口传入的 CSV 文本，处理引号转义、校验属性与比赛行，并生成队伍时间序列
-3. **时间轴层**：`src/core/timeline.js` 根据配置计算播放头、帧间隔和循环状态，通过订阅机制向组件广播统一状态
+2. **数据层**：`src/data/score-data.js` 读取入口传入的 CSV 文本，处理引号转义、校验属性与 game 行，并生成队伍时间序列
+3. **时间轴层**：`src/core/timeline.js` 根据配置按 game 计算播放头、帧间隔和循环状态，通过订阅机制向组件广播统一状态
 4. **组件层**：`src/components/score-chart.js` 负责 Canvas 尺寸适配、坐标映射、曲线插值、标签避让和逐帧绘制
 5. **装配层**：`src/app.js` 应用布局配置，加载 `data/scores.csv`，创建时间轴和图表并连接订阅关系，同时集中处理初始化错误
 
@@ -80,7 +80,7 @@ scores.csv ──> CSV 解析器 ──> 队伍时间序列 ──> 积分图表
 
 ## 比赛详情表
 
-右上区域的 `game-table` 从 `data/matches.json` 读取每场 `gameA`、`gameB` 各四名选手的数据，并与折线图订阅同一条公共时间轴。进入下一场时，旧的八个条目按照 A 桌、B 桌各自从上到下的顺序向左滑出，新条目随后从右滑入。时间轴进入 `overview` 后会隐藏比赛详情并启用预留的 `team-table` 容器，循环重启时恢复第一场比赛。
+右上区域的 `game-table` 从 `data/games.json` 读取按 `gameId` 连续排列的 game 数据，并与折线图订阅同一条公共时间轴。积分图每个 game 更新一次，详情表则将相邻的两个 game 组成一组，每两个 game 更新一次。切换时，旧的八个条目按照两个 game 各自从上到下的顺序向左滑出，新条目随后从右滑入。时间轴进入 `overview` 后会隐藏比赛详情并启用预留的 `team-table` 容器，循环重启时恢复前两个 game。
 
 人物头像和队标不存储在 JSON 中，按以下固定约定添加 PNG 文件：
 
@@ -96,23 +96,23 @@ scores.csv ──> CSV 解析器 ──> 队伍时间序列 ──> 积分图表
 ```csv
 name,team1,team2,team3
 color,#cf3f27,#126783,#ce9215
-match0,0,0,0
-match1,10,-10,0
+game0,0,0,0
+game1,10,-10,0
 ```
 
-- `name`、`color` 和 `match0` 必须存在，且每行队伍数必须一致。
-- `match0` 是初始累计总分，后续 `matchN` 是该场结束后的累计总分。
-- 比赛行必须从 `match0` 开始连续排列；最后一场播放完并停留数秒后，图表会重新播放。
-- 可在首个 `match` 之前添加 `title`、`subcolor` 等属性行。未被页面使用的属性会保留在解析结果中，但不会影响图表。
-- 队伍数和比赛数均由 CSV 动态决定。
+- `name`、`color` 和 `game0` 必须存在，且每行队伍数必须一致。
+- `game0` 表示第一场真实 game 结束后的累计总分，后续 `gameN` 依次表示对应 game 结束后的累计总分。
+- game 行必须从 `game0` 开始连续排列；最后一个 game 播放完并停留数秒后，图表会重新播放。
+- 可在首个 `game` 之前添加 `title`、`subcolor` 等属性行。未被页面使用的属性会保留在解析结果中，但不会影响图表。
+- 队伍数和 game 数均由 CSV 动态决定；`data/games.json` 的 game 数量必须与 CSV 一致且为偶数。
 
 ## 循环结束动画
 
-折线到达最后一场后，会先原地停留一个 `matchDuration`；随后 X 轴平滑展开，直至 `match0` 和最后一场分别位于绘图区左右边界，以展示完整折线。展开开始时会隐藏折线末端的队伍名称，展开完成后继续按 `restartDelay` 停留，再开始下一轮播放。
+折线到达最后一个 game 后，会先原地停留一个 `gameDuration`；随后 X 轴平滑展开，直至 `game0` 和最后一个 game 分别位于绘图区左右边界，以展示完整折线。展开开始时会隐藏折线末端的队伍名称，展开完成后继续按 `restartDelay` 停留，再开始下一轮播放。
 
 可在 `src/config/config.js` 的 `animation` 中调整：
 
-- `matchDuration`：每场比赛的动画时长，也是到达最后一场后的额外停留时长。
+- `gameDuration`：每个 game 的动画时长，也是到达最后一个 game 后的额外停留时长。
 - `overviewDuration`：X 轴展开至完整比赛范围的动画时长。
 - `restartDelay`：全景展开完成后、下一轮播放开始前的停留时长。
 

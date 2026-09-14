@@ -1,7 +1,7 @@
 (function startApplication() {
   "use strict";
 
-  const { animation, backgroundColor, dataUrl, layout, matchesDataUrl } = APP_CONFIG;
+  const { animation, backgroundColor, dataUrl, layout, gamesDataUrl } = APP_CONFIG;
 
   // 将布局比例转换为 CSS 百分比
   function percentage(value, name) {
@@ -42,17 +42,17 @@
     try {
       applyAppearance();
       applyLayout();
-      const [scoreResponse, matchesResponse] = await Promise.all([
+      const [scoreResponse, gamesResponse] = await Promise.all([
         fetch(dataUrl, { cache: "no-store" }),
-        fetch(matchesDataUrl, { cache: "no-store" })
+        fetch(gamesDataUrl, { cache: "no-store" })
       ]);
       if (!scoreResponse.ok) throw new Error(`读取 ${dataUrl} 失败（HTTP ${scoreResponse.status}）`);
-      if (!matchesResponse.ok) {
-        throw new Error(`读取 ${matchesDataUrl} 失败（HTTP ${matchesResponse.status}）`);
+      if (!gamesResponse.ok) {
+        throw new Error(`读取 ${gamesDataUrl} 失败（HTTP ${gamesResponse.status}）`);
       }
 
       const data = ScoreData.parseScoreCsv(await scoreResponse.text());
-      const matchData = MatchData.parseMatchesJson(await matchesResponse.text());
+      const gameData = GameData.parseGamesJson(await gamesResponse.text());
       // 在绘图前验证所有队伍颜色
       data.teams.forEach((team, index) => {
         if (!CSS.supports("color", team.color)) {
@@ -60,22 +60,22 @@
         }
       });
 
-      const finalMatch = data.matches.length - 1;
-      if (matchData.matches.length !== finalMatch + 1) {
+      const finalGame = data.games.length - 1;
+      if (gameData.games.length !== finalGame + 1) {
         throw new Error(
-          `比赛详情有 ${matchData.matches.length} 场，积分时间线有 ${finalMatch + 1} 场`
+          `比赛详情有 ${gameData.games.length} 个 game，积分时间线有 ${finalGame + 1} 个 game`
         );
       }
       const chart = ScoreChart.createScoreChart(
-          document.getElementById("scoreChart"), data.teams, finalMatch, APP_CONFIG
+          document.getElementById("scoreChart"), data.teams, finalGame, APP_CONFIG
       );
       const gameTable = GameTable.createGameTable(
           document.getElementById("gameTable"),
           document.getElementById("teamTableSlot"),
-          matchData.matches,
+          gameData.games,
           APP_CONFIG.gameTable
       );
-      const timeline = ScoreTimeline.createTimeline({ animation, finalMatch });
+      const timeline = ScoreTimeline.createTimeline({ animation, finalGame });
       // 使用同一时间状态驱动折线图和比赛详情
       timeline.subscribe(chart.render);
       timeline.subscribe(gameTable.render);

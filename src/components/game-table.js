@@ -1,8 +1,6 @@
 (function exposeGameTable(global) {
   "use strict";
 
-  const GAME_KEYS = Object.freeze(["gameA", "gameB"]);
-
   function createElement(tagName, className, text) {
     const element = document.createElement(tagName);
     if (className) element.className = className;
@@ -71,37 +69,38 @@
     return row;
   }
 
-  function createGameSection(match, gameKey, startOrder, config) {
+  function createGameSection(game, startOrder, config) {
     const section = createElement("section", "game-table__section");
-    section.setAttribute("aria-label", `${gameKey === "gameA" ? "第一" : "第二"}桌比赛`);
+    section.setAttribute("aria-label", `game${game.gameId} 比赛`);
     const header = createElement("header", "game-table__header");
     header.append(
-        createElement("h2", "game-table__title", `第${match.matchId}场 · ${gameKey === "gameA" ? "A桌" : "B桌"}`),
+        createElement("h2", "game-table__title", `game${game.gameId}`),
         createElement("span", "game-table__column-label game-table__column-label--riichi", "立直"),
         createElement("span", "game-table__column-label", "和了"),
         createElement("span", "game-table__column-label", "放铳")
     );
     const list = createElement("ol", "game-table__list");
-    match[gameKey].players.forEach((player, index) => {
+    game.players.forEach((player, index) => {
       list.append(createPlayerRow(player, startOrder + index, config));
     });
     section.append(header, list);
     return section;
   }
 
-  function createPanel(match, config) {
+  function createPanel(games, pairIndex, config) {
     const panel = createElement("div", "game-table__panel");
-    GAME_KEYS.forEach((gameKey, index) => {
-      panel.append(createGameSection(match, gameKey, index * 4, config));
+    games.slice(pairIndex * 2, pairIndex * 2 + 2).forEach((game, index) => {
+      panel.append(createGameSection(game, index * 4, config));
     });
     return panel;
   }
 
-  function createGameTable(root, teamTableSlot, matches, config) {
+  function createGameTable(root, teamTableSlot, games, config) {
     if (!(root instanceof HTMLElement) || !(teamTableSlot instanceof HTMLElement)) {
       throw new Error("game-table 需要有效的挂载元素");
     }
-    if (!Array.isArray(matches) || !matches.length) throw new Error("game-table 缺少比赛数据");
+    if (!Array.isArray(games) || !games.length) throw new Error("game-table 缺少比赛数据");
+    if (games.length % 2 !== 0) throw new Error("game-table 的 game 数量必须是偶数");
     if (!Number.isFinite(config.rowTransitionDuration) || config.rowTransitionDuration < 0
         || !Number.isFinite(config.rowTransitionDelay) || config.rowTransitionDelay < 0) {
       throw new Error("game-table 动画时长必须是大于或等于 0 的数字");
@@ -144,15 +143,16 @@
       pendingPanel = null;
     }
 
-    function showMatch(index, animate) {
-      const nextIndex = Math.min(matches.length - 1, Math.max(0, index));
+    function showGamePair(index, animate) {
+      const pairCount = games.length / 2;
+      const nextIndex = Math.min(pairCount - 1, Math.max(0, index));
       if (nextIndex === activeIndex) {
         // 重播要求立即展示时，也要结束同一目标上尚未完成的动画。
         if (!animate && pendingPanel) finishTransition(pendingPanel);
         return;
       }
 
-      const nextPanel = createPanel(matches[nextIndex], config);
+      const nextPanel = createPanel(games, nextIndex, config);
 
       // 中途切换到其他比赛时，先收尾上一轮动画，清除残留面板和回调。
       if (pendingPanel) finishTransition(pendingPanel);
@@ -200,7 +200,7 @@
         const isOverview = state.phase === "overview" || state.phase === "restart-hold";
         setOverviewVisibility(isOverview);
         if (isOverview) return;
-        showMatch(state.completedMatch, activeIndex >= 0 && !state.didRestart);
+        showGamePair(Math.floor(state.completedGame / 2), activeIndex >= 0 && !state.didRestart);
       }
     });
   }

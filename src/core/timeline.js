@@ -4,12 +4,12 @@
   // 创建可被多个可视化组件订阅的公共时间轴
   function createTimeline(options) {
     const {
-      matchDuration,
+      gameDuration,
       maximumFrameDelta,
       overviewDuration,
       restartDelay
     } = options.animation;
-    const finalMatch = options.finalMatch;
+    const finalGame = options.finalGame;
     const subscribers = new Set();
     let animationFrame = 0;
     let startTime = 0;
@@ -18,26 +18,26 @@
 
     // 计算当前播放状态并通知所有订阅者
     function frame(now) {
-      const animationDuration = finalMatch * matchDuration;
-      const lastMatchHoldEnd = animationDuration + matchDuration;
-      const overviewEnd = lastMatchHoldEnd + overviewDuration;
+      const animationDuration = finalGame * gameDuration;
+      const lastGameHoldEnd = animationDuration + gameDuration;
+      const overviewEnd = lastGameHoldEnd + overviewDuration;
       const cycleDuration = overviewEnd + restartDelay;
       const elapsed = Math.max(0, now - startTime);
       const cycleElapsed = cycleDuration > 0 ? elapsed % cycleDuration : 0;
-      const playhead = Math.min(finalMatch, cycleElapsed / matchDuration);
+      const playhead = Math.min(finalGame, cycleElapsed / gameDuration);
       const didRestart = elapsed >= cycleDuration && cycleElapsed < previousCycleElapsed;
       const overviewProgress = overviewDuration > 0
-          ? Math.min(1, Math.max(0, (cycleElapsed - lastMatchHoldEnd) / overviewDuration))
-          : Number(cycleElapsed >= lastMatchHoldEnd);
+          ? Math.min(1, Math.max(0, (cycleElapsed - lastGameHoldEnd) / overviewDuration))
+          : Number(cycleElapsed >= lastGameHoldEnd);
       const phase = cycleElapsed < animationDuration
           ? "playing"
-          : cycleElapsed < lastMatchHoldEnd
-              ? "last-match-hold"
+          : cycleElapsed < lastGameHoldEnd
+              ? "last-game-hold"
               : cycleElapsed < overviewEnd
                   ? "overview"
                   : "restart-hold";
       const state = Object.freeze({
-        completedMatch: Math.floor(playhead),
+        completedGame: Math.floor(playhead),
         deltaSeconds: Math.min(maximumFrameDelta, Math.max(0, now - lastFrameTime) / 1000),
         didRestart,
         elapsed,

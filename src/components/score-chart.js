@@ -1,7 +1,7 @@
 (function exposeScoreChart(global) {
   "use strict";
 
-function createScoreChart(canvas, teams, finalMatch, config) {
+function createScoreChart(canvas, teams, finalGame, config) {
 const ctx = canvas.getContext("2d");
 const { chart, labels, xAxis, yAxis } = config;
 
@@ -36,7 +36,7 @@ function lineDash(style) {
 }
 
 // 播放点保持在窗口中心附近
-const centerMatch = chart.windowSize / 2;
+const centerGame = chart.windowSize / 2;
 
 const initialDisplayedRange = rangeForPeak(
     Math.max(...teams.map(team => Math.abs(team.values[0])))
@@ -128,11 +128,11 @@ function parameterForXProgress(progress) {
 
 // 获取固定 Bezier 曲线在指定时间位置上的分数
 function valueOnFixedCurve(team, time) {
-  const match = Math.floor(time);
-  const progress = time - match;
+  const game = Math.floor(time);
+  const progress = time - game;
 
-  const from = team.values[match];
-  const to = team.values[Math.min(match + 1, finalMatch)];
+  const from = team.values[game];
+  const to = team.values[Math.min(game + 1, finalGame)];
 
   // 整数点直接返回原始数据
   if (progress <= 0) {
@@ -272,7 +272,7 @@ function layoutLabels(items, top, bottom) {
 // 绘制当前动画帧
 function render(timelineState) {
   const {
-    completedMatch,
+    completedGame,
     deltaSeconds,
     didRestart,
     overviewProgress,
@@ -318,7 +318,7 @@ function render(timelineState) {
   // 播放点到达中心后开始滚动画面
   const movingViewStart = Math.max(
       0,
-      playhead - centerMatch
+      playhead - centerGame
   );
 
   const movingViewEnd =
@@ -326,14 +326,14 @@ function render(timelineState) {
 
   const overviewEase = easeInOut(overviewProgress);
   const viewStart = movingViewStart * (1 - overviewEase);
-  const viewEnd = movingViewEnd + (finalMatch - movingViewEnd) * overviewEase;
+  const viewEnd = movingViewEnd + (finalGame - movingViewEnd) * overviewEase;
   const viewSpan = viewEnd - viewStart;
 
-  // 将比赛编号映射到 X 坐标
-  const xAt = match =>
+  // 将 game 编号映射到 X 坐标
+  const xAt = game =>
       margin.left +
       (
-          (viewSpan > 0 ? (match - viewStart) / viewSpan : 0)
+          (viewSpan > 0 ? (game - viewStart) / viewSpan : 0)
       ) *
       plotWidth;
 
@@ -347,7 +347,7 @@ function render(timelineState) {
         const values =
             team.values.slice(
                 first,
-                completedMatch + 1
+                completedGame + 1
             );
 
         // 加入窗口左边界上的曲线值
@@ -566,13 +566,13 @@ function render(timelineState) {
 
   // 绘制垂直网格线
   for (
-      let match =
+      let game =
           Math.ceil(viewStart);
-      match <=
+      game <=
       Math.floor(viewEnd);
-      match += 1
+      game += 1
   ) {
-    const x = xAt(match);
+    const x = xAt(game);
 
     ctx.strokeStyle =
         "rgba(28,30,25,.16)";
@@ -596,12 +596,12 @@ function render(timelineState) {
     ctx.stroke();
 
 
-    // 绘制比赛编号
+    // 绘制 game 编号
     ctx.fillStyle =
         "rgba(28,30,25,.78)";
 
     ctx.fillText(
-        String(match),
+        String(game),
         x,
         height -
         margin.bottom +
@@ -643,7 +643,7 @@ function render(timelineState) {
     const points = [];
 
     // 多取一个左侧点保证边缘曲线连续
-    const firstMatch =
+    const firstGame =
         Math.max(
             0,
             Math.floor(
@@ -652,24 +652,24 @@ function render(timelineState) {
         );
 
     // 必须加入当前区间完整的终点 B
-    const lastMatch = Math.min(
-        finalMatch,
-        completedMatch + 1
+    const lastGame = Math.min(
+        finalGame,
+        completedGame + 1
     );
 
 
     // 所有点均为固定整数数据点
     for (
-        let match =
-            firstMatch;
-        match <= lastMatch;
-        match += 1
+        let game =
+            firstGame;
+        game <= lastGame;
+        game += 1
     ) {
       points.push({
-        x: xAt(match),
+        x: xAt(game),
         y: yAt(
             team.values[
-                match
+                game
                 ]
         )
       });
