@@ -36,6 +36,13 @@ const APP_CONFIG = Object.freeze({
     // 八名选手按照相邻两个 game 各自从上到下的顺序依次切换
     rowTransitionDuration: 220,
     rowTransitionDelay: 35,
+    // 设置选手条目内各类文字的字号，单位为 CSS 像素
+    itemFontSizes: Object.freeze({
+      playerName: 19,
+      totalScore: 24,
+      convertedTeamScore: 13,
+      stat: 19
+    }),
     // 队伍色仅用于区分条目；头像与队标按数据字段生成资源路径
     teamColors: Object.freeze([
       "#d94b40", "#d89216", "#258d87", "#8b50a0", "#3071bd",
