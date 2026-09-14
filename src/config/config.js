@@ -17,8 +17,8 @@ const APP_CONFIG = Object.freeze({
   }),
 
   animation: Object.freeze({
-    // 设置每场比赛对应的动画毫秒数
-    matchDuration: 1150,
+    // 设置每个 game 对应的动画毫秒数
+    gameDuration: 1150,
     // 限制单帧参与缩放计算的最大秒数
     maximumFrameDelta: 0.05,
     // 设置结束时将 X 轴展开至完整比赛范围的动画毫秒数
@@ -29,9 +29,24 @@ const APP_CONFIG = Object.freeze({
 
   // 指定队伍属性和累计总分的数据文件
   dataUrl: "data/scores.csv",
+  // 指定每个 game 的选手数据文件
+  gamesDataUrl: "data/games.json",
+
+  gameTable: Object.freeze({
+    // 八名选手按照相邻两个 game 各自从上到下的顺序依次切换
+    rowTransitionDuration: 220,
+    rowTransitionDelay: 35,
+    // 队伍色仅用于区分条目；头像与队标按数据字段生成资源路径
+    teamColors: Object.freeze([
+      "#d94b40", "#d89216", "#258d87", "#8b50a0", "#3071bd",
+      "#df7115", "#af8224", "#51743b", "#64717e", "#b95f7c"
+    ]),
+    playerImageBaseUrl: "assets/images/game-table/players",
+    teamImageBaseUrl: "assets/images/game-table/teams"
+  }),
 
   chart: Object.freeze({
-    // 设置 X 轴同时显示的比赛数量
+    // 设置 X 轴同时显示的 game 数量
     windowSize: 10,
     // 设置所有屏幕尺寸下的积分折线粗细
     lineThickness: 3.6
