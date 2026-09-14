@@ -249,7 +249,7 @@ body {
 
 .game-table__panel--outgoing .game-table__row {
   animation: game-table-slide-out var(--row-transition-duration) cubic-bezier(0.55, 0, 0.8, 0.4) both;
-  animation-delay: var(--row-exit-delay);
+  animation-delay: calc(var(--row-order) * var(--row-transition-delay));
 }
 
 .game-table__panel--incoming .game-table__row {
@@ -260,6 +260,7 @@ body {
 .game-table__panel--incoming.game-table__panel--entering .game-table__row {
   animation: game-table-slide-in var(--row-transition-duration) cubic-bezier(0.2, 0.75, 0.25, 1) both;
   animation-delay: var(--row-enter-delay);
+
 }
 
 .game-table__panel--incoming .game-table__header {
