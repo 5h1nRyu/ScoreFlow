@@ -35,8 +35,8 @@ function lineDash(style) {
   return style.dashLength === 0 ? [] : [style.dashLength, style.dashGap];
 }
 
-// 播放点保持在窗口中心附近
-const centerGame = chart.windowSize / 2;
+// 播放点保持在特定位置
+const centerGame = chart.windowSize * 4 / 6;
 
 const initialDisplayedRange = rangeForPeak(
     Math.max(...teams.map(team => Math.abs(team.values[0])))

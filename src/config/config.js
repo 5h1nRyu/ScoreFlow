@@ -18,7 +18,7 @@ const APP_CONFIG = Object.freeze({
 
   animation: Object.freeze({
     // 设置每个 game 对应的动画毫秒数
-    gameDuration: 1150,
+    gameDuration: 2000,
     // 限制单帧参与缩放计算的最大秒数
     maximumFrameDelta: 0.05,
     // 设置结束时将 X 轴展开至完整比赛范围的动画毫秒数
@@ -41,13 +41,13 @@ const APP_CONFIG = Object.freeze({
       "#d94b40", "#d89216", "#258d87", "#8b50a0", "#3071bd",
       "#df7115", "#af8224", "#51743b", "#64717e", "#b95f7c"
     ]),
-    playerImageBaseUrl: "assets/images/game-table/players",
-    teamImageBaseUrl: "assets/images/game-table/teams"
+    playerImageBaseUrl: "assets/images/players",
+    teamImageBaseUrl: "assets/images/teams"
   }),
 
   chart: Object.freeze({
     // 设置 X 轴同时显示的 game 数量
-    windowSize: 10,
+    windowSize: 6,
     // 设置所有屏幕尺寸下的积分折线粗细
     lineThickness: 3.6
   }),
