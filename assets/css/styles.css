@@ -259,7 +259,7 @@ body {
 
 .game-table__panel--incoming.game-table__panel--entering .game-table__row {
   animation: game-table-slide-in var(--row-transition-duration) cubic-bezier(0.2, 0.75, 0.25, 1) both;
-  animation-delay: var(--row-enter-delay);
+  animation-delay: calc(var(--incoming-base-delay) + var(--row-order) * var(--row-transition-delay));
 
 }
 

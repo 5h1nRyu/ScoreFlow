@@ -38,10 +38,8 @@
 
   function createPlayerRow(player, order, config) {
     const row = createElement("li", "game-table__row");
-    
-    // 直接写入带单位的延迟，避免依赖兼容性有限的 CSS 变量乘法。
-    row.style.setProperty("--row-exit-delay", `${exitDelay}ms`);
-    row.style.setProperty("--row-enter-delay", `${enterDelay}ms`);
+
+    row.style.setProperty("--row-order", order);
 
     row.style.setProperty("--team-color", teamColor(player.team, config));
 
