@@ -29,6 +29,21 @@ const APP_CONFIG = Object.freeze({
 
   // 指定队伍属性和累计总分的数据文件
   dataUrl: "data/scores.csv",
+  // 指定每场两桌比赛的选手数据文件
+  matchesDataUrl: "data/matches.json",
+
+  gameTable: Object.freeze({
+    // 八名选手按照 gameA、gameB 各自从上到下的顺序依次切换
+    rowTransitionDuration: 220,
+    rowTransitionDelay: 35,
+    // 队伍色仅用于区分条目；头像与队标按数据字段生成资源路径
+    teamColors: Object.freeze([
+      "#d94b40", "#d89216", "#258d87", "#8b50a0", "#3071bd",
+      "#df7115", "#af8224", "#51743b", "#64717e", "#b95f7c"
+    ]),
+    playerImageBaseUrl: "assets/images/game-table/players",
+    teamImageBaseUrl: "assets/images/game-table/teams"
+  }),
 
   chart: Object.freeze({
     // 设置 X 轴同时显示的比赛数量
