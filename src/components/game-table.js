@@ -25,7 +25,7 @@
         ? numericSuffix - 1
         : [...team].reduce((total, character) => total + character.codePointAt(0), 0);
     return config.teamColors[((seed % config.teamColors.length) + config.teamColors.length)
-      % config.teamColors.length];
+    % config.teamColors.length];
   }
 
   function createImage(className, source, alt) {
@@ -38,37 +38,35 @@
 
   function createPlayerRow(player, order, config) {
     const row = createElement("li", "game-table__row");
-
     row.style.setProperty("--row-order", order);
-
     row.style.setProperty("--team-color", teamColor(player.team, config));
 
     const identity = createElement("div", "game-table__identity");
     identity.append(
-      createImage(
-        "game-table__portrait",
-        imageUrl(config.playerImageBaseUrl, player.name),
-        `${player.name}的头像`
-      ),
-      createImage(
-        "game-table__team-mark",
-        imageUrl(config.teamImageBaseUrl, player.team),
-        ""
-      ),
-      createElement("strong", "game-table__name", player.name)
+        createImage(
+            "game-table__portrait",
+            imageUrl(config.playerImageBaseUrl, player.name),
+            `${player.name}的头像`
+        ),
+        createImage(
+            "game-table__team-mark",
+            imageUrl(config.teamImageBaseUrl, player.team),
+            ""
+        ),
+        createElement("strong", "game-table__name", player.name)
     );
 
     const score = createElement("div", "game-table__score");
     score.append(
-      createElement("strong", "game-table__score-total", player.score.toLocaleString("zh-CN")),
-      createElement("span", "game-table__team-point", formatTeamPoint(player.teamPoint))
+        createElement("strong", "game-table__score-total", player.score.toLocaleString("zh-CN")),
+        createElement("span", "game-table__team-point", formatTeamPoint(player.teamPoint))
     );
     row.append(
-      identity,
-      score,
-      createElement("span", "game-table__stat", player.riichiCount),
-      createElement("span", "game-table__stat", player.winCount),
-      createElement("span", "game-table__stat", player.dealInCount)
+        identity,
+        score,
+        createElement("span", "game-table__stat", player.riichiCount),
+        createElement("span", "game-table__stat", player.winCount),
+        createElement("span", "game-table__stat", player.dealInCount)
     );
     return row;
   }
@@ -78,10 +76,10 @@
     section.setAttribute("aria-label", `${gameKey === "gameA" ? "第一" : "第二"}桌比赛`);
     const header = createElement("header", "game-table__header");
     header.append(
-      createElement("h2", "game-table__title", `第${match.matchId}场 · ${gameKey === "gameA" ? "A桌" : "B桌"}`),
-      createElement("span", "game-table__column-label game-table__column-label--riichi", "立直"),
-      createElement("span", "game-table__column-label", "和了"),
-      createElement("span", "game-table__column-label", "放铳")
+        createElement("h2", "game-table__title", `第${match.matchId}场 · ${gameKey === "gameA" ? "A桌" : "B桌"}`),
+        createElement("span", "game-table__column-label game-table__column-label--riichi", "立直"),
+        createElement("span", "game-table__column-label", "和了"),
+        createElement("span", "game-table__column-label", "放铳")
     );
     const list = createElement("ol", "game-table__list");
     match[gameKey].players.forEach((player, index) => {
@@ -112,13 +110,16 @@
       throw new Error("game-table 至少需要一种队伍颜色");
     }
 
-    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduceMotion = false;
     const transitionLength = config.rowTransitionDuration
       + config.rowTransitionDelay * 7;
     let activeIndex = -1;
     let activePanel = null;
+    let pendingPanel = null;
     let transitionTimer = 0;
-    let hiddenForOverview = false;
+    let transitionFrame = 0;
+    let hiddenForOverview = null;
 
     config.teamColors.forEach(color => {
       if (!CSS.supports("color", color)) throw new Error(`game-table 队伍颜色“${color}”无效`);
@@ -127,32 +128,60 @@
     root.style.setProperty("--row-transition-delay", `${config.rowTransitionDelay}ms`);
     root.style.setProperty("--incoming-base-delay", `${transitionLength}ms`);
 
-    function finishTransition(nextPanel, nextIndex) {
-      root.replaceChildren(nextPanel);
-      nextPanel.classList.remove("game-table__panel--incoming");
-      activePanel = nextPanel;
-      activeIndex = nextIndex;
+    function finishTransition(nextPanel) {
+      clearTimeout(transitionTimer);
+      cancelAnimationFrame(transitionFrame);
       transitionTimer = 0;
+      transitionFrame = 0;
+
+      root.replaceChildren(nextPanel);
+      nextPanel.classList.remove(
+          "game-table__panel--incoming",
+          "game-table__panel--entering",
+          "game-table__panel--outgoing"
+      );
+      activePanel = nextPanel;
+      pendingPanel = null;
     }
 
     function showMatch(index, animate) {
       const nextIndex = Math.min(matches.length - 1, Math.max(0, index));
-      if (nextIndex === activeIndex) return;
-      clearTimeout(transitionTimer);
+      if (nextIndex === activeIndex) {
+        // 重播要求立即展示时，也要结束同一目标上尚未完成的动画。
+        if (!animate && pendingPanel) finishTransition(pendingPanel);
+        return;
+      }
+
       const nextPanel = createPanel(matches[nextIndex], config);
-      if (!activePanel || !animate || reduceMotion) {
-        finishTransition(nextPanel, nextIndex);
+
+      // 中途切换到其他比赛时，先收尾上一轮动画，清除残留面板和回调。
+      if (pendingPanel) finishTransition(pendingPanel);
+
+      // 必须在动画开始时记录目标，防止每帧重复创建同一个面板。
+      activeIndex = nextIndex;
+
+      if (!activePanel || !animate || reduceMotion || transitionLength === 0) {
+        finishTransition(nextPanel);
         return;
       }
 
       activePanel.classList.add("game-table__panel--outgoing");
       nextPanel.classList.add("game-table__panel--incoming");
+      pendingPanel = nextPanel;
       root.append(nextPanel);
-      requestAnimationFrame(() => nextPanel.classList.add("game-table__panel--entering"));
-      transitionTimer = window.setTimeout(
-        () => finishTransition(nextPanel, nextIndex),
-        transitionLength * 2
-      );
+
+      // 分两帧应用入场状态，让浏览器先处理面板的初始样式。
+      transitionFrame = requestAnimationFrame(() => {
+        transitionFrame = requestAnimationFrame(() => {
+          transitionFrame = 0;
+          if (pendingPanel !== nextPanel) return;
+
+          nextPanel.classList.add("game-table__panel--entering");
+          transitionTimer = window.setTimeout(() => {
+            if (pendingPanel === nextPanel) finishTransition(nextPanel);
+          }, transitionLength * 2);
+        });
+      });
     }
 
     function setOverviewVisibility(isOverview) {
@@ -161,6 +190,9 @@
       root.classList.toggle("game-table--hidden", isOverview);
       root.setAttribute("aria-hidden", String(isOverview));
       teamTableSlot.hidden = !isOverview;
+
+      // 隐藏前完成切换，避免动画回调跨越总览和重播阶段。
+      if (isOverview && pendingPanel) finishTransition(pendingPanel);
     }
 
     return Object.freeze({
