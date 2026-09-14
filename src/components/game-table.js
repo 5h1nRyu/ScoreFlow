@@ -38,7 +38,9 @@
 
   function createPlayerRow(player, order, config) {
     const row = createElement("li", "game-table__row");
+
     row.style.setProperty("--row-order", order);
+
     row.style.setProperty("--team-color", teamColor(player.team, config));
 
     const identity = createElement("div", "game-table__identity");
