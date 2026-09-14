@@ -12,6 +12,19 @@
 
 `src/core/timeline.js` 提供页面级公共时间轴并统一驱动已注册组件，`src/components/score-chart.js` 只负责折线图本身的尺寸和绘制，`src/app.js` 负责数据加载与模块装配。新增依托比赛进度的组件时，可通过 `timeline.subscribe()` 订阅同一份时间状态。
 
+## 图表线条样式
+
+可在 `src/config/config.js` 中调整折线及坐标网格线样式，数值单位均为 Canvas 使用的 CSS 像素：
+
+- `chart.lineThickness`：所有屏幕尺寸下的积分折线粗细。
+- `xAxis.gridLine.thickness`：与 X 轴刻度对应的竖直网格虚线粗细。
+- `xAxis.gridLine.dashLength`、`dashGap`：竖直网格虚线的线段长度和间隔长度。
+- `yAxis.gridLines.zero`：零分水平线的样式。
+- `yAxis.gridLines.major`：主刻度水平虚线的样式。
+- `yAxis.gridLines.minor`：次刻度水平虚线的样式。
+
+每一项 Y 轴线条样式均可分别设置 `thickness`、`dashLength` 和 `dashGap`。`dashLength` 与 `dashGap` 通常须同时为大于 `0` 的数字；零分线可将二者同时设为 `0` 以显示为实线。
+
 ## 文件结构
 
 ```text
