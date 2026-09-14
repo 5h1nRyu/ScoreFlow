@@ -47,7 +47,9 @@
     if (!game || !Array.isArray(game.players) || game.players.length !== 4) {
       throw new Error(`${path}.players 必须恰好包含 4 名选手`);
     }
+    assertNonEmptyString(game.info, `${path}.info`);
     return Object.freeze({
+      info: game.info,
       players: Object.freeze(game.players.map((player, index) =>
         validatePlayer(player, `${path}.players[${index}]`)
       ))

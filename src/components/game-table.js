@@ -71,10 +71,10 @@
 
   function createGameSection(game, startOrder, config) {
     const section = createElement("section", "game-table__section");
-    section.setAttribute("aria-label", `game${game.gameId} 比赛`);
+    section.setAttribute("aria-label", `${game.info} 比赛`);
     const header = createElement("header", "game-table__header");
     header.append(
-        createElement("h2", "game-table__title", `game${game.gameId}`),
+        createElement("h2", "game-table__title", game.info),
         createElement("span", "game-table__column-label game-table__column-label--riichi", "立直"),
         createElement("span", "game-table__column-label", "和了"),
         createElement("span", "game-table__column-label", "放铳")
@@ -125,7 +125,6 @@
     });
     root.style.setProperty("--row-transition-duration", `${config.rowTransitionDuration}ms`);
     root.style.setProperty("--row-transition-delay", `${config.rowTransitionDelay}ms`);
-    root.style.setProperty("--incoming-base-delay", `${transitionLength}ms`);
 
     function finishTransition(nextPanel) {
       clearTimeout(transitionTimer);
@@ -141,6 +140,27 @@
       );
       activePanel = nextPanel;
       pendingPanel = null;
+    }
+
+    function startIncomingTransition(nextPanel) {
+      if (pendingPanel !== nextPanel) return;
+
+      root.replaceChildren(nextPanel);
+      nextPanel.classList.add("game-table__panel--incoming");
+      activePanel = null;
+
+      // 分两帧应用入场状态，让浏览器先处理面板的初始样式。
+      transitionFrame = requestAnimationFrame(() => {
+        transitionFrame = requestAnimationFrame(() => {
+          transitionFrame = 0;
+          if (pendingPanel !== nextPanel) return;
+
+          nextPanel.classList.add("game-table__panel--entering");
+          transitionTimer = window.setTimeout(() => {
+            if (pendingPanel === nextPanel) finishTransition(nextPanel);
+          }, transitionLength);
+        });
+      });
     }
 
     function showGamePair(index, animate) {
@@ -166,22 +186,9 @@
       }
 
       activePanel.classList.add("game-table__panel--outgoing");
-      nextPanel.classList.add("game-table__panel--incoming");
       pendingPanel = nextPanel;
-      root.append(nextPanel);
-
-      // 分两帧应用入场状态，让浏览器先处理面板的初始样式。
-      transitionFrame = requestAnimationFrame(() => {
-        transitionFrame = requestAnimationFrame(() => {
-          transitionFrame = 0;
-          if (pendingPanel !== nextPanel) return;
-
-          nextPanel.classList.add("game-table__panel--entering");
-          transitionTimer = window.setTimeout(() => {
-            if (pendingPanel === nextPanel) finishTransition(nextPanel);
-          }, transitionLength * 2);
-        });
-      });
+      // 旧面板完全退场并移除后才挂载新面板，避免两套文字同时存在。
+      transitionTimer = window.setTimeout(() => startIncomingTransition(nextPanel), transitionLength);
     }
 
     function setOverviewVisibility(isOverview) {
