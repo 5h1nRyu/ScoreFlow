@@ -27,6 +27,12 @@ if (!Number.isFinite(chart.lineThickness) || chart.lineThickness <= 0) {
   throw new Error("chart.lineThickness 必须是大于 0 的数字");
 }
 validateLineStyle(xAxis.gridLine, "xAxis.gridLine");
+if (
+    !Number.isInteger(xAxis.overviewTargetGridLineCount) ||
+    xAxis.overviewTargetGridLineCount <= 0
+) {
+  throw new Error("xAxis.overviewTargetGridLineCount 必须是大于 0 的整数");
+}
 validateLineStyle(yAxis.gridLines.zero, "yAxis.gridLines.zero", true);
 validateLineStyle(yAxis.gridLines.major, "yAxis.gridLines.major");
 validateLineStyle(yAxis.gridLines.minor, "yAxis.gridLines.minor");
@@ -37,6 +43,27 @@ function lineDash(style) {
 
 // 播放点保持在特定位置
 const centerGame = chart.windowSize * 4 / 6;
+
+// 全景展开期间固定使用同一档 2 的幂间隔，避免动画过程中竖线跳变
+function overviewGridStep() {
+  const target = xAxis.overviewTargetGridLineCount;
+  let bestStep = 1;
+  let bestDifference = Math.abs(finalGame + 1 - target);
+
+  for (let step = 2; step <= Math.max(1, finalGame); step *= 2) {
+    const lineCount = Math.floor(finalGame / step) + 1;
+    const difference = Math.abs(lineCount - target);
+
+    if (difference < bestDifference) {
+      bestStep = step;
+      bestDifference = difference;
+    }
+  }
+
+  return bestStep;
+}
+
+const fixedOverviewGridStep = overviewGridStep();
 
 const initialDisplayedRange = rangeForPeak(
     Math.max(...teams.map(team => Math.abs(team.values[0])))
@@ -564,13 +591,16 @@ function render(timelineState) {
   ctx.textBaseline = "top";
 
 
+  // 仅在全景展开阶段减少竖线；普通播放阶段仍逐个显示 game
+  const xGridStep = phase === "overview" ? fixedOverviewGridStep : 1;
+  const firstGridGame = Math.ceil(viewStart / xGridStep) * xGridStep;
+
   // 绘制垂直网格线
   for (
-      let game =
-          Math.ceil(viewStart);
+      let game = firstGridGame;
       game <=
       Math.floor(viewEnd);
-      game += 1
+      game += xGridStep
   ) {
     const x = xAt(game);
 
@@ -754,9 +784,11 @@ function render(timelineState) {
       ctx.arc(
           tipX,
           tipY,
-          width < 520
-              ? 3.2
-              : 4.2,
+          chart.lineThickness * (
+              width < 520
+                  ? 8 / 9
+                  : 7 / 6
+          ),
           0,
           Math.PI * 2
       );
