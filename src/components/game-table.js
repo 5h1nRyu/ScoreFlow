@@ -61,10 +61,7 @@
     );
     row.append(
         identity,
-        score,
-        createElement("span", "game-table__stat", player.riichiCount),
-        createElement("span", "game-table__stat", player.winCount),
-        createElement("span", "game-table__stat", player.dealInCount)
+        score
     );
     return row;
   }
@@ -74,10 +71,7 @@
     section.setAttribute("aria-label", `${game.info} 比赛`);
     const header = createElement("header", "game-table__header");
     header.append(
-        createElement("h2", "game-table__title", game.info),
-        createElement("span", "game-table__column-label game-table__column-label--riichi", "立直"),
-        createElement("span", "game-table__column-label", "和了"),
-        createElement("span", "game-table__column-label", "放铳")
+        createElement("h2", "game-table__title", game.info)
     );
     const list = createElement("ol", "game-table__list");
     game.players.forEach((player, index) => {
@@ -109,7 +103,7 @@
       throw new Error("game-table 至少需要一种队伍颜色");
     }
 
-    const itemFontSizeNames = ["playerName", "totalScore", "convertedTeamScore", "stat"];
+    const itemFontSizeNames = ["playerName", "totalScore", "convertedTeamScore"];
     itemFontSizeNames.forEach(name => {
       if (!Number.isFinite(config.itemFontSizes?.[name]) || config.itemFontSizes[name] <= 0) {
         throw new Error(`gameTable.itemFontSizes.${name} 必须是大于 0 的数字`);
@@ -144,11 +138,6 @@
         "--game-table-converted-score-font-size",
         `${config.itemFontSizes.convertedTeamScore}px`
     );
-    root.style.setProperty(
-        "--game-table-stat-font-size",
-        `${config.itemFontSizes.stat}px`
-    );
-
     function finishTransition(nextPanel) {
       clearTimeout(transitionTimer);
       cancelAnimationFrame(transitionFrame);

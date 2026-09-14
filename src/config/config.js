@@ -40,8 +40,7 @@ const APP_CONFIG = Object.freeze({
     itemFontSizes: Object.freeze({
       playerName: 19,
       totalScore: 24,
-      convertedTeamScore: 13,
-      stat: 19
+      convertedTeamScore: 13
     }),
     // 队伍色仅用于区分条目；头像与队标按数据字段生成资源路径
     teamColors: Object.freeze([

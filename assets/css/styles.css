@@ -110,7 +110,7 @@ body {
 .game-table__header,
 .game-table__row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(74px, 0.47fr) repeat(3, minmax(28px, 0.16fr));
+  grid-template-columns: minmax(0, 1fr) max-content;
   align-items: center;
 }
 
@@ -126,15 +126,6 @@ body {
   font-size: clamp(21px, 1.652vw, 30.8px);
   font-weight: 850;
   letter-spacing: -0.04em;
-}
-
-.game-table__column-label {
-  text-align: center;
-  white-space: nowrap;
-}
-
-.game-table__column-label--riichi {
-  grid-column: 3;
 }
 
 .game-table__list {
@@ -244,18 +235,6 @@ body {
   line-height: 1;
   font-weight: 700;
   white-space: nowrap;
-}
-
-.game-table__stat {
-  display: flex;
-  align-self: stretch;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  font-size: var(--game-table-stat-font-size);
-  font-variant-numeric: tabular-nums;
-  font-weight: 750;
-  line-height: 1;
 }
 
 .game-table__panel--outgoing .game-table__row {
