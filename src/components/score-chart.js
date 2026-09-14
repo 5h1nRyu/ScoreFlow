@@ -3,7 +3,37 @@
 
 function createScoreChart(canvas, teams, finalMatch, config) {
 const ctx = canvas.getContext("2d");
-const { chart, labels, yAxis } = config;
+const { chart, labels, xAxis, yAxis } = config;
+
+// 校验 Canvas 线条配置，避免无效数值导致图表样式异常
+function validateLineStyle(style, name, allowSolid = false) {
+  if (!Number.isFinite(style.thickness) || style.thickness <= 0) {
+    throw new Error(`${name}.thickness 必须是大于 0 的数字`);
+  }
+  if (!Number.isFinite(style.dashLength) || style.dashLength < 0) {
+    throw new Error(`${name}.dashLength 必须是大于或等于 0 的数字`);
+  }
+  if (!Number.isFinite(style.dashGap) || style.dashGap < 0) {
+    throw new Error(`${name}.dashGap 必须是大于或等于 0 的数字`);
+  }
+
+  const isSolid = style.dashLength === 0 && style.dashGap === 0;
+  if ((!allowSolid || !isSolid) && (style.dashLength <= 0 || style.dashGap <= 0)) {
+    throw new Error(`${name} 的 dashLength 和 dashGap 必须同时为大于 0 的数字`);
+  }
+}
+
+if (!Number.isFinite(chart.lineThickness) || chart.lineThickness <= 0) {
+  throw new Error("chart.lineThickness 必须是大于 0 的数字");
+}
+validateLineStyle(xAxis.gridLine, "xAxis.gridLine");
+validateLineStyle(yAxis.gridLines.zero, "yAxis.gridLines.zero", true);
+validateLineStyle(yAxis.gridLines.major, "yAxis.gridLines.major");
+validateLineStyle(yAxis.gridLines.minor, "yAxis.gridLines.minor");
+
+function lineDash(style) {
+  return style.dashLength === 0 ? [] : [style.dashLength, style.dashGap];
+}
 
 // 播放点保持在窗口中心附近
 const centerMatch = chart.windowSize / 2;
@@ -14,6 +44,12 @@ const initialDisplayedRange = rangeForPeak(
 let displayedRange = initialDisplayedRange;
 let width = 0;
 let height = 0;
+
+
+// 为全景展开提供起止平滑的缓动进度
+function easeInOut(progress) {
+  return progress * progress * (3 - 2 * progress);
+}
 
 
 // 根据窗口大小调整 Canvas 分辨率
@@ -235,7 +271,14 @@ function layoutLabels(items, top, bottom) {
 
 // 绘制当前动画帧
 function render(timelineState) {
-  const { completedMatch, deltaSeconds, didRestart, playhead } = timelineState;
+  const {
+    completedMatch,
+    deltaSeconds,
+    didRestart,
+    overviewProgress,
+    phase,
+    playhead
+  } = timelineState;
   if (width <= 0 || height <= 0) return;
 
   // 根据窗口尺寸动态设置边距
@@ -273,20 +316,24 @@ function render(timelineState) {
   }
 
   // 播放点到达中心后开始滚动画面
-  const viewStart = Math.max(
+  const movingViewStart = Math.max(
       0,
       playhead - centerMatch
   );
 
-  const viewEnd =
-      viewStart + chart.windowSize;
+  const movingViewEnd =
+      movingViewStart + chart.windowSize;
+
+  const overviewEase = easeInOut(overviewProgress);
+  const viewStart = movingViewStart * (1 - overviewEase);
+  const viewEnd = movingViewEnd + (finalMatch - movingViewEnd) * overviewEase;
+  const viewSpan = viewEnd - viewStart;
 
   // 将比赛编号映射到 X 坐标
   const xAt = match =>
       margin.left +
       (
-          (match - viewStart) /
-          chart.windowSize
+          (viewSpan > 0 ? (match - viewStart) / viewSpan : 0)
       ) *
       plotWidth;
 
@@ -455,20 +502,14 @@ function render(timelineState) {
                 ? "rgba(28,30,25,.3)"
                 : "rgba(28,30,25,.16)";
 
-    ctx.lineWidth =
-        isZero
-            ? 2.4
-            : isMajor
-                ? 1.6
-                : 1.1;
+    const gridLineStyle = isZero
+        ? yAxis.gridLines.zero
+        : isMajor
+            ? yAxis.gridLines.major
+            : yAxis.gridLines.minor;
 
-    ctx.setLineDash(
-        isZero
-            ? []
-            : isMajor
-                ? [4, 5]
-                : [2, 6]
-    );
+    ctx.lineWidth = gridLineStyle.thickness;
+    ctx.setLineDash(lineDash(gridLineStyle));
 
 
     // 绘制水平线
@@ -536,11 +577,8 @@ function render(timelineState) {
     ctx.strokeStyle =
         "rgba(28,30,25,.16)";
 
-    ctx.lineWidth = 1.3;
-
-    ctx.setLineDash(
-        [3, 6]
-    );
+    ctx.lineWidth = xAxis.gridLine.thickness;
+    ctx.setLineDash(lineDash(xAxis.gridLine));
 
     ctx.beginPath();
 
@@ -671,10 +709,7 @@ function render(timelineState) {
     ctx.strokeStyle =
         team.color;
 
-    ctx.lineWidth =
-        width < 520
-            ? 2.8
-            : 3.6;
+    ctx.lineWidth = chart.lineThickness;
 
     ctx.stroke();
 
@@ -731,7 +766,7 @@ function render(timelineState) {
   });
 
 
-  if (labels.enabled) {
+  if (labels.enabled && phase !== "overview" && phase !== "restart-hold") {
     const halfLabelHeight = labels.fontSize / 2;
     const arrangedLabels = layoutLabels(
         labelItems,
