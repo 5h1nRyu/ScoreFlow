@@ -32,7 +32,18 @@ const APP_CONFIG = Object.freeze({
 
   chart: Object.freeze({
     // 设置 X 轴同时显示的比赛数量
-    windowSize: 10
+    windowSize: 10,
+    // 设置所有屏幕尺寸下的积分折线粗细
+    lineThickness: 3.6
+  }),
+
+  xAxis: Object.freeze({
+    gridLine: Object.freeze({
+      // 设置竖直网格虚线的粗细、线段长度和间隔长度
+      thickness: 1.3,
+      dashLength: 3,
+      dashGap: 6
+    })
   }),
 
   labels: Object.freeze({
@@ -58,6 +69,26 @@ const APP_CONFIG = Object.freeze({
     // 设置 Y 轴扩张时的平滑调整速率
     expansionRate: 10,
     // 设置 Y 轴收缩时的平滑调整速率
-    contractionRate: 1.8
+    contractionRate: 1.8,
+    gridLines: Object.freeze({
+      zero: Object.freeze({
+        // 零分线默认保持实线；将两个虚线参数改为正数即可显示为虚线
+        thickness: 2.4,
+        dashLength: 0,
+        dashGap: 0
+      }),
+      major: Object.freeze({
+        // 设置主刻度水平虚线的粗细、线段长度和间隔长度
+        thickness: 1.6,
+        dashLength: 4,
+        dashGap: 5
+      }),
+      minor: Object.freeze({
+        // 设置次刻度水平虚线的粗细、线段长度和间隔长度
+        thickness: 1.1,
+        dashLength: 2,
+        dashGap: 6
+      })
+    })
   })
 });
