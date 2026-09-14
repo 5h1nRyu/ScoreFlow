@@ -4,7 +4,7 @@ const APP_CONFIG = Object.freeze({
 
   layout: Object.freeze({
     // 纵向分隔位置为 0.7 时左侧占页面宽度的 70%
-    verticalSplit: 0.7,
+    verticalSplit: 0.8,
     // 横向分隔位置为 0.7 时上方占页面高度的 70%
     horizontalSplit: 0.8,
     divider: Object.freeze({
