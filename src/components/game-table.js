@@ -109,6 +109,13 @@
       throw new Error("game-table 至少需要一种队伍颜色");
     }
 
+    const itemFontSizeNames = ["playerName", "totalScore", "convertedTeamScore", "stat"];
+    itemFontSizeNames.forEach(name => {
+      if (!Number.isFinite(config.itemFontSizes?.[name]) || config.itemFontSizes[name] <= 0) {
+        throw new Error(`gameTable.itemFontSizes.${name} 必须是大于 0 的数字`);
+      }
+    });
+
     // const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const reduceMotion = false;
     const transitionLength = config.rowTransitionDuration
@@ -125,6 +132,22 @@
     });
     root.style.setProperty("--row-transition-duration", `${config.rowTransitionDuration}ms`);
     root.style.setProperty("--row-transition-delay", `${config.rowTransitionDelay}ms`);
+    root.style.setProperty(
+        "--game-table-player-name-font-size",
+        `${config.itemFontSizes.playerName}px`
+    );
+    root.style.setProperty(
+        "--game-table-total-score-font-size",
+        `${config.itemFontSizes.totalScore}px`
+    );
+    root.style.setProperty(
+        "--game-table-converted-score-font-size",
+        `${config.itemFontSizes.convertedTeamScore}px`
+    );
+    root.style.setProperty(
+        "--game-table-stat-font-size",
+        `${config.itemFontSizes.stat}px`
+    );
 
     function finishTransition(nextPanel) {
       clearTimeout(transitionTimer);

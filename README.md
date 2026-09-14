@@ -16,9 +16,10 @@
 
 可在 `src/config/config.js` 中调整折线及坐标网格线样式，数值单位均为 Canvas 使用的 CSS 像素：
 
-- `chart.lineThickness`：所有屏幕尺寸下的积分折线粗细。
+- `chart.lineThickness`：所有屏幕尺寸下的积分折线粗细；折线末端圆点会随该值等比例缩放。
 - `xAxis.gridLine.thickness`：与 X 轴刻度对应的竖直网格虚线粗细。
 - `xAxis.gridLine.dashLength`、`dashGap`：竖直网格虚线的线段长度和间隔长度。
+- `xAxis.overviewTargetGridLineCount`：全景展开阶段期望显示的竖直网格线数量；实际间隔会从 `1、2、4、8、16...` 中选择最接近目标数量的一档，并在整个展开阶段保持稳定。
 - `yAxis.gridLines.zero`：零分水平线的样式。
 - `yAxis.gridLines.major`：主刻度水平虚线的样式。
 - `yAxis.gridLines.minor`：次刻度水平虚线的样式。
@@ -81,6 +82,13 @@ scores.csv ──> CSV 解析器 ──> 队伍时间序列 ──> 积分图表
 ## 比赛详情表
 
 右上区域的 `game-table` 从 `data/games.json` 读取按 `gameId` 连续排列的 game 数据，并使用每个 game 的 `info` 字符串作为表头。详情表与折线图订阅同一条公共时间轴：积分图每个 game 更新一次，详情表则将相邻的两个 game 组成一组，每两个 game 更新一次。切换时，旧的八个条目按照两个 game 各自从上到下的顺序向左滑出，新条目随后从右滑入。时间轴进入 `overview` 后会隐藏比赛详情并启用预留的 `team-table` 容器，循环重启时恢复前两个 game。
+
+可在 `src/config/config.js` 的 `gameTable.itemFontSizes` 中调整选手条目内的字号，数值单位均为 CSS 像素：
+
+- `playerName`：选手名字号。
+- `totalScore`：总分字号。
+- `convertedTeamScore`：换算队伍得分字号。
+- `stat`：立直、和了和放铳次数共用的字号。
 
 人物头像和队标不存储在 JSON 中，按以下固定约定添加 PNG 文件：
 
