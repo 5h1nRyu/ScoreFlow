@@ -4,7 +4,7 @@ const APP_CONFIG = Object.freeze({
 
   layout: Object.freeze({
     // 纵向分隔位置为 0.7 时左侧占页面宽度的 70%
-    verticalSplit: 0.7,
+    verticalSplit: 0.8,
     // 横向分隔位置为 0.7 时上方占页面高度的 70%
     horizontalSplit: 0.8,
     divider: Object.freeze({
@@ -38,10 +38,10 @@ const APP_CONFIG = Object.freeze({
     rowTransitionDelay: 35,
     // 设置选手条目内各类文字的字号，单位为 CSS 像素
     itemFontSizes: Object.freeze({
-      playerName: 19,
-      totalScore: 24,
-      convertedTeamScore: 13,
-      stat: 19
+      playerName: 36,
+      totalScore: 36,
+      convertedTeamScore: 20,
+      stat: 28
     }),
     // 队伍色仅用于区分条目；头像与队标按数据字段生成资源路径
     teamColors: Object.freeze([
@@ -56,7 +56,7 @@ const APP_CONFIG = Object.freeze({
     // 设置 X 轴同时显示的 game 数量
     windowSize: 6,
     // 设置所有屏幕尺寸下的积分折线粗细
-    lineThickness: 3.6
+    lineThickness: 6
   }),
 
   xAxis: Object.freeze({
@@ -74,7 +74,7 @@ const APP_CONFIG = Object.freeze({
     // 控制折线末端的队伍名称显示
     enabled: true,
     // 设置标签字号的 CSS 像素值
-    fontSize: 16,
+    fontSize: 24,
     // 设置 Canvas 支持的标签字重
     fontWeight: 700,
     // 设置标签与折线末端圆点的水平间距
