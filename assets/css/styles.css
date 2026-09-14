@@ -299,15 +299,6 @@ body {
   to { opacity: 1; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .game-table,
-  .game-table__row,
-  .game-table__header {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
 .dashboard__divider {
   position: absolute;
   z-index: 1;
