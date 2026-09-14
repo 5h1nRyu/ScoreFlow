@@ -62,10 +62,10 @@
     }
 
     const properties = Object.create(null);
-    const matches = [];
-    let reachedMatches = false;
+    const games = [];
+    let reachedGames = false;
 
-    // 属性行必须位于连续的比赛行之前
+    // 属性行必须位于连续的 game 行之前
     rows.forEach((cells, rowIndex) => {
       const line = rowIndex + 1;
       if (cells.length !== teamCount + 1) {
@@ -74,26 +74,26 @@
 
       const key = cells[0].trim();
       const values = cells.slice(1).map(value => value.trim());
-      const matchResult = /^match(\d+)$/.exec(key);
+      const gameResult = /^game(\d+)$/.exec(key);
 
-      if (matchResult) {
-        reachedMatches = true;
-        const matchIndex = Number(matchResult[1]);
-        if (matchIndex !== matches.length) {
-          throw new Error(`CSV 比赛行必须从 match0 开始连续排列，此处应为 match${matches.length}`);
+      if (gameResult) {
+        reachedGames = true;
+        const gameIndex = Number(gameResult[1]);
+        if (gameIndex !== games.length) {
+          throw new Error(`CSV 对局行必须从 game0 开始连续排列，此处应为 game${games.length}`);
         }
-        matches.push(values.map((value, teamIndex) => {
+        games.push(values.map((value, teamIndex) => {
           const score = Number(value);
           if (value === "" || !Number.isFinite(score)) {
-            throw new Error(`match${matchIndex} 中第 ${teamIndex + 1} 支队伍的分数无效`);
+            throw new Error(`game${gameIndex} 中第 ${teamIndex + 1} 支队伍的分数无效`);
           }
           return score;
         }));
         return;
       }
 
-      if (reachedMatches) {
-        throw new Error(`属性行“${key || "(空)"}”必须位于所有 match 行之前`);
+      if (reachedGames) {
+        throw new Error(`属性行“${key || "(空)"}”必须位于所有 game 行之前`);
       }
       if (!key) {
         throw new Error(`CSV 第 ${line} 行的属性名不能为空`);
@@ -113,8 +113,8 @@
       }
     });
 
-    if (matches.length === 0) {
-      throw new Error("CSV 至少需要 match0 行");
+    if (games.length === 0) {
+      throw new Error("CSV 至少需要 game0 行");
     }
 
     // 将按行存储的数据转换为每支队伍的时间序列
@@ -122,10 +122,10 @@
       const attributes = Object.fromEntries(
           Object.entries(properties).map(([key, values]) => [key, values[index]])
       );
-      return { ...attributes, values: matches.map(scores => scores[index]) };
+      return { ...attributes, values: games.map(scores => scores[index]) };
     });
 
-    return { properties, matches, teams };
+    return { properties, games, teams };
   }
 
   global.ScoreData = Object.freeze({ parseScoreCsv });
