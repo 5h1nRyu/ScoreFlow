@@ -32,16 +32,6 @@
 
     const identity = createElement("div", "game-table__identity");
     identity.append(
-        createImage(
-            "game-table__portrait",
-            imageUrl(config.playerImageBaseUrl, player.name),
-            `${player.name}的头像`
-        ),
-        createImage(
-            "game-table__team-mark",
-            imageUrl(config.teamImageBaseUrl, player.team),
-            ""
-        ),
         createElement("strong", "game-table__name", player.name)
     );
 
@@ -51,8 +41,18 @@
         createElement("span", "game-table__team-point", formatTeamPoint(player.teamPoint))
     );
     row.append(
+        createImage(
+            "game-table__team-mark",
+            imageUrl(config.teamImageBaseUrl, player.team),
+            ""
+        ),
         identity,
-        score
+        score,
+        createImage(
+            "game-table__portrait",
+            imageUrl(config.playerImageBaseUrl, player.name),
+            `${player.name}的头像`
+        )
     );
     return row;
   }
@@ -96,6 +96,18 @@
         throw new Error(`gameTable.itemFontSizes.${name} 必须是大于 0 的数字`);
       }
     });
+    const positiveConfigNames = ["itemHeightRatio", "playerImageHeightRatio"];
+    positiveConfigNames.forEach(name => {
+      if (!Number.isFinite(config[name]) || config[name] <= 0) {
+        throw new Error(`gameTable.${name} 必须是大于 0 的数字`);
+      }
+    });
+    const nonNegativeConfigNames = ["itemGapRatio", "totalScoreRightGap"];
+    nonNegativeConfigNames.forEach(name => {
+      if (!Number.isFinite(config[name]) || config[name] < 0) {
+        throw new Error(`gameTable.${name} 必须是大于或等于 0 的数字`);
+      }
+    });
 
     // const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const reduceMotion = false;
@@ -122,6 +134,31 @@
         "--game-table-converted-score-font-size",
         `${config.itemFontSizes.convertedTeamScore}px`
     );
+    root.style.setProperty(
+        "--game-table-player-image-height-ratio",
+        config.playerImageHeightRatio
+    );
+    root.style.setProperty(
+        "--game-table-total-score-right-gap",
+        `${config.totalScoreRightGap}px`
+    );
+
+    function updateItemDimensions() {
+      const regionHeight = root.getBoundingClientRect().height;
+      root.style.setProperty(
+          "--game-table-item-height",
+          `${regionHeight * config.itemHeightRatio}px`
+      );
+      root.style.setProperty(
+          "--game-table-item-gap",
+          `${regionHeight * config.itemGapRatio}px`
+      );
+    }
+
+    updateItemDimensions();
+    const resizeObserver = new ResizeObserver(updateItemDimensions);
+    resizeObserver.observe(root);
+
     function finishTransition(nextPanel) {
       clearTimeout(transitionTimer);
       cancelAnimationFrame(transitionFrame);
