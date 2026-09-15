@@ -26,6 +26,16 @@ function validateLineStyle(style, name, allowSolid = false) {
 if (!Number.isFinite(chart.lineThickness) || chart.lineThickness <= 0) {
   throw new Error("chart.lineThickness 必须是大于 0 的数字");
 }
+if (!Number.isInteger(chart.windowSize) || chart.windowSize <= 0) {
+  throw new Error("chart.windowSize 必须是大于 0 的整数");
+}
+if (
+    !Number.isInteger(chart.playheadPosition) ||
+    chart.playheadPosition <= 0 ||
+    chart.playheadPosition >= chart.windowSize
+) {
+  throw new Error("chart.playheadPosition 必须是大于 0 且小于 chart.windowSize 的整数");
+}
 validateLineStyle(xAxis.gridLine, "xAxis.gridLine");
 if (
     !Number.isInteger(xAxis.overviewTargetGridLineCount) ||
@@ -40,9 +50,6 @@ validateLineStyle(yAxis.gridLines.minor, "yAxis.gridLines.minor");
 function lineDash(style) {
   return style.dashLength === 0 ? [] : [style.dashLength, style.dashGap];
 }
-
-// 播放点保持在特定位置
-const centerGame = chart.windowSize * 4 / 6;
 
 // 全景展开期间固定使用同一档 2 的幂间隔，避免动画过程中竖线跳变
 function overviewGridStep() {
@@ -342,10 +349,10 @@ function render(timelineState) {
     displayedRange = initialDisplayedRange;
   }
 
-  // 播放点到达中心后开始滚动画面
-  const movingViewStart = Math.max(
-      0,
-      playhead - centerGame
+  // 播放点到达配置位置后开始滚动，并在最后一个窗口处停止
+  const movingViewStart = Math.min(
+      Math.max(0, playhead - chart.playheadPosition),
+      Math.max(0, finalGame - chart.windowSize)
   );
 
   const movingViewEnd =
@@ -811,14 +818,25 @@ function render(timelineState) {
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
 
-    arrangedLabels.forEach((label) => {
-      ctx.fillStyle = label.color;
-      ctx.fillText(
-          label.name,
-          label.tipX + labels.horizontalGap,
-          label.labelY
-      );
-    });
+    // 最长标签放不进绘图区时，所有标签同步隐藏
+    const longestLabelWidth = arrangedLabels.reduce(
+        (maximum, label) => Math.max(maximum, ctx.measureText(label.name).width),
+        0
+    );
+    const labelsFit = arrangedLabels.every(label =>
+      label.tipX + labels.horizontalGap + longestLabelWidth <= width - margin.right
+    );
+
+    if (labelsFit) {
+      arrangedLabels.forEach((label) => {
+        ctx.fillStyle = label.color;
+        ctx.fillText(
+            label.name,
+            label.tipX + labels.horizontalGap,
+            label.labelY
+        );
+      });
+    }
 
     ctx.restore();
   }

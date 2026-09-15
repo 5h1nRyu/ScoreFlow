@@ -84,6 +84,8 @@ const APP_CONFIG = Object.freeze({
   chart: Object.freeze({
     // 设置 X 轴同时显示的 game 数量
     windowSize: 6,
+    // 设置滚动期间当前 game 位于从左侧起第几个 X 轴间隔
+    playheadPosition: 4,
     // 设置所有屏幕尺寸下的积分折线粗细
     lineThickness: 6
   }),
