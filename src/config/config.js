@@ -84,6 +84,8 @@ const APP_CONFIG = Object.freeze({
   chart: Object.freeze({
     // 设置 X 轴同时显示的 game 数量
     windowSize: 6,
+    // 设置滚动期间当前 game 位于从左侧起第几个 X 轴间隔
+    playheadPosition: 4,
     // 设置所有屏幕尺寸下的积分折线粗细
     lineThickness: 6
   }),
@@ -108,6 +110,10 @@ const APP_CONFIG = Object.freeze({
     fontWeight: 700,
     // 设置标签与折线末端圆点的水平间距
     horizontalGap: 10,
+    // 设置判断右侧空间是否充足时额外保留的 CSS 像素
+    rightSafetyMargin: 12,
+    // 设置右侧空间不足后标签渐隐的毫秒数；设为 0 时立即隐藏
+    fadeOutDuration: 400,
     // 设置标签之间的额外垂直间距
     verticalGap: 4
   }),

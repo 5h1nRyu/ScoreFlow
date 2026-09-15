@@ -132,7 +132,13 @@ games.json ──┘             │                          ↑
 
 ## 循环结束动画
 
-折线到达最后一个 game 后，会先原地停留一个 `gameDuration`；随后 X 轴平滑展开，直至 `game0` 和最后一个 game 分别位于绘图区左右边界，以展示完整折线。展开开始时会隐藏折线末端的队伍名称，展开完成后继续按 `restartDelay` 停留，再开始下一轮播放。
+正常播放时，折线末端到达 `chart.playheadPosition` 指定的位置后，X 轴开始滚动。最后一个 game 能够落在绘图区右边界时，X 轴停止滚动，折线末端继续向右移动并最终到达右边界。折线到达最后一个 game 后，会先原地停留一个 `gameDuration`；随后 X 轴平滑展开，直至 `game0` 和最后一个 game 分别位于绘图区左右边界，以展示完整折线。展开开始时会隐藏折线末端的队伍名称，展开完成后继续按 `restartDelay` 停留，再开始下一轮播放。
+
+可在 `src/config/config.js` 的 `chart` 中调整：
+
+- `windowSize`：X 轴窗口同时显示的 game 数量。
+- `playheadPosition`：滚动期间当前 game 位于从左侧起第几个 X 轴间隔；必须是大于 `0` 且小于 `windowSize` 的整数。
+- `lineThickness`：积分折线的粗细。
 
 可在 `src/config/config.js` 的 `animation` 中调整：
 
@@ -161,7 +167,7 @@ games.json ──┘             │                          ↑
 
 ## 折线标签
 
-每条折线的末端会显示 `teams.json` 中的队伍名称。标签会跟随当前分数，并在分数接近时自动上下偏移以避免重叠；当队伍的分数大小关系互换时，标签的上下顺序也会互换。
+每条折线的末端会显示 `teams.json` 中的队伍名称。标签会跟随当前分数，并在分数接近时自动上下偏移以避免重叠；当队伍的分数大小关系互换时，标签的上下顺序也会互换。当最长的队伍名称连同预留空间无法完整放入折线末端与绘图区右边界之间时，所有队伍标签会同步渐隐。
 
 可在 `src/config/config.js` 的 `labels` 中调整：
 
@@ -169,6 +175,8 @@ games.json ──┘             │                          ↑
 - `fontSize`：标签字号。
 - `fontWeight`：标签加粗程度。
 - `horizontalGap`：标签与折线末端的水平间距。
+- `rightSafetyMargin`：检测右侧空间时，在最长标签末端额外保留的像素数。
+- `fadeOutDuration`：右侧空间不足后所有标签同步渐隐的毫秒数；设为 `0` 时立即隐藏。
 - `verticalGap`：避让时标签之间的额外垂直间距。
 
 由于浏览器需要通过 HTTP 加载 JSON，请不要直接以 `file://` 打开页面。例如可在项目目录运行：
