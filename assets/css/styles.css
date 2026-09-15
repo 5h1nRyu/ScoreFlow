@@ -68,6 +68,8 @@ body {
   --game-table-item-gap: 1.2%;
   --game-table-player-image-height-ratio: 1.2;
   --game-table-total-score-right-gap: 8px;
+  --game-table-header-font-size: 30px;
+  --game-table-header-item-gap: 0px;
   position: relative;
   overflow: hidden;
   opacity: 1;
@@ -105,7 +107,9 @@ body {
 
 .game-table__section {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: var(--game-table-header-item-gap);
+  align-content: start;
   min-height: 0;
 }
 
@@ -125,7 +129,7 @@ body {
 .game-table__title {
   margin: 0;
   color: #18232d;
-  font-size: clamp(21px, 1.652vw, 30.8px);
+  font-size: var(--game-table-header-font-size);
   font-weight: 850;
   letter-spacing: -0.04em;
 }
@@ -300,7 +304,7 @@ body {
   font-size: clamp(22px, 1.7vw, 32px);
   font-weight: 900;
   line-height: 1.15;
-  text-align: center;
+  text-align: left;
 }
 
 .team-table__list {
