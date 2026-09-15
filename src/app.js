@@ -1,7 +1,7 @@
 (function startApplication() {
   "use strict";
 
-  const { animation, backgroundColor, dataUrl, layout, gamesDataUrl } = APP_CONFIG;
+  const { animation, backgroundColor, debug, teamsDataUrl, layout, gamesDataUrl } = APP_CONFIG;
 
   // 将布局比例转换为 CSS 百分比
   function percentage(value, name) {
@@ -37,22 +37,44 @@
     dashboard.classList.toggle("dashboard--dividers-visible", layout.divider.visible);
   }
 
+  // 调试时保留从 game0 到指定 gameId 的数据，并同步截断各队积分序列。
+  function limitDataForDebug(data) {
+    const { finalGameId } = debug;
+    if (finalGameId === -1) return data;
+    if (!Number.isInteger(finalGameId) || finalGameId <= 0 || finalGameId >= data.games.length) {
+      throw new Error(`debug.finalGameId 必须是 -1，或大于 0 且小于 ${data.games.length} 的整数`);
+    }
+
+    const length = finalGameId + 1;
+    return Object.freeze({
+      games: Object.freeze(data.games.slice(0, length)),
+      teams: Object.freeze(data.teams.map(team => Object.freeze({
+        ...team,
+        values: Object.freeze(team.values.slice(0, length))
+      })))
+    });
+  }
+
   // 加载数据并装配图表与公共时间轴
   async function start() {
     try {
       applyAppearance();
       applyLayout();
-      const [scoreResponse, gamesResponse] = await Promise.all([
-        fetch(dataUrl, { cache: "no-store" }),
+      const [teamsResponse, gamesResponse] = await Promise.all([
+        fetch(teamsDataUrl, { cache: "no-store" }),
         fetch(gamesDataUrl, { cache: "no-store" })
       ]);
-      if (!scoreResponse.ok) throw new Error(`读取 ${dataUrl} 失败（HTTP ${scoreResponse.status}）`);
+      if (!teamsResponse.ok) {
+        throw new Error(`读取 ${teamsDataUrl} 失败（HTTP ${teamsResponse.status}）`);
+      }
       if (!gamesResponse.ok) {
         throw new Error(`读取 ${gamesDataUrl} 失败（HTTP ${gamesResponse.status}）`);
       }
 
-      const data = ScoreData.parseScoreCsv(await scoreResponse.text());
+      const teamData = TeamData.parseTeamsJson(await teamsResponse.text());
       const gameData = GameData.parseGamesJson(await gamesResponse.text());
+      const completeData = TeamData.combineWithGames(teamData, gameData);
+      const data = limitDataForDebug(completeData);
       // 在绘图前验证所有队伍颜色
       data.teams.forEach((team, index) => {
         if (!CSS.supports("color", team.color)) {
@@ -61,24 +83,23 @@
       });
 
       const finalGame = data.games.length - 1;
-      if (gameData.games.length !== finalGame + 1) {
-        throw new Error(
-          `比赛详情有 ${gameData.games.length} 个 game，积分时间线有 ${finalGame + 1} 个 game`
-        );
-      }
       const chart = ScoreChart.createScoreChart(
           document.getElementById("scoreChart"), data.teams, finalGame, APP_CONFIG
       );
       const gameTable = GameTable.createGameTable(
           document.getElementById("gameTable"),
           document.getElementById("teamTableSlot"),
-          gameData.games,
+          data.games,
           APP_CONFIG.gameTable
+      );
+      const teamTable = TeamTable.createTeamTable(
+          document.getElementById("teamTableSlot"), data.teams, APP_CONFIG.teamTable
       );
       const timeline = ScoreTimeline.createTimeline({ animation, finalGame });
       // 使用同一时间状态驱动折线图和比赛详情
       timeline.subscribe(chart.render);
       timeline.subscribe(gameTable.render);
+      timeline.subscribe(teamTable.render);
       timeline.start();
     } catch (error) {
       // 将初始化错误同时展示给用户和开发者

@@ -1,10 +1,20 @@
+// 全景阶段由队伍表的四个连续阶段共同组成。
+const OVERVIEW_PHASES = Object.freeze({
+  teamTableEnterDuration: 1000,
+  initialHoldDuration: 2000,
+  reorderDuration: 1000,
+  finalHoldDuration: 3000
+});
+const OVERVIEW_DURATION = Object.values(OVERVIEW_PHASES)
+    .reduce((total, duration) => total + duration, 0);
+
 // 集中管理项目公共配置
 const APP_CONFIG = Object.freeze({
   backgroundColor: "#ffffff",
 
   layout: Object.freeze({
     // 纵向分隔位置为 0.7 时左侧占页面宽度的 70%
-    verticalSplit: 0.7,
+    verticalSplit: 0.75,
     // 横向分隔位置为 0.7 时上方占页面高度的 70%
     horizontalSplit: 0.8,
     divider: Object.freeze({
@@ -18,41 +28,84 @@ const APP_CONFIG = Object.freeze({
 
   animation: Object.freeze({
     // 设置每个 game 对应的动画毫秒数
-    gameDuration: 1150,
+    gameDuration: 2000,
     // 限制单帧参与缩放计算的最大秒数
     maximumFrameDelta: 0.05,
-    // 设置结束时将 X 轴展开至完整比赛范围的动画毫秒数
-    overviewDuration: 1500,
+    // 四段时长之和作为完整的队伍表总览阶段时间
+    overview: OVERVIEW_PHASES,
+    overviewDuration: OVERVIEW_DURATION,
     // 设置最后一场结束后重新播放前的停留毫秒数
     restartDelay: 3000
   }),
 
-  // 指定队伍属性和累计总分的数据文件
-  dataUrl: "data/scores.csv",
+  // 指定队伍、队员归属和初始分数的数据文件
+  teamsDataUrl: "data/teams.json",
   // 指定每个 game 的选手数据文件
   gamesDataUrl: "data/games.json",
+
+  debug: Object.freeze({
+    // -1 使用完整数据；正整数 x 只演示到 gameId 为 x 的 game（包含该 game）
+    finalGameId: -1
+  }),
 
   gameTable: Object.freeze({
     // 八名选手按照相邻两个 game 各自从上到下的顺序依次切换
     rowTransitionDuration: 220,
     rowTransitionDelay: 35,
-    // 队伍色仅用于区分条目；头像与队标按数据字段生成资源路径
-    teamColors: Object.freeze([
-      "#d94b40", "#d89216", "#258d87", "#8b50a0", "#3071bd",
-      "#df7115", "#af8224", "#51743b", "#64717e", "#b95f7c"
-    ]),
-    playerImageBaseUrl: "assets/images/game-table/players",
-    teamImageBaseUrl: "assets/images/game-table/teams"
+    // 设置单个选手条目高度与 game-table 区域高度的比例
+    itemHeightRatio: 0.08,
+    // 设置同一场比赛中相邻选手条目间距与 game-table 区域高度的比例
+    itemGapRatio: 0.016,
+    // 设置选手头像高度与条目高度的比例；大于 1 时头像可超出条目
+    playerImageHeightRatio: 1.2,
+    // 设置总分区域与条目右端的距离，单位为 CSS 像素
+    totalScoreRightGap: 12,
+    // 设置 info 表头字号及其与下方选手条目的距离，单位为 CSS 像素
+    headerFontSize: 36,
+    headerItemGap: 10,
+    // 设置选手条目内各类文字的字号，单位为 CSS 像素
+    itemFontSizes: Object.freeze({
+      playerName: 36,
+      totalScore: 36,
+      convertedTeamScore: 20,
+      stat: 28
+    }),
+    playerImageBaseUrl: "assets/images/players",
+    teamImageBaseUrl: "assets/images/teams"
+  }),
+
+  teamTable: Object.freeze({
+    // 分别设置重排前后的排行榜标题
+    initialTitle: "9月13日队伍排名",
+    finalTitle: "9月30日队伍排名",
+    // 条目高度和间距均相对于 team-table 区域高度计算
+    itemHeightRatio: 0.075,
+    itemGapRatio: 0.018,
+    // 队标高度与各类文字字号均使用 CSS 像素
+    teamImageHeight: 42,
+    // 设置重排过程中条目放大或缩小的最大比例
+    reorderScaleAmplitude: 0.012,
+    itemFontSizes: Object.freeze({
+      rank: 28,
+      teamName: 24,
+      score: 30,
+      rankChange: 20
+    }),
+    teamImageBaseUrl: "assets/images/icons"
   }),
 
   chart: Object.freeze({
     // 设置 X 轴同时显示的 game 数量
-    windowSize: 10,
+    windowSize: 6,
+    // 设置滚动期间当前 game 位于从左侧起第几个 X 轴间隔
+    playheadPosition: 4,
     // 设置所有屏幕尺寸下的积分折线粗细
-    lineThickness: 3.6
+    lineThickness: 6
   }),
 
   xAxis: Object.freeze({
+    // 全景阶段期望显示的竖直网格线数量
+    overviewTargetGridLineCount: 12,
     gridLine: Object.freeze({
       // 设置竖直网格虚线的粗细、线段长度和间隔长度
       thickness: 1.3,
@@ -65,11 +118,15 @@ const APP_CONFIG = Object.freeze({
     // 控制折线末端的队伍名称显示
     enabled: true,
     // 设置标签字号的 CSS 像素值
-    fontSize: 16,
+    fontSize: 24,
     // 设置 Canvas 支持的标签字重
     fontWeight: 700,
     // 设置标签与折线末端圆点的水平间距
     horizontalGap: 10,
+    // 在最长标签宽度之外额外保留的 CSS 像素
+    rightSafetyMargin: 50,
+    // 设置右侧空间不足后标签渐隐的毫秒数；设为 0 时立即隐藏
+    fadeOutDuration: 100,
     // 设置标签之间的额外垂直间距
     verticalGap: 4
   }),

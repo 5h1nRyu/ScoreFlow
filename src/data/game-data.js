@@ -2,7 +2,7 @@
   "use strict";
 
   const REQUIRED_PLAYER_FIELDS = Object.freeze([
-    "name", "team", "score", "teamPoint", "riichiCount", "winCount", "dealInCount"
+    "name", "score", "teamPoint"
   ]);
 
   function assertNonEmptyString(value, path) {
@@ -23,23 +23,13 @@
       if (!(field in player)) throw new Error(`${path}.${field} 缺失`);
     });
     assertNonEmptyString(player.name, `${path}.name`);
-    assertNonEmptyString(player.team, `${path}.team`);
-    ["score", "teamPoint", "riichiCount", "winCount", "dealInCount"].forEach(field => {
+    ["score", "teamPoint"].forEach(field => {
       assertFiniteNumber(player[field], `${path}.${field}`);
-    });
-    ["riichiCount", "winCount", "dealInCount"].forEach(field => {
-      if (!Number.isInteger(player[field]) || player[field] < 0) {
-        throw new Error(`${path}.${field} 必须是大于或等于 0 的整数`);
-      }
     });
     return Object.freeze({
       name: player.name,
-      team: player.team,
       score: player.score,
-      teamPoint: player.teamPoint,
-      riichiCount: player.riichiCount,
-      winCount: player.winCount,
-      dealInCount: player.dealInCount
+      teamPoint: player.teamPoint
     });
   }
 
@@ -47,7 +37,9 @@
     if (!game || !Array.isArray(game.players) || game.players.length !== 4) {
       throw new Error(`${path}.players 必须恰好包含 4 名选手`);
     }
+    assertNonEmptyString(game.info, `${path}.info`);
     return Object.freeze({
+      info: game.info,
       players: Object.freeze(game.players.map((player, index) =>
         validatePlayer(player, `${path}.players[${index}]`)
       ))

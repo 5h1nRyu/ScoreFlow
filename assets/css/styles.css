@@ -58,15 +58,18 @@ body {
 .table-stage {
   position: relative;
   padding: clamp(10px, 1.2vw, 22px);
-  background:
-    radial-gradient(circle at 90% 5%, rgba(35, 88, 122, 0.08), transparent 32%),
-    linear-gradient(155deg, #f8fafb 0%, #eef2f4 100%);
+  background-color: var(--background-color);
 }
 
 .game-table {
   --row-transition-duration: 220ms;
   --row-transition-delay: 35ms;
-  --incoming-base-delay: 465ms;
+  --game-table-item-height: 9%;
+  --game-table-item-gap: 1.2%;
+  --game-table-player-image-height-ratio: 1.2;
+  --game-table-total-score-right-gap: 8px;
+  --game-table-header-font-size: 30px;
+  --game-table-header-item-gap: 0px;
   position: relative;
   overflow: hidden;
   opacity: 1;
@@ -104,44 +107,38 @@ body {
 
 .game-table__section {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: var(--game-table-header-item-gap);
+  align-content: start;
   min-height: 0;
 }
 
 .game-table__header,
 .game-table__row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(74px, 0.47fr) repeat(3, minmax(28px, 0.16fr));
+  grid-template-columns: minmax(0, 1fr) max-content;
   align-items: center;
 }
 
 .game-table__header {
   min-height: 28px;
   color: #52606b;
-  font: 700 clamp(10px, 0.78vw, 15px)/1.2 system-ui, -apple-system, "Segoe UI", sans-serif;
+  font: 700 clamp(14px, 1.092vw, 21px)/1.2 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 .game-table__title {
   margin: 0;
   color: #18232d;
-  font-size: clamp(15px, 1.18vw, 22px);
+  font-size: var(--game-table-header-font-size);
   font-weight: 850;
   letter-spacing: -0.04em;
 }
 
-.game-table__column-label {
-  text-align: center;
-  white-space: nowrap;
-}
-
-.game-table__column-label--riichi {
-  grid-column: 3;
-}
-
 .game-table__list {
   display: grid;
-  grid-template-rows: repeat(4, minmax(0, 1fr));
-  gap: clamp(3px, 0.45vh, 7px);
+  grid-template-rows: repeat(4, var(--game-table-item-height));
+  gap: var(--game-table-item-gap);
+  align-content: center;
   min-height: 0;
   margin: 0;
   padding: 0;
@@ -150,8 +147,9 @@ body {
 
 .game-table__row {
   position: relative;
+  height: var(--game-table-item-height);
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   color: #18232d;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   background: rgba(255, 255, 255, 0.9);
@@ -164,6 +162,7 @@ body {
 
 .game-table__identity {
   position: relative;
+  z-index: 2;
   align-self: stretch;
   min-width: 0;
   overflow: hidden;
@@ -171,13 +170,14 @@ body {
 
 .game-table__portrait {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
   bottom: 0;
   left: 0;
-  width: clamp(45px, 4.1vw, 76px);
-  height: 96%;
+  width: auto;
+  height: calc(100% * var(--game-table-player-image-height-ratio));
+  max-width: none;
   object-fit: contain;
-  object-position: bottom center;
+  object-position: left bottom;
 }
 
 .game-table__portrait--missing {
@@ -186,13 +186,15 @@ body {
 
 .game-table__team-mark {
   position: absolute;
-  top: 50%;
-  left: clamp(42px, 4vw, 72px);
-  width: clamp(50px, 4.5vw, 82px);
-  height: 90%;
-  object-fit: contain;
+  z-index: 0;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right top;
   opacity: 0.16;
-  transform: translateY(-50%);
+  border-radius: inherit;
 }
 
 .game-table__team-mark--missing {
@@ -207,7 +209,8 @@ body {
   height: 100%;
   padding-left: clamp(55px, 5.1vw, 94px);
   overflow: hidden;
-  font-size: clamp(12px, 1vw, 19px);
+  font-size: var(--game-table-player-name-font-size);
+  line-height: 1;
   font-weight: 800;
   letter-spacing: -0.035em;
   white-space: nowrap;
@@ -215,18 +218,23 @@ body {
 }
 
 .game-table__score {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  align-self: stretch;
   justify-content: center;
+  height: 100%;
   min-width: 0;
-  padding-right: clamp(4px, 0.45vw, 9px);
+  padding-right: var(--game-table-total-score-right-gap);
   font-variant-numeric: tabular-nums;
   line-height: 1.04;
 }
 
 .game-table__score-total {
-  font-size: clamp(14px, 1.28vw, 24px);
+  font-size: var(--game-table-total-score-font-size);
+  line-height: 1;
   font-weight: 900;
   letter-spacing: -0.055em;
   white-space: nowrap;
@@ -235,21 +243,19 @@ body {
 .game-table__team-point {
   margin-top: 2px;
   color: #6a7680;
-  font-size: clamp(9px, 0.7vw, 13px);
+  font-size: var(--game-table-converted-score-font-size);
+  line-height: 1;
   font-weight: 700;
   white-space: nowrap;
-}
-
-.game-table__stat {
-  font-size: clamp(12px, 1vw, 19px);
-  font-variant-numeric: tabular-nums;
-  font-weight: 750;
-  text-align: center;
 }
 
 .game-table__panel--outgoing .game-table__row {
   animation: game-table-slide-out var(--row-transition-duration) cubic-bezier(0.55, 0, 0.8, 0.4) both;
   animation-delay: calc(var(--row-order) * var(--row-transition-delay));
+}
+
+.game-table__panel--outgoing .game-table__header {
+  animation: game-table-header-out 180ms ease both;
 }
 
 .game-table__panel--incoming .game-table__row {
@@ -259,7 +265,7 @@ body {
 
 .game-table__panel--incoming.game-table__panel--entering .game-table__row {
   animation: game-table-slide-in var(--row-transition-duration) cubic-bezier(0.2, 0.75, 0.25, 1) both;
-  animation-delay: calc(var(--incoming-base-delay) + var(--row-order) * var(--row-transition-delay));
+  animation-delay: calc(var(--row-order) * var(--row-transition-delay));
 
 }
 
@@ -268,12 +274,141 @@ body {
 }
 
 .game-table__panel--incoming.game-table__panel--entering .game-table__header {
-  animation: game-table-header-in 180ms ease var(--incoming-base-delay) both;
+  animation: game-table-header-in 180ms ease both;
 }
 
 .team-table-slot {
   position: absolute;
   inset: 0;
+}
+
+.team-table {
+  --team-table-item-height: 60px;
+  --team-table-logo-height: 42px;
+  padding: clamp(10px, 1.2vw, 22px);
+  overflow: hidden;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 0.8vw, 14px);
+}
+
+.team-table[hidden] {
+  display: none;
+}
+
+.team-table__title {
+  flex: 0 0 auto;
+  margin: 0;
+  color: #18232d;
+  font-size: clamp(22px, 1.7vw, 32px);
+  font-weight: 900;
+  line-height: 1.15;
+  text-align: left;
+}
+
+.team-table__list {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.team-table__row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  grid-template-columns: 2.3ch var(--team-table-logo-height) minmax(0, 1fr) max-content 4.2ch;
+  align-items: center;
+  gap: clamp(7px, 0.65vw, 12px);
+  width: 100%;
+  height: var(--team-table-item-height);
+  min-height: 0;
+  padding: 0 clamp(9px, 0.8vw, 15px);
+  color: #18232d;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(44, 65, 78, 0.13);
+  border-left: clamp(5px, 0.45vw, 9px) solid var(--team-color);
+  border-radius: clamp(7px, 0.65vw, 12px);
+  box-shadow: 0 2px 8px rgba(35, 48, 57, 0.1);
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+.team-table__rank,
+.team-table__name,
+.team-table__score,
+.team-table__change {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.team-table__rank {
+  justify-content: center;
+  color: #52606b;
+  font-size: var(--team-table-rank-font-size);
+  font-weight: 900;
+}
+
+.team-table__logo {
+  display: block;
+  justify-self: start;
+  width: auto;
+  height: var(--team-table-logo-height);
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.team-table__logo--missing {
+  visibility: hidden;
+}
+
+.team-table__name {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--team-table-name-font-size);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.team-table__score {
+  justify-content: flex-end;
+  font-size: var(--team-table-score-font-size);
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.team-table__change {
+  justify-content: flex-end;
+  font-size: var(--team-table-change-font-size);
+  font-weight: 850;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.team-table__change--visible {
+  opacity: 1;
+}
+
+.team-table__change--up {
+  color: #168449;
+}
+
+.team-table__change--down {
+  color: #c33b32;
+}
+
+.team-table__change--same {
+  color: #7a858e;
 }
 
 @keyframes game-table-slide-out {
@@ -297,6 +432,10 @@ body {
 @keyframes game-table-header-in {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes game-table-header-out {
+  to { opacity: 0; }
 }
 
 .dashboard__divider {

@@ -17,15 +17,6 @@
     return `${baseUrl}/${encodeURIComponent(fileName)}.png`;
   }
 
-  function teamColor(team, config) {
-    const numericSuffix = Number.parseInt(team.match(/\d+$/)?.[0], 10);
-    const seed = Number.isFinite(numericSuffix)
-        ? numericSuffix - 1
-        : [...team].reduce((total, character) => total + character.codePointAt(0), 0);
-    return config.teamColors[((seed % config.teamColors.length) + config.teamColors.length)
-    % config.teamColors.length];
-  }
-
   function createImage(className, source, alt) {
     const image = createElement("img", className);
     image.src = source;
@@ -37,20 +28,10 @@
   function createPlayerRow(player, order, config) {
     const row = createElement("li", "game-table__row");
     row.style.setProperty("--row-order", order);
-    row.style.setProperty("--team-color", teamColor(player.team, config));
+    row.style.setProperty("--team-color", player.teamColor);
 
     const identity = createElement("div", "game-table__identity");
     identity.append(
-        createImage(
-            "game-table__portrait",
-            imageUrl(config.playerImageBaseUrl, player.name),
-            `${player.name}的头像`
-        ),
-        createImage(
-            "game-table__team-mark",
-            imageUrl(config.teamImageBaseUrl, player.team),
-            ""
-        ),
         createElement("strong", "game-table__name", player.name)
     );
 
@@ -60,24 +41,28 @@
         createElement("span", "game-table__team-point", formatTeamPoint(player.teamPoint))
     );
     row.append(
+        createImage(
+            "game-table__team-mark",
+            imageUrl(config.teamImageBaseUrl, player.team),
+            ""
+        ),
         identity,
         score,
-        createElement("span", "game-table__stat", player.riichiCount),
-        createElement("span", "game-table__stat", player.winCount),
-        createElement("span", "game-table__stat", player.dealInCount)
+        createImage(
+            "game-table__portrait",
+            imageUrl(config.playerImageBaseUrl, player.name),
+            `${player.name}的头像`
+        )
     );
     return row;
   }
 
   function createGameSection(game, startOrder, config) {
     const section = createElement("section", "game-table__section");
-    section.setAttribute("aria-label", `game${game.gameId} 比赛`);
+    section.setAttribute("aria-label", `${game.info} 比赛`);
     const header = createElement("header", "game-table__header");
     header.append(
-        createElement("h2", "game-table__title", `game${game.gameId}`),
-        createElement("span", "game-table__column-label game-table__column-label--riichi", "立直"),
-        createElement("span", "game-table__column-label", "和了"),
-        createElement("span", "game-table__column-label", "放铳")
+        createElement("h2", "game-table__title", game.info)
     );
     const list = createElement("ol", "game-table__list");
     game.players.forEach((player, index) => {
@@ -105,8 +90,26 @@
         || !Number.isFinite(config.rowTransitionDelay) || config.rowTransitionDelay < 0) {
       throw new Error("game-table 动画时长必须是大于或等于 0 的数字");
     }
-    if (!Array.isArray(config.teamColors) || !config.teamColors.length) {
-      throw new Error("game-table 至少需要一种队伍颜色");
+    const itemFontSizeNames = ["playerName", "totalScore", "convertedTeamScore"];
+    itemFontSizeNames.forEach(name => {
+      if (!Number.isFinite(config.itemFontSizes?.[name]) || config.itemFontSizes[name] <= 0) {
+        throw new Error(`gameTable.itemFontSizes.${name} 必须是大于 0 的数字`);
+      }
+    });
+    const positiveConfigNames = ["itemHeightRatio", "playerImageHeightRatio"];
+    positiveConfigNames.forEach(name => {
+      if (!Number.isFinite(config[name]) || config[name] <= 0) {
+        throw new Error(`gameTable.${name} 必须是大于 0 的数字`);
+      }
+    });
+    const nonNegativeConfigNames = ["itemGapRatio", "totalScoreRightGap", "headerItemGap"];
+    nonNegativeConfigNames.forEach(name => {
+      if (!Number.isFinite(config[name]) || config[name] < 0) {
+        throw new Error(`gameTable.${name} 必须是大于或等于 0 的数字`);
+      }
+    });
+    if (!Number.isFinite(config.headerFontSize) || config.headerFontSize <= 0) {
+      throw new Error("gameTable.headerFontSize 必须是大于 0 的数字");
     }
 
     // const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -120,12 +123,46 @@
     let transitionFrame = 0;
     let hiddenForOverview = null;
 
-    config.teamColors.forEach(color => {
-      if (!CSS.supports("color", color)) throw new Error(`game-table 队伍颜色“${color}”无效`);
-    });
     root.style.setProperty("--row-transition-duration", `${config.rowTransitionDuration}ms`);
     root.style.setProperty("--row-transition-delay", `${config.rowTransitionDelay}ms`);
-    root.style.setProperty("--incoming-base-delay", `${transitionLength}ms`);
+    root.style.setProperty(
+        "--game-table-player-name-font-size",
+        `${config.itemFontSizes.playerName}px`
+    );
+    root.style.setProperty(
+        "--game-table-total-score-font-size",
+        `${config.itemFontSizes.totalScore}px`
+    );
+    root.style.setProperty(
+        "--game-table-converted-score-font-size",
+        `${config.itemFontSizes.convertedTeamScore}px`
+    );
+    root.style.setProperty(
+        "--game-table-player-image-height-ratio",
+        config.playerImageHeightRatio
+    );
+    root.style.setProperty(
+        "--game-table-total-score-right-gap",
+        `${config.totalScoreRightGap}px`
+    );
+    root.style.setProperty("--game-table-header-font-size", `${config.headerFontSize}px`);
+    root.style.setProperty("--game-table-header-item-gap", `${config.headerItemGap}px`);
+
+    function updateItemDimensions() {
+      const regionHeight = root.getBoundingClientRect().height;
+      root.style.setProperty(
+          "--game-table-item-height",
+          `${regionHeight * config.itemHeightRatio}px`
+      );
+      root.style.setProperty(
+          "--game-table-item-gap",
+          `${regionHeight * config.itemGapRatio}px`
+      );
+    }
+
+    updateItemDimensions();
+    const resizeObserver = new ResizeObserver(updateItemDimensions);
+    resizeObserver.observe(root);
 
     function finishTransition(nextPanel) {
       clearTimeout(transitionTimer);
@@ -141,6 +178,27 @@
       );
       activePanel = nextPanel;
       pendingPanel = null;
+    }
+
+    function startIncomingTransition(nextPanel) {
+      if (pendingPanel !== nextPanel) return;
+
+      root.replaceChildren(nextPanel);
+      nextPanel.classList.add("game-table__panel--incoming");
+      activePanel = null;
+
+      // 分两帧应用入场状态，让浏览器先处理面板的初始样式。
+      transitionFrame = requestAnimationFrame(() => {
+        transitionFrame = requestAnimationFrame(() => {
+          transitionFrame = 0;
+          if (pendingPanel !== nextPanel) return;
+
+          nextPanel.classList.add("game-table__panel--entering");
+          transitionTimer = window.setTimeout(() => {
+            if (pendingPanel === nextPanel) finishTransition(nextPanel);
+          }, transitionLength);
+        });
+      });
     }
 
     function showGamePair(index, animate) {
@@ -166,22 +224,9 @@
       }
 
       activePanel.classList.add("game-table__panel--outgoing");
-      nextPanel.classList.add("game-table__panel--incoming");
       pendingPanel = nextPanel;
-      root.append(nextPanel);
-
-      // 分两帧应用入场状态，让浏览器先处理面板的初始样式。
-      transitionFrame = requestAnimationFrame(() => {
-        transitionFrame = requestAnimationFrame(() => {
-          transitionFrame = 0;
-          if (pendingPanel !== nextPanel) return;
-
-          nextPanel.classList.add("game-table__panel--entering");
-          transitionTimer = window.setTimeout(() => {
-            if (pendingPanel === nextPanel) finishTransition(nextPanel);
-          }, transitionLength * 2);
-        });
-      });
+      // 旧面板完全退场并移除后才挂载新面板，避免两套文字同时存在。
+      transitionTimer = window.setTimeout(() => startIncomingTransition(nextPanel), transitionLength);
     }
 
     function setOverviewVisibility(isOverview) {
