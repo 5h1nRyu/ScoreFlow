@@ -50,7 +50,7 @@
     if (!Number.isFinite(config.itemGapRatio) || config.itemGapRatio < 0) {
       throw new Error("teamTable.itemGapRatio 必须是大于或等于 0 的数字");
     }
-    ["rank", "score", "rankChange"].forEach(name => {
+    ["rank", "teamName", "score", "rankChange"].forEach(name => {
       if (!Number.isFinite(config.itemFontSizes?.[name]) || config.itemFontSizes[name] <= 0) {
         throw new Error(`teamTable.itemFontSizes.${name} 必须是大于 0 的数字`);
       }
@@ -67,6 +67,7 @@
 
     root.classList.add("team-table");
     root.style.setProperty("--team-table-rank-font-size", `${config.itemFontSizes.rank}px`);
+    root.style.setProperty("--team-table-name-font-size", `${config.itemFontSizes.teamName}px`);
     root.style.setProperty("--team-table-score-font-size", `${config.itemFontSizes.score}px`);
     root.style.setProperty("--team-table-change-font-size", `${config.itemFontSizes.rankChange}px`);
     root.style.setProperty("--team-table-logo-height", `${config.teamImageHeight}px`);
@@ -79,6 +80,7 @@
       logo.src = imageUrl(config.teamImageBaseUrl, entry.team.name);
       logo.alt = `${entry.team.name}队标`;
       logo.addEventListener("error", () => logo.classList.add("team-table__logo--missing"), { once: true });
+      const name = createElement("strong", "team-table__name", entry.team.name);
       const score = createElement("strong", "team-table__score", scoreFormatter(entry.score));
       const finalEntry = finalByName.get(entry.team.name);
       const difference = entry.rank - finalEntry.rank;
@@ -96,7 +98,7 @@
         change.textContent = "—";
         change.setAttribute("aria-label", "排名不变");
       }
-      row.append(rank, logo, score, change);
+      row.append(rank, logo, name, score, change);
       list.append(row);
       rows.set(entry.team.name, { change, rank, row, score });
     });

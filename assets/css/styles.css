@@ -300,7 +300,7 @@ body {
   top: 0;
   left: 0;
   display: grid;
-  grid-template-columns: 2.3ch minmax(var(--team-table-logo-height), 1fr) max-content 4.2ch;
+  grid-template-columns: 2.3ch var(--team-table-logo-height) minmax(0, 1fr) max-content 4.2ch;
   align-items: center;
   gap: clamp(7px, 0.65vw, 12px);
   width: 100%;
@@ -318,6 +318,7 @@ body {
 }
 
 .team-table__rank,
+.team-table__name,
 .team-table__score,
 .team-table__change {
   display: flex;
@@ -345,6 +346,16 @@ body {
 
 .team-table__logo--missing {
   visibility: hidden;
+}
+
+.team-table__name {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--team-table-name-font-size);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .team-table__score {

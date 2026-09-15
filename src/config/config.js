@@ -74,6 +74,7 @@ const APP_CONFIG = Object.freeze({
     teamImageHeight: 42,
     itemFontSizes: Object.freeze({
       rank: 28,
+      teamName: 24,
       score: 30,
       rankChange: 20
     }),

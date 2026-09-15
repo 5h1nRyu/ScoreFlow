@@ -156,8 +156,8 @@ games.json ──┘             │                          ↑
 `assets/images/icons/<team>.png`；缺少图片时会隐藏破损图像但保留布局。
 
 可在 `teamTable` 配置中调整 `itemHeightRatio`、`itemGapRatio`、`teamImageHeight`，以及
-`itemFontSizes.rank`、`itemFontSizes.score`、`itemFontSizes.rankChange`。队标、排名、分数和
-排名变化文字均与条目的竖直中心对齐。
+`itemFontSizes.rank`、`itemFontSizes.teamName`、`itemFontSizes.score`、
+`itemFontSizes.rankChange`。队标、排名、队伍名称、分数和排名变化文字均与条目的竖直中心对齐。
 
 ## 折线标签
 
