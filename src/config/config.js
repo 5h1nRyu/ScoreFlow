@@ -31,7 +31,7 @@ const APP_CONFIG = Object.freeze({
     gameDuration: 2000,
     // 限制单帧参与缩放计算的最大秒数
     maximumFrameDelta: 0.05,
-    // 四段时长之和同时作为折线图的完整全景展开时间
+    // 四段时长之和作为完整的队伍表总览阶段时间
     overview: OVERVIEW_PHASES,
     overviewDuration: OVERVIEW_DURATION,
     // 设置最后一场结束后重新播放前的停留毫秒数

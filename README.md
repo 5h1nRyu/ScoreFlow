@@ -145,11 +145,11 @@ games.json ──┘             │                          ↑
 可在 `src/config/config.js` 的 `animation` 中调整：
 
 - `gameDuration`：每个 game 的动画时长，也是到达最后一个 game 后的额外停留时长。
-- `overview.teamTableEnterDuration`：队伍排名表按初始分数进场的动画时长。
+- `overview.teamTableEnterDuration`：队伍排名表按初始分数进场的动画时长；折线图也会在此阶段完成全景展开。
 - `overview.initialHoldDuration`：初始排名进场后的停留时长。
 - `overview.reorderDuration`：积分数字变化及最终排名重排的动画时长。
 - `overview.finalHoldDuration`：最终排名重排完成后的停留时长。
-- `overviewDuration`：以上四项之和，由配置自动计算并作为 X 轴展开至完整比赛范围的总时长。
+- `overviewDuration`：以上四项之和，由配置自动计算并作为完整队伍表总览阶段的时长。
 - `restartDelay`：全景展开完成后、下一轮播放开始前的停留时长。
 
 ## 队伍总分排名

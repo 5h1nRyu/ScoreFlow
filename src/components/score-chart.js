@@ -436,18 +436,23 @@ function render(timelineState) {
           ? yAxis.expansionRate
           : yAxis.contractionRate;
 
-  displayedRange +=
-      (
-          targetRange -
-          displayedRange
-      ) *
-      (
-          1 -
-          Math.exp(
-              -scaleRate *
-              frameSeconds
-          )
-      );
+  if (overviewProgress >= 1 && (phase === "overview" || phase === "restart-hold")) {
+    // 全景进场结束时对齐最终范围，避免后续队伍表阶段折线图继续缩放。
+    displayedRange = targetRange;
+  } else {
+    displayedRange +=
+        (
+            targetRange -
+            displayedRange
+        ) *
+        (
+            1 -
+            Math.exp(
+                -scaleRate *
+                frameSeconds
+            )
+        );
+  }
 
 
 
