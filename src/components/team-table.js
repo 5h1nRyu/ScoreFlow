@@ -113,7 +113,7 @@
 
     function rankText(order, entry) {
       const previous = order[entry.position - 1];
-      return previous?.score === entry.score ? "—" : String(entry.rank);
+      return previous?.score === entry.score ? "-" : String(entry.rank);
     }
 
     function updateDimensions() {
