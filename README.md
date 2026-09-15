@@ -90,6 +90,15 @@ games.json ──┘             │                          ↑
 - `totalScore`：总分字号。
 - `convertedTeamScore`：换算队伍得分字号。
 
+`gameTable` 还提供以下条目布局配置：
+
+- `itemHeightRatio`：单个选手条目高度与整个 `game-table` 区域高度的比例。
+- `itemGapRatio`：同一场比赛中相邻选手条目间距与整个 `game-table` 区域高度的比例。
+- `playerImageHeightRatio`：头像高度与条目高度的比例；大于 `1` 时头像会从条目顶部伸出，且不会被条目裁切。
+- `totalScoreRightGap`：总分区域与条目右端的距离，单位为 CSS 像素。
+
+头像保持原始比例，并以头像左下角和条目左下角为锚点。背景队标同样保持原始比例，以右上角为锚点缩放至铺满整个条目，超出条目的部分不会显示。
+
 比赛条目仅展示选手信息与得分，得分靠右排列。选手所属队伍根据 `teams.json` 中的队员名单动态取得，不在每场比赛中重复保存。
 
 人物头像和队标不存储在 JSON 中，按以下固定约定添加 PNG 文件：

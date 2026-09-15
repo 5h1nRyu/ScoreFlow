@@ -36,6 +36,14 @@ const APP_CONFIG = Object.freeze({
     // 八名选手按照相邻两个 game 各自从上到下的顺序依次切换
     rowTransitionDuration: 220,
     rowTransitionDelay: 35,
+    // 设置单个选手条目高度与 game-table 区域高度的比例
+    itemHeightRatio: 0.09,
+    // 设置同一场比赛中相邻选手条目间距与 game-table 区域高度的比例
+    itemGapRatio: 0.012,
+    // 设置选手头像高度与条目高度的比例；大于 1 时头像可超出条目
+    playerImageHeightRatio: 1.2,
+    // 设置总分区域与条目右端的距离，单位为 CSS 像素
+    totalScoreRightGap: 8,
     // 设置选手条目内各类文字的字号，单位为 CSS 像素
     itemFontSizes: Object.freeze({
       playerName: 36,
