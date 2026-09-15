@@ -42,6 +42,7 @@ ScoreFlow/
 ├── src/
 │   ├── components/
 │   │   ├── game-table.js           # 比赛详情表及逐项切换动画
+│   │   ├── team-table.js           # 队伍总分排名及重排动画
 │   │   └── score-chart.js          # 折线图计算与 Canvas 绘制
 │   ├── config/
 │   │   └── config.js               # 页面、动画和图表配置
@@ -136,8 +137,27 @@ games.json ──┘             │                          ↑
 可在 `src/config/config.js` 的 `animation` 中调整：
 
 - `gameDuration`：每个 game 的动画时长，也是到达最后一个 game 后的额外停留时长。
-- `overviewDuration`：X 轴展开至完整比赛范围的动画时长。
+- `overview.teamTableEnterDuration`：队伍排名表按初始分数进场的动画时长。
+- `overview.initialHoldDuration`：初始排名进场后的停留时长。
+- `overview.reorderDuration`：积分数字变化及最终排名重排的动画时长。
+- `overview.finalHoldDuration`：最终排名重排完成后的停留时长。
+- `overviewDuration`：以上四项之和，由配置自动计算并作为 X 轴展开至完整比赛范围的总时长。
 - `restartDelay`：全景展开完成后、下一轮播放开始前的停留时长。
+
+## 队伍总分排名
+
+进入全景阶段后，右上区域依次展示 10 支队伍的初始排名和最终排名。初始排名直接使用
+`teams.json` 的 `initialScore`，不包含 `game0`；重排时分数平滑变化至最后一场结束后的累计分数，
+条目同步上下交换。分数相同的队伍采用竞赛排名（例如 `1、2、2、4`），同分时保持数据文件中的
+原始先后顺序。
+
+重排期间，最终排名较高的条目具有更高的层叠顺序，并通过轻微缩放增强交错效果。排名变化以
+绿色 `▲`、红色 `▼` 或灰色 `—` 显示，并附带上升或下降的名次数。队标文件约定为
+`assets/images/icons/<team>.png`；缺少图片时会隐藏破损图像但保留布局。
+
+可在 `teamTable` 配置中调整 `itemHeightRatio`、`itemGapRatio`、`teamImageHeight`，以及
+`itemFontSizes.rank`、`itemFontSizes.teamName`、`itemFontSizes.score`、
+`itemFontSizes.rankChange`。队标、排名、队伍名称、分数和排名变化文字均与条目的竖直中心对齐。
 
 ## 折线标签
 

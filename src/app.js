@@ -73,10 +73,14 @@
           data.games,
           APP_CONFIG.gameTable
       );
+      const teamTable = TeamTable.createTeamTable(
+          document.getElementById("teamTableSlot"), data.teams, APP_CONFIG.teamTable
+      );
       const timeline = ScoreTimeline.createTimeline({ animation, finalGame });
       // 使用同一时间状态驱动折线图和比赛详情
       timeline.subscribe(chart.render);
       timeline.subscribe(gameTable.render);
+      timeline.subscribe(teamTable.render);
       timeline.start();
     } catch (error) {
       // 将初始化错误同时展示给用户和开发者
