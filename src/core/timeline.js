@@ -6,6 +6,7 @@
     const {
       gameDuration,
       maximumFrameDelta,
+      overview,
       overviewDuration,
       restartDelay
     } = options.animation;
@@ -29,6 +30,28 @@
       const overviewProgress = overviewDuration > 0
           ? Math.min(1, Math.max(0, (cycleElapsed - lastGameHoldEnd) / overviewDuration))
           : Number(cycleElapsed >= lastGameHoldEnd);
+      const overviewElapsed = Math.max(0, cycleElapsed - lastGameHoldEnd);
+      const overviewStages = [
+        ["team-table-enter", overview.teamTableEnterDuration],
+        ["initial-hold", overview.initialHoldDuration],
+        ["reorder", overview.reorderDuration],
+        ["final-hold", overview.finalHoldDuration]
+      ];
+      let overviewStage = null;
+      let overviewStageProgress = 0;
+      let stageStart = 0;
+      if (cycleElapsed >= lastGameHoldEnd) {
+        for (const [name, duration] of overviewStages) {
+          if (overviewElapsed < stageStart + duration || name === "final-hold") {
+            overviewStage = name;
+            overviewStageProgress = duration > 0
+                ? Math.min(1, Math.max(0, (overviewElapsed - stageStart) / duration))
+                : 1;
+            break;
+          }
+          stageStart += duration;
+        }
+      }
       const phase = cycleElapsed < animationDuration
           ? "playing"
           : cycleElapsed < lastGameHoldEnd
@@ -43,6 +66,8 @@
         elapsed,
         isHolding: phase !== "playing" && phase !== "overview",
         overviewProgress,
+        overviewStage,
+        overviewStageProgress,
         phase,
         playhead
       });

@@ -278,6 +278,106 @@ body {
   inset: 0;
 }
 
+.team-table {
+  --team-table-item-height: 60px;
+  --team-table-logo-height: 42px;
+  padding: clamp(10px, 1.2vw, 22px);
+  overflow: hidden;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.team-table__list {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.team-table__row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  grid-template-columns: 2.3ch minmax(var(--team-table-logo-height), 1fr) max-content 4.2ch;
+  align-items: center;
+  gap: clamp(7px, 0.65vw, 12px);
+  width: 100%;
+  height: var(--team-table-item-height);
+  min-height: 0;
+  padding: 0 clamp(9px, 0.8vw, 15px);
+  color: #18232d;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(44, 65, 78, 0.13);
+  border-left: clamp(5px, 0.45vw, 9px) solid var(--team-color);
+  border-radius: clamp(7px, 0.65vw, 12px);
+  box-shadow: 0 2px 8px rgba(35, 48, 57, 0.1);
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+.team-table__rank,
+.team-table__score,
+.team-table__change {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.team-table__rank {
+  justify-content: center;
+  color: #52606b;
+  font-size: var(--team-table-rank-font-size);
+  font-weight: 900;
+}
+
+.team-table__logo {
+  display: block;
+  justify-self: start;
+  width: auto;
+  height: var(--team-table-logo-height);
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.team-table__logo--missing {
+  visibility: hidden;
+}
+
+.team-table__score {
+  justify-content: flex-end;
+  font-size: var(--team-table-score-font-size);
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+.team-table__change {
+  justify-content: flex-end;
+  font-size: var(--team-table-change-font-size);
+  font-weight: 850;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.team-table__change--visible {
+  opacity: 1;
+}
+
+.team-table__change--up {
+  color: #168449;
+}
+
+.team-table__change--down {
+  color: #c33b32;
+}
+
+.team-table__change--same {
+  color: #7a858e;
+}
+
 @keyframes game-table-slide-out {
   to {
     opacity: 0;
