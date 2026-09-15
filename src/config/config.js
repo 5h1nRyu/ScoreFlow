@@ -43,6 +43,11 @@ const APP_CONFIG = Object.freeze({
   // 指定每个 game 的选手数据文件
   gamesDataUrl: "data/games.json",
 
+  debug: Object.freeze({
+    // -1 使用完整数据；正整数 x 只演示到 gameId 为 x 的 game（包含该 game）
+    finalGameId: -1
+  }),
+
   gameTable: Object.freeze({
     // 八名选手按照相邻两个 game 各自从上到下的顺序依次切换
     rowTransitionDuration: 220,
@@ -67,11 +72,15 @@ const APP_CONFIG = Object.freeze({
   }),
 
   teamTable: Object.freeze({
+    // 设置排行榜标题
+    title: "队伍总分排行榜",
     // 条目高度和间距均相对于 team-table 区域高度计算
     itemHeightRatio: 0.075,
     itemGapRatio: 0.018,
     // 队标高度与各类文字字号均使用 CSS 像素
     teamImageHeight: 42,
+    // 设置重排过程中条目放大或缩小的最大比例
+    reorderScaleAmplitude: 0.012,
     itemFontSizes: Object.freeze({
       rank: 28,
       teamName: 24,
@@ -110,7 +119,7 @@ const APP_CONFIG = Object.freeze({
     fontWeight: 700,
     // 设置标签与折线末端圆点的水平间距
     horizontalGap: 10,
-    // 设置判断右侧空间是否充足时额外保留的 CSS 像素
+    // 在最长标签宽度之外额外保留的 CSS 像素
     rightSafetyMargin: 50,
     // 设置右侧空间不足后标签渐隐的毫秒数；设为 0 时立即隐藏
     fadeOutDuration: 100,
