@@ -1,9 +1,9 @@
 // 全景阶段由队伍表的四个连续阶段共同组成。
 const OVERVIEW_PHASES = Object.freeze({
-  teamTableEnterDuration: 700,
-  initialHoldDuration: 900,
+  teamTableEnterDuration: 1000,
+  initialHoldDuration: 2000,
   reorderDuration: 1000,
-  finalHoldDuration: 1200
+  finalHoldDuration: 3000
 });
 const OVERVIEW_DURATION = Object.values(OVERVIEW_PHASES)
     .reduce((total, duration) => total + duration, 0);
