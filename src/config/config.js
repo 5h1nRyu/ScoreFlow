@@ -59,10 +59,10 @@ const APP_CONFIG = Object.freeze({
     // 设置选手头像高度与条目高度的比例；大于 1 时头像可超出条目
     playerImageHeightRatio: 1.2,
     // 设置总分区域与条目右端的距离，单位为 CSS 像素
-    totalScoreRightGap: 8,
+    totalScoreRightGap: 12,
     // 设置 info 表头字号及其与下方选手条目的距离，单位为 CSS 像素
-    headerFontSize: 30,
-    headerItemGap: 0,
+    headerFontSize: 36,
+    headerItemGap: 10,
     // 设置选手条目内各类文字的字号，单位为 CSS 像素
     itemFontSizes: Object.freeze({
       playerName: 36,
