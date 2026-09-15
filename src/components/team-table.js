@@ -42,6 +42,9 @@
     if (!Array.isArray(teams) || teams.length !== 10) {
       throw new Error("team-table 必须恰好接收 10 支队伍");
     }
+    if (typeof config.title !== "string" || !config.title.trim()) {
+      throw new Error("teamTable.title 必须是非空字符串");
+    }
     ["itemHeightRatio", "teamImageHeight"].forEach(name => {
       if (!Number.isFinite(config[name]) || config[name] <= 0) {
         throw new Error(`teamTable.${name} 必须是大于 0 的数字`);
@@ -49,6 +52,9 @@
     });
     if (!Number.isFinite(config.itemGapRatio) || config.itemGapRatio < 0) {
       throw new Error("teamTable.itemGapRatio 必须是大于或等于 0 的数字");
+    }
+    if (!Number.isFinite(config.reorderScaleAmplitude) || config.reorderScaleAmplitude < 0) {
+      throw new Error("teamTable.reorderScaleAmplitude 必须是大于或等于 0 的数字");
     }
     ["rank", "teamName", "score", "rankChange"].forEach(name => {
       if (!Number.isFinite(config.itemFontSizes?.[name]) || config.itemFontSizes[name] <= 0) {
@@ -60,6 +66,7 @@
     const finalOrder = rankTeams(teams, team => team.values.at(-1));
     const initialByName = new Map(initialOrder.map(entry => [entry.team.name, entry]));
     const finalByName = new Map(finalOrder.map(entry => [entry.team.name, entry]));
+    const title = createElement("h2", "team-table__title", config.title);
     const list = createElement("ol", "team-table__list");
     const rows = new Map();
     let itemHeight = 0;
@@ -95,17 +102,22 @@
         change.setAttribute("aria-label", `排名下降 ${Math.abs(difference)} 位`);
       } else {
         change.classList.add("team-table__change--same");
-        change.textContent = "—";
+        change.textContent = "=";
         change.setAttribute("aria-label", "排名不变");
       }
       row.append(rank, logo, name, score, change);
       list.append(row);
       rows.set(entry.team.name, { change, rank, row, score });
     });
-    root.replaceChildren(list);
+    root.replaceChildren(title, list);
+
+    function rankText(order, entry) {
+      const previous = order[entry.position - 1];
+      return previous?.score === entry.score ? "—" : String(entry.rank);
+    }
 
     function updateDimensions() {
-      const height = root.getBoundingClientRect().height;
+      const height = list.getBoundingClientRect().height;
       itemHeight = height * config.itemHeightRatio;
       itemGap = height * config.itemGapRatio;
       root.style.setProperty("--team-table-item-height", `${itemHeight}px`);
@@ -136,12 +148,14 @@
         const position = initialEntry.position
             + (finalEntry.position - initialEntry.position) * progress;
         const direction = Math.sign(initialEntry.position - finalEntry.position);
-        const scale = 1 + direction * 0.025 * Math.sin(Math.PI * progress);
+        const scale = 1 + direction * config.reorderScaleAmplitude * Math.sin(Math.PI * progress);
         const y = position * (itemHeight + itemGap);
         elements.row.style.opacity = easedEnter;
         elements.row.style.zIndex = String(100 - finalEntry.position);
         elements.row.style.transform = `translate3d(${(1 - easedEnter) * 28}px, ${y}px, 0) scale(${scale})`;
-        elements.rank.textContent = String(isReordered ? finalEntry.rank : initialEntry.rank);
+        elements.rank.textContent = isReordered
+            ? rankText(finalOrder, finalEntry)
+            : rankText(initialOrder, initialEntry);
         const shownScore = initialEntry.score + (finalEntry.score - initialEntry.score) * progress;
         elements.score.textContent = scoreFormatter(shownScore);
         elements.change.classList.toggle("team-table__change--visible", isReordered);

@@ -128,6 +128,8 @@ games.json ──┘             │                          ↑
 
 `data/games.json` 中每名选手只保存 `name`、`score` 和 `teamPoint`。`gameId` 必须从 0 开始连续排列，每个 game 必须恰好有 4 名来自不同队伍的选手，且全部 40 名选手都必须至少出场一次。
 
+调试时可将 `debug.finalGameId` 设为大于 `0` 且小于 game 总场数的整数 `x`，页面将只演示 `game0` 到 `gamex`（包含 `gamex`），并据此计算最终积分和排名。默认值 `-1` 表示使用完整数据。
+
 积分时间序列从各队的 `initialScore` 开始计算。每场比赛结束时，程序根据选手名找到 `teams.json` 中的所属队伍，将该选手的 `teamPoint` 累加到队伍当前分数；没有选手出场的队伍保持原分数。同一场中每支队伍至多有一名选手，因此图表在 `x = 0` 的第一个点已经是“初始分数 + game0 的 teamPoint”，不会单独绘制纯初始分数点。最后一个 game 播放完并停留数秒后，图表会重新播放。
 
 ## 循环结束动画
@@ -155,13 +157,13 @@ games.json ──┘             │                          ↑
 进入全景阶段后，右上区域依次展示 10 支队伍的初始排名和最终排名。初始排名直接使用
 `teams.json` 的 `initialScore`，不包含 `game0`；重排时分数平滑变化至最后一场结束后的累计分数，
 条目同步上下交换。分数相同的队伍采用竞赛排名（例如 `1、2、2、4`），同分时保持数据文件中的
-原始先后顺序。
+原始先后顺序。每组并列队伍只有第一支显示数字排名，后续队伍以 `—` 表示并列。
 
 重排期间，最终排名较高的条目具有更高的层叠顺序，并通过轻微缩放增强交错效果。排名变化以
-绿色 `▲`、红色 `▼` 或灰色 `—` 显示，并附带上升或下降的名次数。队标文件约定为
+绿色 `▲`、红色 `▼` 或灰色 `=` 显示，并附带上升或下降的名次数。队标文件约定为
 `assets/images/icons/<team>.png`；缺少图片时会隐藏破损图像但保留布局。
 
-可在 `teamTable` 配置中调整 `itemHeightRatio`、`itemGapRatio`、`teamImageHeight`，以及
+排行榜标题由 `teamTable.title` 配置。可在 `teamTable` 配置中调整 `itemHeightRatio`、`itemGapRatio`、`teamImageHeight`、`reorderScaleAmplitude`（重排时条目的最大缩放比例），以及
 `itemFontSizes.rank`、`itemFontSizes.teamName`、`itemFontSizes.score`、
 `itemFontSizes.rankChange`。队标、排名、队伍名称、分数和排名变化文字均与条目的竖直中心对齐。
 
