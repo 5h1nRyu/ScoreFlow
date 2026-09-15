@@ -102,12 +102,15 @@
         throw new Error(`gameTable.${name} 必须是大于 0 的数字`);
       }
     });
-    const nonNegativeConfigNames = ["itemGapRatio", "totalScoreRightGap"];
+    const nonNegativeConfigNames = ["itemGapRatio", "totalScoreRightGap", "headerItemGap"];
     nonNegativeConfigNames.forEach(name => {
       if (!Number.isFinite(config[name]) || config[name] < 0) {
         throw new Error(`gameTable.${name} 必须是大于或等于 0 的数字`);
       }
     });
+    if (!Number.isFinite(config.headerFontSize) || config.headerFontSize <= 0) {
+      throw new Error("gameTable.headerFontSize 必须是大于 0 的数字");
+    }
 
     // const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const reduceMotion = false;
@@ -142,6 +145,8 @@
         "--game-table-total-score-right-gap",
         `${config.totalScoreRightGap}px`
     );
+    root.style.setProperty("--game-table-header-font-size", `${config.headerFontSize}px`);
+    root.style.setProperty("--game-table-header-item-gap", `${config.headerItemGap}px`);
 
     function updateItemDimensions() {
       const regionHeight = root.getBoundingClientRect().height;

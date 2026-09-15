@@ -60,6 +60,9 @@ const APP_CONFIG = Object.freeze({
     playerImageHeightRatio: 1.2,
     // 设置总分区域与条目右端的距离，单位为 CSS 像素
     totalScoreRightGap: 8,
+    // 设置 info 表头字号及其与下方选手条目的距离，单位为 CSS 像素
+    headerFontSize: 30,
+    headerItemGap: 0,
     // 设置选手条目内各类文字的字号，单位为 CSS 像素
     itemFontSizes: Object.freeze({
       playerName: 36,
@@ -72,8 +75,9 @@ const APP_CONFIG = Object.freeze({
   }),
 
   teamTable: Object.freeze({
-    // 设置排行榜标题
-    title: "队伍总分排行榜",
+    // 分别设置重排前后的排行榜标题
+    initialTitle: "9月13日队伍排名",
+    finalTitle: "9月30日队伍排名",
     // 条目高度和间距均相对于 team-table 区域高度计算
     itemHeightRatio: 0.075,
     itemGapRatio: 0.018,

@@ -42,9 +42,11 @@
     if (!Array.isArray(teams) || teams.length !== 10) {
       throw new Error("team-table 必须恰好接收 10 支队伍");
     }
-    if (typeof config.title !== "string" || !config.title.trim()) {
-      throw new Error("teamTable.title 必须是非空字符串");
-    }
+    ["initialTitle", "finalTitle"].forEach(name => {
+      if (typeof config[name] !== "string" || !config[name].trim()) {
+        throw new Error(`teamTable.${name} 必须是非空字符串`);
+      }
+    });
     ["itemHeightRatio", "teamImageHeight"].forEach(name => {
       if (!Number.isFinite(config[name]) || config[name] <= 0) {
         throw new Error(`teamTable.${name} 必须是大于 0 的数字`);
@@ -66,7 +68,7 @@
     const finalOrder = rankTeams(teams, team => team.values.at(-1));
     const initialByName = new Map(initialOrder.map(entry => [entry.team.name, entry]));
     const finalByName = new Map(finalOrder.map(entry => [entry.team.name, entry]));
-    const title = createElement("h2", "team-table__title", config.title);
+    const title = createElement("h2", "team-table__title", config.initialTitle);
     const list = createElement("ol", "team-table__list");
     const rows = new Map();
     let itemHeight = 0;
@@ -131,6 +133,7 @@
       const isReordered = state.overviewStage === "reorder"
           || state.overviewStage === "final-hold"
           || state.phase === "restart-hold";
+      title.textContent = isReordered ? config.finalTitle : config.initialTitle;
       const rawProgress = state.overviewStage === "reorder"
           ? state.overviewStageProgress
           : Number(isReordered);

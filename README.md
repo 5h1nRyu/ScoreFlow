@@ -93,6 +93,8 @@ games.json ──┘             │                          ↑
 
 `gameTable` 还提供以下条目布局配置：
 
+- `headerFontSize`：每场比赛 `info` 表头的字号，单位为 CSS 像素。
+- `headerItemGap`：`info` 表头与下方首个选手条目的距离，单位为 CSS 像素。
 - `itemHeightRatio`：单个选手条目高度与整个 `game-table` 区域高度的比例。
 - `itemGapRatio`：同一场比赛中相邻选手条目间距与整个 `game-table` 区域高度的比例。
 - `playerImageHeightRatio`：头像高度与条目高度的比例；大于 `1` 时头像会从条目顶部伸出，且不会被条目裁切。
@@ -163,7 +165,7 @@ games.json ──┘             │                          ↑
 绿色 `▲`、红色 `▼` 或灰色 `=` 显示，并附带上升或下降的名次数。队标文件约定为
 `assets/images/icons/<team>.png`；缺少图片时会隐藏破损图像但保留布局。
 
-排行榜标题由 `teamTable.title` 配置。可在 `teamTable` 配置中调整 `itemHeightRatio`、`itemGapRatio`、`teamImageHeight`、`reorderScaleAmplitude`（重排时条目的最大缩放比例），以及
+排行榜在重排前使用 `teamTable.initialTitle`，重排开始后使用 `teamTable.finalTitle`，两个标题均左对齐。可在 `teamTable` 配置中调整 `itemHeightRatio`、`itemGapRatio`、`teamImageHeight`、`reorderScaleAmplitude`（重排时条目的最大缩放比例），以及
 `itemFontSizes.rank`、`itemFontSizes.teamName`、`itemFontSizes.score`、
 `itemFontSizes.rankChange`。队标、排名、队伍名称、分数和排名变化文字均与条目的竖直中心对齐。
 
