@@ -1,3 +1,13 @@
+// 全景阶段由队伍表的四个连续阶段共同组成。
+const OVERVIEW_PHASES = Object.freeze({
+  teamTableEnterDuration: 700,
+  initialHoldDuration: 900,
+  reorderDuration: 1000,
+  finalHoldDuration: 1200
+});
+const OVERVIEW_DURATION = Object.values(OVERVIEW_PHASES)
+    .reduce((total, duration) => total + duration, 0);
+
 // 集中管理项目公共配置
 const APP_CONFIG = Object.freeze({
   backgroundColor: "#ffffff",
@@ -21,8 +31,9 @@ const APP_CONFIG = Object.freeze({
     gameDuration: 2000,
     // 限制单帧参与缩放计算的最大秒数
     maximumFrameDelta: 0.05,
-    // 设置结束时将 X 轴展开至完整比赛范围的动画毫秒数
-    overviewDuration: 1500,
+    // 四段时长之和同时作为折线图的完整全景展开时间
+    overview: OVERVIEW_PHASES,
+    overviewDuration: OVERVIEW_DURATION,
     // 设置最后一场结束后重新播放前的停留毫秒数
     restartDelay: 3000
   }),
@@ -53,6 +64,20 @@ const APP_CONFIG = Object.freeze({
     }),
     playerImageBaseUrl: "assets/images/players",
     teamImageBaseUrl: "assets/images/teams"
+  }),
+
+  teamTable: Object.freeze({
+    // 条目高度和间距均相对于 team-table 区域高度计算
+    itemHeightRatio: 0.075,
+    itemGapRatio: 0.018,
+    // 队标高度与各类文字字号均使用 CSS 像素
+    teamImageHeight: 42,
+    itemFontSizes: Object.freeze({
+      rank: 28,
+      score: 30,
+      rankChange: 20
+    }),
+    teamImageBaseUrl: "assets/images/icons"
   }),
 
   chart: Object.freeze({
