@@ -1,0 +1,114 @@
+{
+  "teams": [
+    {
+      "name": "team01",
+      "color": "#cf3f27",
+      "initialScore": 0,
+      "players": [
+        "player01",
+        "player02",
+        "player03",
+        "player04"
+      ]
+    },
+    {
+      "name": "team02",
+      "color": "#126783",
+      "initialScore": 0,
+      "players": [
+        "player05",
+        "player06",
+        "player07",
+        "player08"
+      ]
+    },
+    {
+      "name": "team03",
+      "color": "#ce9215",
+      "initialScore": 0,
+      "players": [
+        "player09",
+        "player10",
+        "player11",
+        "player12"
+      ]
+    },
+    {
+      "name": "team04",
+      "color": "#39714e",
+      "initialScore": 0,
+      "players": [
+        "player13",
+        "player14",
+        "player15",
+        "player16"
+      ]
+    },
+    {
+      "name": "team05",
+      "color": "#745087",
+      "initialScore": 0,
+      "players": [
+        "player17",
+        "player18",
+        "player19",
+        "player20"
+      ]
+    },
+    {
+      "name": "team06",
+      "color": "#db655d",
+      "initialScore": 0,
+      "players": [
+        "player21",
+        "player22",
+        "player23",
+        "player24"
+      ]
+    },
+    {
+      "name": "team07",
+      "color": "#59666e",
+      "initialScore": 0,
+      "players": [
+        "player25",
+        "player26",
+        "player27",
+        "player28"
+      ]
+    },
+    {
+      "name": "team08",
+      "color": "#718a31",
+      "initialScore": 0,
+      "players": [
+        "player29",
+        "player30",
+        "player31",
+        "player32"
+      ]
+    },
+    {
+      "name": "team09",
+      "color": "#30467d",
+      "initialScore": 0,
+      "players": [
+        "player33",
+        "player34",
+        "player35",
+        "player36"
+      ]
+    },
+    {
+      "name": "team10",
+      "color": "#ae6220",
+      "initialScore": 0,
+      "players": [
+        "player37",
+        "player38",
+        "player39",
+        "player40"
+      ]
+    }
+  ]
+}

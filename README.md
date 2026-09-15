@@ -37,8 +37,8 @@ ScoreFlow/
 │       ├── players/                # 以选手 name 命名的 PNG 头像
 │       └── teams/                  # 以 team 命名的 PNG 队标
 ├── data/
-│   ├── games.json                  # 按顺序存储的单个 game 选手详情
-│   └── scores.csv                  # 队伍属性和累计积分
+│   ├── games.json                  # 按顺序存储的单个 game 选手详情与得分
+│   └── teams.json                  # 队伍属性、初始积分和队员名单
 ├── src/
 │   ├── components/
 │   │   ├── game-table.js           # 比赛详情表及逐项切换动画
@@ -49,7 +49,7 @@ ScoreFlow/
 │   │   └── timeline.js             # 公共动画时间轴
 │   ├── data/
 │   │   ├── game-data.js            # game JSON 校验与转换
-│   │   └── score-data.js           # CSV 解析和业务数据转换
+│   │   └── team-data.js            # 队伍 JSON 校验、归属关联和积分累计
 │   └── app.js                      # 应用入口与模块装配
 ├── index.html                      # 页面结构和资源入口
 └── README.md                       # 使用与架构说明
@@ -62,19 +62,20 @@ ScoreFlow/
 项目采用无构建工具的浏览器端分层结构，各脚本按依赖顺序由 `index.html` 加载：
 
 1. **配置层**：`src/config/config.js` 创建只读的 `APP_CONFIG`，集中提供布局比例、动画速度、数据地址和图表参数
-2. **数据层**：`src/data/score-data.js` 读取入口传入的 CSV 文本，处理引号转义、校验属性与 game 行，并生成队伍时间序列
+2. **数据层**：`src/data/team-data.js` 和 `src/data/game-data.js` 校验两份 JSON，根据队员名关联队伍，并按 game 累加队伍积分
 3. **时间轴层**：`src/core/timeline.js` 根据配置按 game 计算播放头、帧间隔和循环状态，通过订阅机制向组件广播统一状态
 4. **组件层**：`src/components/score-chart.js` 负责 Canvas 尺寸适配、坐标映射、曲线插值、标签避让和逐帧绘制
-5. **装配层**：`src/app.js` 应用布局配置，加载 `data/scores.csv`，创建时间轴和图表并连接订阅关系，同时集中处理初始化错误
+5. **装配层**：`src/app.js` 应用布局配置，加载两份 JSON，创建时间轴和图表并连接订阅关系，同时集中处理初始化错误
 
 核心数据流如下：
 
 ```text
 APP_CONFIG ──> 应用入口 ──> 页面布局
                     │
-scores.csv ──> CSV 解析器 ──> 队伍时间序列 ──> 积分图表
-                    │                         ↑
-                    └──> 公共时间轴 ──────────┘
+teams.json ──┐
+             ├──> 数据校验与关联 ──> 队伍时间序列 ──> 积分图表
+games.json ──┘             │                          ↑
+                           └──> 公共时间轴 ───────────┘
 ```
 
 模块通过 `globalThis` 暴露只读入口，避免跨层访问内部状态。时间轴只发布状态而不负责绘图，因此后续组件可以订阅同一时间轴，与积分图表保持同步。
@@ -89,7 +90,7 @@ scores.csv ──> CSV 解析器 ──> 队伍时间序列 ──> 积分图表
 - `totalScore`：总分字号。
 - `convertedTeamScore`：换算队伍得分字号。
 
-比赛条目仅展示选手信息与得分，得分靠右排列；立直、和了和放铳次数仍保留在数据文件中，但不在详情表中显示。
+比赛条目仅展示选手信息与得分，得分靠右排列。选手所属队伍根据 `teams.json` 中的队员名单动态取得，不在每场比赛中重复保存。
 
 人物头像和队标不存储在 JSON 中，按以下固定约定添加 PNG 文件：
 
@@ -100,20 +101,24 @@ scores.csv ──> CSV 解析器 ──> 队伍时间序列 ──> 积分图表
 
 ## 数据文件
 
-所有队伍属性和累计分数均从 `data/scores.csv` 读取。CSV 的第一列是行属性名，而不是传统的列标题：
+队伍基础信息从 `data/teams.json` 读取。文件固定包含 10 支队伍，每支队伍包含唯一的队伍名、折线颜色、初始分数和 4 名队员：
 
-```csv
-name,team1,team2,team3
-color,#cf3f27,#126783,#ce9215
-game0,0,0,0
-game1,10,-10,0
+```json
+{
+  "teams": [
+    {
+      "name": "team01",
+      "color": "#cf3f27",
+      "initialScore": 0,
+      "players": ["player01", "player02", "player03", "player04"]
+    }
+  ]
+}
 ```
 
-- `name`、`color` 和 `game0` 必须存在，且每行队伍数必须一致。
-- `game0` 表示第一场真实 game 结束后的累计总分，后续 `gameN` 依次表示对应 game 结束后的累计总分。
-- game 行必须从 `game0` 开始连续排列；最后一个 game 播放完并停留数秒后，图表会重新播放。
-- 可在首个 `game` 之前添加 `title`、`subcolor` 等属性行。未被页面使用的属性会保留在解析结果中，但不会影响图表。
-- 队伍数和 game 数均由 CSV 动态决定；`data/games.json` 的 game 数量必须与 CSV 一致且为偶数。
+`data/games.json` 中每名选手只保存 `name`、`score` 和 `teamPoint`。`gameId` 必须从 0 开始连续排列，每个 game 必须恰好有 4 名来自不同队伍的选手，且全部 40 名选手都必须至少出场一次。
+
+积分时间序列从各队的 `initialScore` 开始计算。每场比赛结束时，程序根据选手名找到 `teams.json` 中的所属队伍，将该选手的 `teamPoint` 累加到队伍当前分数；没有选手出场的队伍保持原分数。同一场中每支队伍至多有一名选手，因此图表在 `x = 0` 的第一个点已经是“初始分数 + game0 的 teamPoint”，不会单独绘制纯初始分数点。最后一个 game 播放完并停留数秒后，图表会重新播放。
 
 ## 循环结束动画
 
@@ -127,7 +132,7 @@ game1,10,-10,0
 
 ## 折线标签
 
-每条折线的末端会显示 CSV `name` 属性中的队伍名称。标签会跟随当前分数，并在分数接近时自动上下偏移以避免重叠；当队伍的分数大小关系互换时，标签的上下顺序也会互换。
+每条折线的末端会显示 `teams.json` 中的队伍名称。标签会跟随当前分数，并在分数接近时自动上下偏移以避免重叠；当队伍的分数大小关系互换时，标签的上下顺序也会互换。
 
 可在 `src/config/config.js` 的 `labels` 中调整：
 
@@ -137,7 +142,7 @@ game1,10,-10,0
 - `horizontalGap`：标签与折线末端的水平间距。
 - `verticalGap`：避让时标签之间的额外垂直间距。
 
-由于浏览器需要通过 HTTP 加载 CSV，请不要直接以 `file://` 打开页面。例如可在项目目录运行：
+由于浏览器需要通过 HTTP 加载 JSON，请不要直接以 `file://` 打开页面。例如可在项目目录运行：
 
 ```bash
 python3 -m http.server 8000

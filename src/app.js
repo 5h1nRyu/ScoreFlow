@@ -1,7 +1,7 @@
 (function startApplication() {
   "use strict";
 
-  const { animation, backgroundColor, dataUrl, layout, gamesDataUrl } = APP_CONFIG;
+  const { animation, backgroundColor, teamsDataUrl, layout, gamesDataUrl } = APP_CONFIG;
 
   // 将布局比例转换为 CSS 百分比
   function percentage(value, name) {
@@ -42,17 +42,20 @@
     try {
       applyAppearance();
       applyLayout();
-      const [scoreResponse, gamesResponse] = await Promise.all([
-        fetch(dataUrl, { cache: "no-store" }),
+      const [teamsResponse, gamesResponse] = await Promise.all([
+        fetch(teamsDataUrl, { cache: "no-store" }),
         fetch(gamesDataUrl, { cache: "no-store" })
       ]);
-      if (!scoreResponse.ok) throw new Error(`读取 ${dataUrl} 失败（HTTP ${scoreResponse.status}）`);
+      if (!teamsResponse.ok) {
+        throw new Error(`读取 ${teamsDataUrl} 失败（HTTP ${teamsResponse.status}）`);
+      }
       if (!gamesResponse.ok) {
         throw new Error(`读取 ${gamesDataUrl} 失败（HTTP ${gamesResponse.status}）`);
       }
 
-      const data = ScoreData.parseScoreCsv(await scoreResponse.text());
+      const teamData = TeamData.parseTeamsJson(await teamsResponse.text());
       const gameData = GameData.parseGamesJson(await gamesResponse.text());
+      const data = TeamData.combineWithGames(teamData, gameData);
       // 在绘图前验证所有队伍颜色
       data.teams.forEach((team, index) => {
         if (!CSS.supports("color", team.color)) {
@@ -61,18 +64,13 @@
       });
 
       const finalGame = data.games.length - 1;
-      if (gameData.games.length !== finalGame + 1) {
-        throw new Error(
-          `比赛详情有 ${gameData.games.length} 个 game，积分时间线有 ${finalGame + 1} 个 game`
-        );
-      }
       const chart = ScoreChart.createScoreChart(
           document.getElementById("scoreChart"), data.teams, finalGame, APP_CONFIG
       );
       const gameTable = GameTable.createGameTable(
           document.getElementById("gameTable"),
           document.getElementById("teamTableSlot"),
-          gameData.games,
+          data.games,
           APP_CONFIG.gameTable
       );
       const timeline = ScoreTimeline.createTimeline({ animation, finalGame });

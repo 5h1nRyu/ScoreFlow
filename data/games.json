@@ -5,40 +5,24 @@
       "info": "game0",
       "players": [
         {
-          "name": "player04",
-          "team": "team04",
-          "score": 30491,
-          "teamPoint": 5.5,
-          "riichiCount": 5,
-          "winCount": 2,
-          "dealInCount": 0
+          "name": "player01",
+          "score": 42000,
+          "teamPoint": 17.0
         },
         {
-          "name": "player06",
-          "team": "team06",
-          "score": 37372,
-          "teamPoint": 12.4,
-          "riichiCount": 5,
-          "winCount": 2,
-          "dealInCount": 2
+          "name": "player09",
+          "score": 31000,
+          "teamPoint": 6.0
         },
         {
-          "name": "player08",
-          "team": "team08",
-          "score": 32357,
-          "teamPoint": 7.4,
-          "riichiCount": 4,
-          "winCount": 1,
-          "dealInCount": 2
+          "name": "player21",
+          "score": 19000,
+          "teamPoint": -6.0
         },
         {
-          "name": "player02",
-          "team": "team02",
-          "score": -220,
-          "teamPoint": -25.2,
-          "riichiCount": 0,
-          "winCount": 2,
-          "dealInCount": 1
+          "name": "player29",
+          "score": 8000,
+          "teamPoint": -17.0
         }
       ]
     },
@@ -47,40 +31,24 @@
       "info": "game1",
       "players": [
         {
-          "name": "player06",
-          "team": "team06",
-          "score": 28113,
-          "teamPoint": 3.1,
-          "riichiCount": 0,
-          "winCount": 4,
-          "dealInCount": 2
+          "name": "player05",
+          "score": 10500,
+          "teamPoint": -14.5
         },
         {
-          "name": "player08",
-          "team": "team08",
-          "score": 24409,
-          "teamPoint": -0.6,
-          "riichiCount": 2,
-          "winCount": 3,
-          "dealInCount": 3
+          "name": "player13",
+          "score": 39500,
+          "teamPoint": 14.5
         },
         {
-          "name": "player02",
-          "team": "team02",
-          "score": 20460,
-          "teamPoint": -4.5,
-          "riichiCount": 0,
-          "winCount": 3,
-          "dealInCount": 0
+          "name": "player25",
+          "score": 29500,
+          "teamPoint": 4.5
         },
         {
-          "name": "player04",
-          "team": "team04",
-          "score": 27018,
-          "teamPoint": 2.0,
-          "riichiCount": 1,
-          "winCount": 4,
-          "dealInCount": 2
+          "name": "player33",
+          "score": 20500,
+          "teamPoint": -4.5
         }
       ]
     },
@@ -89,40 +57,24 @@
       "info": "game2",
       "players": [
         {
-          "name": "player07",
-          "team": "team07",
-          "score": 24973,
-          "teamPoint": -0.0,
-          "riichiCount": 1,
-          "winCount": 4,
-          "dealInCount": 1
+          "name": "player10",
+          "score": 22000,
+          "teamPoint": -3.0
         },
         {
-          "name": "player01",
-          "team": "team01",
-          "score": 34870,
-          "teamPoint": 9.9,
-          "riichiCount": 2,
-          "winCount": 0,
-          "dealInCount": 3
+          "name": "player17",
+          "score": 13000,
+          "teamPoint": -12.0
         },
         {
-          "name": "player03",
-          "team": "team03",
-          "score": 30076,
-          "teamPoint": 5.1,
-          "riichiCount": 5,
-          "winCount": 1,
-          "dealInCount": 3
+          "name": "player30",
+          "score": 37000,
+          "teamPoint": 12.0
         },
         {
-          "name": "player05",
-          "team": "team05",
-          "score": 10081,
-          "teamPoint": -14.9,
-          "riichiCount": 5,
-          "winCount": 3,
-          "dealInCount": 0
+          "name": "player37",
+          "score": 28000,
+          "teamPoint": 3.0
         }
       ]
     },
@@ -131,40 +83,24 @@
       "info": "game3",
       "players": [
         {
-          "name": "player01",
-          "team": "team01",
-          "score": 20224,
-          "teamPoint": -4.8,
-          "riichiCount": 3,
-          "winCount": 2,
-          "dealInCount": 2
+          "name": "player14",
+          "score": 31000,
+          "teamPoint": 6.0
         },
         {
-          "name": "player03",
-          "team": "team03",
-          "score": 32890,
-          "teamPoint": 7.9,
-          "riichiCount": 0,
-          "winCount": 2,
-          "dealInCount": 3
+          "name": "player22",
+          "score": 19000,
+          "teamPoint": -6.0
         },
         {
-          "name": "player05",
-          "team": "team05",
-          "score": 28079,
-          "teamPoint": 3.1,
-          "riichiCount": 4,
-          "winCount": 0,
-          "dealInCount": 0
+          "name": "player34",
+          "score": 8000,
+          "teamPoint": -17.0
         },
         {
-          "name": "player07",
-          "team": "team07",
-          "score": 18807,
-          "teamPoint": -6.2,
-          "riichiCount": 0,
-          "winCount": 3,
-          "dealInCount": 0
+          "name": "player02",
+          "score": 42000,
+          "teamPoint": 17.0
         }
       ]
     },
@@ -173,40 +109,24 @@
       "info": "game4",
       "players": [
         {
-          "name": "player02",
-          "team": "team02",
-          "score": 37406,
-          "teamPoint": 12.4,
-          "riichiCount": 5,
-          "winCount": 2,
-          "dealInCount": 3
+          "name": "player18",
+          "score": 39500,
+          "teamPoint": 14.5
         },
         {
-          "name": "player04",
-          "team": "team04",
-          "score": 34502,
-          "teamPoint": 9.5,
-          "riichiCount": 2,
-          "winCount": 2,
-          "dealInCount": 2
+          "name": "player26",
+          "score": 29500,
+          "teamPoint": 4.5
+        },
+        {
+          "name": "player38",
+          "score": 20500,
+          "teamPoint": -4.5
         },
         {
           "name": "player06",
-          "team": "team06",
-          "score": 17430,
-          "teamPoint": -7.6,
-          "riichiCount": 5,
-          "winCount": 1,
-          "dealInCount": 2
-        },
-        {
-          "name": "player08",
-          "team": "team08",
-          "score": 10662,
-          "teamPoint": -14.3,
-          "riichiCount": 1,
-          "winCount": 0,
-          "dealInCount": 2
+          "score": 10500,
+          "teamPoint": -14.5
         }
       ]
     },
@@ -215,40 +135,24 @@
       "info": "game5",
       "players": [
         {
-          "name": "player04",
-          "team": "team04",
-          "score": 24992,
-          "teamPoint": -0.0,
-          "riichiCount": 3,
-          "winCount": 2,
-          "dealInCount": 2
+          "name": "player23",
+          "score": 13000,
+          "teamPoint": -12.0
         },
         {
-          "name": "player06",
-          "team": "team06",
-          "score": 25290,
-          "teamPoint": 0.3,
-          "riichiCount": 5,
-          "winCount": 3,
-          "dealInCount": 3
+          "name": "player31",
+          "score": 37000,
+          "teamPoint": 12.0
         },
         {
-          "name": "player08",
-          "team": "team08",
-          "score": 31118,
-          "teamPoint": 6.1,
-          "riichiCount": 2,
-          "winCount": 4,
-          "dealInCount": 3
+          "name": "player03",
+          "score": 28000,
+          "teamPoint": 3.0
         },
         {
-          "name": "player02",
-          "team": "team02",
-          "score": 18600,
-          "teamPoint": -6.4,
-          "riichiCount": 1,
-          "winCount": 1,
-          "dealInCount": 0
+          "name": "player11",
+          "score": 22000,
+          "teamPoint": -3.0
         }
       ]
     },
@@ -257,40 +161,24 @@
       "info": "game6",
       "players": [
         {
-          "name": "player05",
-          "team": "team05",
-          "score": 32246,
-          "teamPoint": 7.2,
-          "riichiCount": 0,
-          "winCount": 4,
-          "dealInCount": 2
+          "name": "player27",
+          "score": 19000,
+          "teamPoint": -6.0
+        },
+        {
+          "name": "player35",
+          "score": 8000,
+          "teamPoint": -17.0
         },
         {
           "name": "player07",
-          "team": "team07",
-          "score": 35218,
-          "teamPoint": 10.2,
-          "riichiCount": 0,
-          "winCount": 0,
-          "dealInCount": 0
+          "score": 42000,
+          "teamPoint": 17.0
         },
         {
-          "name": "player01",
-          "team": "team01",
-          "score": 28042,
-          "teamPoint": 3.0,
-          "riichiCount": 5,
-          "winCount": 3,
-          "dealInCount": 3
-        },
-        {
-          "name": "player03",
-          "team": "team03",
-          "score": 4494,
-          "teamPoint": -20.5,
-          "riichiCount": 0,
-          "winCount": 4,
-          "dealInCount": 3
+          "name": "player15",
+          "score": 31000,
+          "teamPoint": 6.0
         }
       ]
     },
@@ -299,40 +187,24 @@
       "info": "game7",
       "players": [
         {
-          "name": "player07",
-          "team": "team07",
-          "score": 34429,
-          "teamPoint": 9.4,
-          "riichiCount": 4,
-          "winCount": 1,
-          "dealInCount": 3
+          "name": "player32",
+          "score": 29500,
+          "teamPoint": 4.5
         },
         {
-          "name": "player01",
-          "team": "team01",
-          "score": 36782,
-          "teamPoint": 11.8,
-          "riichiCount": 2,
-          "winCount": 0,
-          "dealInCount": 1
+          "name": "player39",
+          "score": 20500,
+          "teamPoint": -4.5
         },
         {
-          "name": "player03",
-          "team": "team03",
-          "score": 21230,
-          "teamPoint": -3.8,
-          "riichiCount": 4,
-          "winCount": 0,
-          "dealInCount": 2
+          "name": "player12",
+          "score": 10500,
+          "teamPoint": -14.5
         },
         {
-          "name": "player05",
-          "team": "team05",
-          "score": 7559,
-          "teamPoint": -17.4,
-          "riichiCount": 4,
-          "winCount": 3,
-          "dealInCount": 0
+          "name": "player19",
+          "score": 39500,
+          "teamPoint": 14.5
         }
       ]
     },
@@ -341,40 +213,24 @@
       "info": "game8",
       "players": [
         {
-          "name": "player08",
-          "team": "team08",
-          "score": 29199,
-          "teamPoint": 4.2,
-          "riichiCount": 4,
-          "winCount": 0,
-          "dealInCount": 1
-        },
-        {
-          "name": "player02",
-          "team": "team02",
-          "score": 23533,
-          "teamPoint": -1.5,
-          "riichiCount": 4,
-          "winCount": 4,
-          "dealInCount": 2
+          "name": "player36",
+          "score": 37000,
+          "teamPoint": 12.0
         },
         {
           "name": "player04",
-          "team": "team04",
-          "score": 19657,
-          "teamPoint": -5.3,
-          "riichiCount": 2,
-          "winCount": 4,
-          "dealInCount": 2
+          "score": 28000,
+          "teamPoint": 3.0
         },
         {
-          "name": "player06",
-          "team": "team06",
-          "score": 27611,
-          "teamPoint": 2.6,
-          "riichiCount": 1,
-          "winCount": 1,
-          "dealInCount": 0
+          "name": "player16",
+          "score": 22000,
+          "teamPoint": -3.0
+        },
+        {
+          "name": "player24",
+          "score": 13000,
+          "teamPoint": -12.0
         }
       ]
     },
@@ -383,40 +239,24 @@
       "info": "game9",
       "players": [
         {
-          "name": "player02",
-          "team": "team02",
-          "score": 26998,
-          "teamPoint": 2.0,
-          "riichiCount": 0,
-          "winCount": 0,
-          "dealInCount": 2
-        },
-        {
-          "name": "player04",
-          "team": "team04",
-          "score": 30360,
-          "teamPoint": 5.4,
-          "riichiCount": 3,
-          "winCount": 2,
-          "dealInCount": 3
-        },
-        {
-          "name": "player06",
-          "team": "team06",
-          "score": 36956,
-          "teamPoint": 12.0,
-          "riichiCount": 0,
-          "winCount": 4,
-          "dealInCount": 1
+          "name": "player40",
+          "score": 8000,
+          "teamPoint": -17.0
         },
         {
           "name": "player08",
-          "team": "team08",
-          "score": 5686,
-          "teamPoint": -19.3,
-          "riichiCount": 3,
-          "winCount": 4,
-          "dealInCount": 3
+          "score": 42000,
+          "teamPoint": 17.0
+        },
+        {
+          "name": "player20",
+          "score": 31000,
+          "teamPoint": 6.0
+        },
+        {
+          "name": "player28",
+          "score": 19000,
+          "teamPoint": -6.0
         }
       ]
     },
@@ -425,40 +265,24 @@
       "info": "game10",
       "players": [
         {
-          "name": "player03",
-          "team": "team03",
-          "score": 22720,
-          "teamPoint": -2.3,
-          "riichiCount": 5,
-          "winCount": 3,
-          "dealInCount": 0
-        },
-        {
-          "name": "player05",
-          "team": "team05",
-          "score": 19665,
-          "teamPoint": -5.3,
-          "riichiCount": 4,
-          "winCount": 1,
-          "dealInCount": 0
-        },
-        {
-          "name": "player07",
-          "team": "team07",
-          "score": 32467,
-          "teamPoint": 7.5,
-          "riichiCount": 2,
-          "winCount": 1,
-          "dealInCount": 1
-        },
-        {
           "name": "player01",
-          "team": "team01",
-          "score": 25148,
-          "teamPoint": 0.1,
-          "riichiCount": 3,
-          "winCount": 0,
-          "dealInCount": 3
+          "score": 20500,
+          "teamPoint": -4.5
+        },
+        {
+          "name": "player09",
+          "score": 10500,
+          "teamPoint": -14.5
+        },
+        {
+          "name": "player21",
+          "score": 39500,
+          "teamPoint": 14.5
+        },
+        {
+          "name": "player29",
+          "score": 29500,
+          "teamPoint": 4.5
         }
       ]
     },
@@ -468,39 +292,23 @@
       "players": [
         {
           "name": "player05",
-          "team": "team05",
-          "score": 31199,
-          "teamPoint": 6.2,
-          "riichiCount": 1,
-          "winCount": 3,
-          "dealInCount": 3
+          "score": 28000,
+          "teamPoint": 3.0
         },
         {
-          "name": "player07",
-          "team": "team07",
-          "score": 19561,
-          "teamPoint": -5.4,
-          "riichiCount": 5,
-          "winCount": 3,
-          "dealInCount": 3
+          "name": "player13",
+          "score": 22000,
+          "teamPoint": -3.0
         },
         {
-          "name": "player01",
-          "team": "team01",
-          "score": 27387,
-          "teamPoint": 2.4,
-          "riichiCount": 4,
-          "winCount": 1,
-          "dealInCount": 3
+          "name": "player25",
+          "score": 13000,
+          "teamPoint": -12.0
         },
         {
-          "name": "player03",
-          "team": "team03",
-          "score": 21853,
-          "teamPoint": -3.1,
-          "riichiCount": 3,
-          "winCount": 0,
-          "dealInCount": 3
+          "name": "player33",
+          "score": 37000,
+          "teamPoint": 12.0
         }
       ]
     },
@@ -509,40 +317,24 @@
       "info": "game12",
       "players": [
         {
-          "name": "player06",
-          "team": "team06",
-          "score": 34043,
-          "teamPoint": 9.0,
-          "riichiCount": 2,
-          "winCount": 1,
-          "dealInCount": 1
+          "name": "player10",
+          "score": 42000,
+          "teamPoint": 17.0
         },
         {
-          "name": "player08",
-          "team": "team08",
-          "score": 29422,
-          "teamPoint": 4.4,
-          "riichiCount": 1,
-          "winCount": 2,
-          "dealInCount": 0
+          "name": "player17",
+          "score": 31000,
+          "teamPoint": 6.0
         },
         {
-          "name": "player02",
-          "team": "team02",
-          "score": 34559,
-          "teamPoint": 9.6,
-          "riichiCount": 1,
-          "winCount": 4,
-          "dealInCount": 0
+          "name": "player30",
+          "score": 19000,
+          "teamPoint": -6.0
         },
         {
-          "name": "player04",
-          "team": "team04",
-          "score": 1976,
-          "teamPoint": -23.0,
-          "riichiCount": 3,
-          "winCount": 2,
-          "dealInCount": 2
+          "name": "player37",
+          "score": 8000,
+          "teamPoint": -17.0
         }
       ]
     },
@@ -551,40 +343,24 @@
       "info": "game13",
       "players": [
         {
-          "name": "player08",
-          "team": "team08",
-          "score": 32631,
-          "teamPoint": 7.6,
-          "riichiCount": 4,
-          "winCount": 1,
-          "dealInCount": 2
+          "name": "player14",
+          "score": 10500,
+          "teamPoint": -14.5
+        },
+        {
+          "name": "player22",
+          "score": 39500,
+          "teamPoint": 14.5
+        },
+        {
+          "name": "player34",
+          "score": 29500,
+          "teamPoint": 4.5
         },
         {
           "name": "player02",
-          "team": "team02",
-          "score": 26476,
-          "teamPoint": 1.5,
-          "riichiCount": 1,
-          "winCount": 2,
-          "dealInCount": 3
-        },
-        {
-          "name": "player04",
-          "team": "team04",
-          "score": 32715,
-          "teamPoint": 7.7,
-          "riichiCount": 0,
-          "winCount": 3,
-          "dealInCount": 3
-        },
-        {
-          "name": "player06",
-          "team": "team06",
-          "score": 8178,
-          "teamPoint": -16.8,
-          "riichiCount": 2,
-          "winCount": 1,
-          "dealInCount": 0
+          "score": 20500,
+          "teamPoint": -4.5
         }
       ]
     },
@@ -593,40 +369,24 @@
       "info": "game14",
       "players": [
         {
-          "name": "player01",
-          "team": "team01",
-          "score": 23142,
-          "teamPoint": -1.9,
-          "riichiCount": 2,
-          "winCount": 4,
-          "dealInCount": 1
+          "name": "player18",
+          "score": 22000,
+          "teamPoint": -3.0
         },
         {
-          "name": "player03",
-          "team": "team03",
-          "score": 31463,
-          "teamPoint": 6.5,
-          "riichiCount": 2,
-          "winCount": 3,
-          "dealInCount": 3
+          "name": "player26",
+          "score": 13000,
+          "teamPoint": -12.0
         },
         {
-          "name": "player05",
-          "team": "team05",
-          "score": 26130,
-          "teamPoint": 1.1,
-          "riichiCount": 2,
-          "winCount": 2,
-          "dealInCount": 1
+          "name": "player38",
+          "score": 37000,
+          "teamPoint": 12.0
         },
         {
-          "name": "player07",
-          "team": "team07",
-          "score": 19265,
-          "teamPoint": -5.7,
-          "riichiCount": 1,
-          "winCount": 3,
-          "dealInCount": 2
+          "name": "player06",
+          "score": 28000,
+          "teamPoint": 3.0
         }
       ]
     },
@@ -635,40 +395,24 @@
       "info": "game15",
       "players": [
         {
+          "name": "player23",
+          "score": 31000,
+          "teamPoint": 6.0
+        },
+        {
+          "name": "player31",
+          "score": 19000,
+          "teamPoint": -6.0
+        },
+        {
           "name": "player03",
-          "team": "team03",
-          "score": 19940,
-          "teamPoint": -5.1,
-          "riichiCount": 1,
-          "winCount": 4,
-          "dealInCount": 3
+          "score": 8000,
+          "teamPoint": -17.0
         },
         {
-          "name": "player05",
-          "team": "team05",
-          "score": 23587,
-          "teamPoint": -1.4,
-          "riichiCount": 0,
-          "winCount": 3,
-          "dealInCount": 2
-        },
-        {
-          "name": "player07",
-          "team": "team07",
-          "score": 18714,
-          "teamPoint": -6.3,
-          "riichiCount": 2,
-          "winCount": 3,
-          "dealInCount": 1
-        },
-        {
-          "name": "player01",
-          "team": "team01",
-          "score": 37759,
-          "teamPoint": 12.8,
-          "riichiCount": 3,
-          "winCount": 3,
-          "dealInCount": 3
+          "name": "player11",
+          "score": 42000,
+          "teamPoint": 17.0
         }
       ]
     },
@@ -677,40 +421,24 @@
       "info": "game16",
       "players": [
         {
-          "name": "player04",
-          "team": "team04",
-          "score": 31730,
-          "teamPoint": 6.7,
-          "riichiCount": 3,
-          "winCount": 3,
-          "dealInCount": 1
+          "name": "player27",
+          "score": 39500,
+          "teamPoint": 14.5
         },
         {
-          "name": "player06",
-          "team": "team06",
-          "score": 24798,
-          "teamPoint": -0.2,
-          "riichiCount": 4,
-          "winCount": 4,
-          "dealInCount": 2
+          "name": "player35",
+          "score": 29500,
+          "teamPoint": 4.5
         },
         {
-          "name": "player08",
-          "team": "team08",
-          "score": 37914,
-          "teamPoint": 12.9,
-          "riichiCount": 3,
-          "winCount": 1,
-          "dealInCount": 1
+          "name": "player07",
+          "score": 20500,
+          "teamPoint": -4.5
         },
         {
-          "name": "player02",
-          "team": "team02",
-          "score": 5558,
-          "teamPoint": -19.4,
-          "riichiCount": 3,
-          "winCount": 2,
-          "dealInCount": 2
+          "name": "player15",
+          "score": 10500,
+          "teamPoint": -14.5
         }
       ]
     },
@@ -719,40 +447,24 @@
       "info": "game17",
       "players": [
         {
-          "name": "player06",
-          "team": "team06",
-          "score": 19251,
-          "teamPoint": -5.7,
-          "riichiCount": 5,
-          "winCount": 4,
-          "dealInCount": 2
+          "name": "player32",
+          "score": 13000,
+          "teamPoint": -12.0
         },
         {
-          "name": "player08",
-          "team": "team08",
-          "score": 36409,
-          "teamPoint": 11.4,
-          "riichiCount": 0,
-          "winCount": 1,
-          "dealInCount": 3
+          "name": "player39",
+          "score": 37000,
+          "teamPoint": 12.0
         },
         {
-          "name": "player02",
-          "team": "team02",
-          "score": 25114,
-          "teamPoint": 0.1,
-          "riichiCount": 1,
-          "winCount": 2,
-          "dealInCount": 1
+          "name": "player12",
+          "score": 28000,
+          "teamPoint": 3.0
         },
         {
-          "name": "player04",
-          "team": "team04",
-          "score": 19226,
-          "teamPoint": -5.8,
-          "riichiCount": 3,
-          "winCount": 4,
-          "dealInCount": 0
+          "name": "player19",
+          "score": 22000,
+          "teamPoint": -3.0
         }
       ]
     },
@@ -761,40 +473,24 @@
       "info": "game18",
       "players": [
         {
-          "name": "player07",
-          "team": "team07",
-          "score": 28319,
-          "teamPoint": 3.3,
-          "riichiCount": 3,
-          "winCount": 1,
-          "dealInCount": 1
+          "name": "player36",
+          "score": 19000,
+          "teamPoint": -6.0
         },
         {
-          "name": "player01",
-          "team": "team01",
-          "score": 35316,
-          "teamPoint": 10.3,
-          "riichiCount": 0,
-          "winCount": 4,
-          "dealInCount": 1
+          "name": "player04",
+          "score": 8000,
+          "teamPoint": -17.0
         },
         {
-          "name": "player03",
-          "team": "team03",
-          "score": 28085,
-          "teamPoint": 3.1,
-          "riichiCount": 0,
-          "winCount": 2,
-          "dealInCount": 0
+          "name": "player16",
+          "score": 42000,
+          "teamPoint": 17.0
         },
         {
-          "name": "player05",
-          "team": "team05",
-          "score": 8280,
-          "teamPoint": -16.7,
-          "riichiCount": 1,
-          "winCount": 0,
-          "dealInCount": 3
+          "name": "player24",
+          "score": 31000,
+          "teamPoint": 6.0
         }
       ]
     },
@@ -803,40 +499,24 @@
       "info": "game19",
       "players": [
         {
-          "name": "player01",
-          "team": "team01",
-          "score": 23651,
-          "teamPoint": -1.3,
-          "riichiCount": 0,
-          "winCount": 0,
-          "dealInCount": 0
+          "name": "player40",
+          "score": 29500,
+          "teamPoint": 4.5
         },
         {
-          "name": "player03",
-          "team": "team03",
-          "score": 33703,
-          "teamPoint": 8.7,
-          "riichiCount": 3,
-          "winCount": 1,
-          "dealInCount": 1
+          "name": "player08",
+          "score": 20500,
+          "teamPoint": -4.5
         },
         {
-          "name": "player05",
-          "team": "team05",
-          "score": 19363,
-          "teamPoint": -5.6,
-          "riichiCount": 5,
-          "winCount": 1,
-          "dealInCount": 3
+          "name": "player20",
+          "score": 10500,
+          "teamPoint": -14.5
         },
         {
-          "name": "player07",
-          "team": "team07",
-          "score": 23283,
-          "teamPoint": -1.7,
-          "riichiCount": 2,
-          "winCount": 3,
-          "dealInCount": 3
+          "name": "player28",
+          "score": 39500,
+          "teamPoint": 14.5
         }
       ]
     },
@@ -845,40 +525,24 @@
       "info": "game20",
       "players": [
         {
-          "name": "player02",
-          "team": "team02",
-          "score": 26556,
-          "teamPoint": 1.6,
-          "riichiCount": 0,
-          "winCount": 2,
-          "dealInCount": 0
+          "name": "player01",
+          "score": 37000,
+          "teamPoint": 12.0
         },
         {
-          "name": "player04",
-          "team": "team04",
-          "score": 36033,
-          "teamPoint": 11.0,
-          "riichiCount": 4,
-          "winCount": 0,
-          "dealInCount": 0
+          "name": "player09",
+          "score": 28000,
+          "teamPoint": 3.0
         },
         {
-          "name": "player06",
-          "team": "team06",
-          "score": 35713,
-          "teamPoint": 10.7,
-          "riichiCount": 4,
-          "winCount": 4,
-          "dealInCount": 2
+          "name": "player21",
+          "score": 22000,
+          "teamPoint": -3.0
         },
         {
-          "name": "player08",
-          "team": "team08",
-          "score": 1698,
-          "teamPoint": -23.3,
-          "riichiCount": 0,
-          "winCount": 2,
-          "dealInCount": 1
+          "name": "player29",
+          "score": 13000,
+          "teamPoint": -12.0
         }
       ]
     },
@@ -887,40 +551,24 @@
       "info": "game21",
       "players": [
         {
-          "name": "player04",
-          "team": "team04",
-          "score": 23060,
-          "teamPoint": -1.9,
-          "riichiCount": 3,
-          "winCount": 1,
-          "dealInCount": 3
+          "name": "player05",
+          "score": 8000,
+          "teamPoint": -17.0
         },
         {
-          "name": "player06",
-          "team": "team06",
-          "score": 20562,
-          "teamPoint": -4.4,
-          "riichiCount": 0,
-          "winCount": 2,
-          "dealInCount": 2
+          "name": "player13",
+          "score": 42000,
+          "teamPoint": 17.0
         },
         {
-          "name": "player08",
-          "team": "team08",
-          "score": 26401,
-          "teamPoint": 1.4,
-          "riichiCount": 4,
-          "winCount": 3,
-          "dealInCount": 2
+          "name": "player25",
+          "score": 31000,
+          "teamPoint": 6.0
         },
         {
-          "name": "player02",
-          "team": "team02",
-          "score": 29977,
-          "teamPoint": 5.0,
-          "riichiCount": 0,
-          "winCount": 4,
-          "dealInCount": 3
+          "name": "player33",
+          "score": 19000,
+          "teamPoint": -6.0
         }
       ]
     },
@@ -929,40 +577,24 @@
       "info": "game22",
       "players": [
         {
-          "name": "player05",
-          "team": "team05",
-          "score": 30059,
-          "teamPoint": 5.1,
-          "riichiCount": 5,
-          "winCount": 2,
-          "dealInCount": 2
+          "name": "player10",
+          "score": 20500,
+          "teamPoint": -4.5
         },
         {
-          "name": "player07",
-          "team": "team07",
-          "score": 26346,
-          "teamPoint": 1.3,
-          "riichiCount": 1,
-          "winCount": 0,
-          "dealInCount": 2
+          "name": "player17",
+          "score": 10500,
+          "teamPoint": -14.5
         },
         {
-          "name": "player01",
-          "team": "team01",
-          "score": 26054,
-          "teamPoint": 1.1,
-          "riichiCount": 2,
-          "winCount": 2,
-          "dealInCount": 3
+          "name": "player30",
+          "score": 39500,
+          "teamPoint": 14.5
         },
         {
-          "name": "player03",
-          "team": "team03",
-          "score": 17541,
-          "teamPoint": -7.5,
-          "riichiCount": 5,
-          "winCount": 4,
-          "dealInCount": 3
+          "name": "player37",
+          "score": 29500,
+          "teamPoint": 4.5
         }
       ]
     },
@@ -971,40 +603,24 @@
       "info": "game23",
       "players": [
         {
-          "name": "player07",
-          "team": "team07",
-          "score": 25903,
-          "teamPoint": 0.9,
-          "riichiCount": 4,
-          "winCount": 4,
-          "dealInCount": 1
+          "name": "player14",
+          "score": 28000,
+          "teamPoint": 3.0
         },
         {
-          "name": "player01",
-          "team": "team01",
-          "score": 29953,
-          "teamPoint": 5.0,
-          "riichiCount": 4,
-          "winCount": 0,
-          "dealInCount": 1
+          "name": "player22",
+          "score": 22000,
+          "teamPoint": -3.0
         },
         {
-          "name": "player03",
-          "team": "team03",
-          "score": 32095,
-          "teamPoint": 7.1,
-          "riichiCount": 3,
-          "winCount": 0,
-          "dealInCount": 0
+          "name": "player34",
+          "score": 13000,
+          "teamPoint": -12.0
         },
         {
-          "name": "player05",
-          "team": "team05",
-          "score": 12049,
-          "teamPoint": -13.0,
-          "riichiCount": 4,
-          "winCount": 4,
-          "dealInCount": 2
+          "name": "player02",
+          "score": 37000,
+          "teamPoint": 12.0
         }
       ]
     }

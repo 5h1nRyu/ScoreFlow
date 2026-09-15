@@ -27,8 +27,8 @@ const APP_CONFIG = Object.freeze({
     restartDelay: 3000
   }),
 
-  // 指定队伍属性和累计总分的数据文件
-  dataUrl: "data/scores.csv",
+  // 指定队伍、队员归属和初始分数的数据文件
+  teamsDataUrl: "data/teams.json",
   // 指定每个 game 的选手数据文件
   gamesDataUrl: "data/games.json",
 
@@ -43,11 +43,6 @@ const APP_CONFIG = Object.freeze({
       convertedTeamScore: 20,
       stat: 28
     }),
-    // 队伍色仅用于区分条目；头像与队标按数据字段生成资源路径
-    teamColors: Object.freeze([
-      "#d94b40", "#d89216", "#258d87", "#8b50a0", "#3071bd",
-      "#df7115", "#af8224", "#51743b", "#64717e", "#b95f7c"
-    ]),
     playerImageBaseUrl: "assets/images/players",
     teamImageBaseUrl: "assets/images/teams"
   }),
