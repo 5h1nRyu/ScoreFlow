@@ -37,9 +37,9 @@ const APP_CONFIG = Object.freeze({
     rowTransitionDuration: 220,
     rowTransitionDelay: 35,
     // 设置单个选手条目高度与 game-table 区域高度的比例
-    itemHeightRatio: 0.09,
+    itemHeightRatio: 0.08,
     // 设置同一场比赛中相邻选手条目间距与 game-table 区域高度的比例
-    itemGapRatio: 0.012,
+    itemGapRatio: 0.016,
     // 设置选手头像高度与条目高度的比例；大于 1 时头像可超出条目
     playerImageHeightRatio: 1.2,
     // 设置总分区域与条目右端的距离，单位为 CSS 像素
