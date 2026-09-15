@@ -27,8 +27,11 @@
       const cycleElapsed = cycleDuration > 0 ? elapsed % cycleDuration : 0;
       const playhead = Math.min(finalGame, cycleElapsed / gameDuration);
       const didRestart = elapsed >= cycleDuration && cycleElapsed < previousCycleElapsed;
-      const overviewProgress = overviewDuration > 0
-          ? Math.min(1, Math.max(0, (cycleElapsed - lastGameHoldEnd) / overviewDuration))
+      // 折线图在队伍表进场阶段完成全景展开，之后保持最终视图不动。
+      const overviewProgress = overview.teamTableEnterDuration > 0
+          ? Math.min(1, Math.max(0,
+              (cycleElapsed - lastGameHoldEnd) / overview.teamTableEnterDuration
+          ))
           : Number(cycleElapsed >= lastGameHoldEnd);
       const overviewElapsed = Math.max(0, cycleElapsed - lastGameHoldEnd);
       const overviewStages = [
