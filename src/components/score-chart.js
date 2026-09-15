@@ -36,6 +36,12 @@ if (
 ) {
   throw new Error("chart.playheadPosition 必须是大于 0 且小于 chart.windowSize 的整数");
 }
+if (!Number.isFinite(labels.rightSafetyMargin) || labels.rightSafetyMargin < 0) {
+  throw new Error("labels.rightSafetyMargin 必须是大于或等于 0 的数字");
+}
+if (!Number.isFinite(labels.fadeOutDuration) || labels.fadeOutDuration < 0) {
+  throw new Error("labels.fadeOutDuration 必须是大于或等于 0 的数字");
+}
 validateLineStyle(xAxis.gridLine, "xAxis.gridLine");
 if (
     !Number.isInteger(xAxis.overviewTargetGridLineCount) ||
@@ -76,6 +82,7 @@ const initialDisplayedRange = rangeForPeak(
     Math.max(...teams.map(team => Math.abs(team.values[0])))
 );
 let displayedRange = initialDisplayedRange;
+let labelOpacity = 1;
 let width = 0;
 let height = 0;
 
@@ -347,6 +354,7 @@ function render(timelineState) {
 
   if (didRestart) {
     displayedRange = initialDisplayedRange;
+    labelOpacity = 1;
   }
 
   // 播放点到达配置位置后开始滚动，并在最后一个窗口处停止
@@ -824,10 +832,18 @@ function render(timelineState) {
         0
     );
     const labelsFit = arrangedLabels.every(label =>
-      label.tipX + labels.horizontalGap + longestLabelWidth <= width - margin.right
+      label.tipX + labels.horizontalGap + longestLabelWidth + labels.rightSafetyMargin <=
+      width - margin.right
     );
 
-    if (labelsFit) {
+    if (!labelsFit) {
+      labelOpacity = labels.fadeOutDuration > 0
+          ? Math.max(0, labelOpacity - deltaSeconds * 1000 / labels.fadeOutDuration)
+          : 0;
+    }
+
+    if (labelOpacity > 0) {
+      ctx.globalAlpha = labelOpacity;
       arrangedLabels.forEach((label) => {
         ctx.fillStyle = label.color;
         ctx.fillText(

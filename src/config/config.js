@@ -110,6 +110,10 @@ const APP_CONFIG = Object.freeze({
     fontWeight: 700,
     // 设置标签与折线末端圆点的水平间距
     horizontalGap: 10,
+    // 设置判断右侧空间是否充足时额外保留的 CSS 像素
+    rightSafetyMargin: 12,
+    // 设置右侧空间不足后标签渐隐的毫秒数；设为 0 时立即隐藏
+    fadeOutDuration: 400,
     // 设置标签之间的额外垂直间距
     verticalGap: 4
   }),
