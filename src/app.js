@@ -1,7 +1,7 @@
 (function startApplication() {
   "use strict";
 
-  const { animation, backgroundColor, teamsDataUrl, layout, gamesDataUrl } = APP_CONFIG;
+  const { animation, backgroundColor, debug, teamsDataUrl, layout, gamesDataUrl } = APP_CONFIG;
 
   // 将布局比例转换为 CSS 百分比
   function percentage(value, name) {
@@ -37,6 +37,24 @@
     dashboard.classList.toggle("dashboard--dividers-visible", layout.divider.visible);
   }
 
+  // 调试时保留从 game0 到指定 gameId 的数据，并同步截断各队积分序列。
+  function limitDataForDebug(data) {
+    const { finalGameId } = debug;
+    if (finalGameId === -1) return data;
+    if (!Number.isInteger(finalGameId) || finalGameId <= 0 || finalGameId >= data.games.length) {
+      throw new Error(`debug.finalGameId 必须是 -1，或大于 0 且小于 ${data.games.length} 的整数`);
+    }
+
+    const length = finalGameId + 1;
+    return Object.freeze({
+      games: Object.freeze(data.games.slice(0, length)),
+      teams: Object.freeze(data.teams.map(team => Object.freeze({
+        ...team,
+        values: Object.freeze(team.values.slice(0, length))
+      })))
+    });
+  }
+
   // 加载数据并装配图表与公共时间轴
   async function start() {
     try {
@@ -55,7 +73,8 @@
 
       const teamData = TeamData.parseTeamsJson(await teamsResponse.text());
       const gameData = GameData.parseGamesJson(await gamesResponse.text());
-      const data = TeamData.combineWithGames(teamData, gameData);
+      const completeData = TeamData.combineWithGames(teamData, gameData);
+      const data = limitDataForDebug(completeData);
       // 在绘图前验证所有队伍颜色
       data.teams.forEach((team, index) => {
         if (!CSS.supports("color", team.color)) {
