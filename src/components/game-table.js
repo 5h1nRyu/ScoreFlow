@@ -17,15 +17,6 @@
     return `${baseUrl}/${encodeURIComponent(fileName)}.png`;
   }
 
-  function teamColor(team, config) {
-    const numericSuffix = Number.parseInt(team.match(/\d+$/)?.[0], 10);
-    const seed = Number.isFinite(numericSuffix)
-        ? numericSuffix - 1
-        : [...team].reduce((total, character) => total + character.codePointAt(0), 0);
-    return config.teamColors[((seed % config.teamColors.length) + config.teamColors.length)
-    % config.teamColors.length];
-  }
-
   function createImage(className, source, alt) {
     const image = createElement("img", className);
     image.src = source;
@@ -37,7 +28,7 @@
   function createPlayerRow(player, order, config) {
     const row = createElement("li", "game-table__row");
     row.style.setProperty("--row-order", order);
-    row.style.setProperty("--team-color", teamColor(player.team, config));
+    row.style.setProperty("--team-color", player.teamColor);
 
     const identity = createElement("div", "game-table__identity");
     identity.append(
@@ -99,10 +90,6 @@
         || !Number.isFinite(config.rowTransitionDelay) || config.rowTransitionDelay < 0) {
       throw new Error("game-table 动画时长必须是大于或等于 0 的数字");
     }
-    if (!Array.isArray(config.teamColors) || !config.teamColors.length) {
-      throw new Error("game-table 至少需要一种队伍颜色");
-    }
-
     const itemFontSizeNames = ["playerName", "totalScore", "convertedTeamScore"];
     itemFontSizeNames.forEach(name => {
       if (!Number.isFinite(config.itemFontSizes?.[name]) || config.itemFontSizes[name] <= 0) {
@@ -121,9 +108,6 @@
     let transitionFrame = 0;
     let hiddenForOverview = null;
 
-    config.teamColors.forEach(color => {
-      if (!CSS.supports("color", color)) throw new Error(`game-table 队伍颜色“${color}”无效`);
-    });
     root.style.setProperty("--row-transition-duration", `${config.rowTransitionDuration}ms`);
     root.style.setProperty("--row-transition-delay", `${config.rowTransitionDelay}ms`);
     root.style.setProperty(
