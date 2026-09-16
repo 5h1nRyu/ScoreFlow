@@ -78,6 +78,9 @@ const APP_CONFIG = Object.freeze({
     // 分别设置重排前后的排行榜标题
     initialTitle: "9月13日队伍排名",
     finalTitle: "9月30日队伍排名",
+    // 设置标题字号与单次淡出或淡入动画时长
+    titleFontSize: 32,
+    titleTransitionDuration: 180,
     // 条目高度和间距均相对于 team-table 区域高度计算
     itemHeightRatio: 0.075,
     itemGapRatio: 0.018,

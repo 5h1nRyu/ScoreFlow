@@ -2,6 +2,7 @@
   "teams": [
     {
       "name": "EX风林火山",
+      "shortName": "风林火山",
       "color": "#cf3f27",
       "initialScore": 0,
       "players": [
@@ -13,6 +14,7 @@
     },
     {
       "name": "科乐美麻将格斗俱乐部",
+      "shortName": "格斗俱乐部",
       "color": "#126783",
       "initialScore": 0,
       "players": [
@@ -24,6 +26,7 @@
     },
     {
       "name": "野兽X",
+      "shortName": "BEAST",
       "color": "#ce9215",
       "initialScore": 0,
       "players": [
@@ -35,6 +38,7 @@
     },
     {
       "name": "赤坂驱动力",
+      "shortName": "赤坂动力",
       "color": "#39714e",
       "initialScore": 0,
       "players": [
@@ -46,6 +50,7 @@
     },
     {
       "name": "U-NEXT海盗",
+      "shortName": "海盗",
       "color": "#745087",
       "initialScore": 0,
       "players": [
@@ -57,6 +62,7 @@
     },
     {
       "name": "地球喷射机",
+      "shortName": "喷射机",
       "color": "#db655d",
       "initialScore": 0,
       "players": [
@@ -68,6 +74,7 @@
     },
     {
       "name": "角川樱花骑士",
+      "shortName": "樱花骑士",
       "color": "#59666e",
       "initialScore": 0,
       "players": [
@@ -79,6 +86,7 @@
     },
     {
       "name": "雷电",
+      "shortName": "雷电",
       "color": "#718a31",
       "initialScore": 0,
       "players": [
@@ -90,6 +98,7 @@
     },
     {
       "name": "涩谷ABEMAS",
+      "shortName": "ABEMAS",
       "color": "#30467d",
       "initialScore": 0,
       "players": [
@@ -101,6 +110,7 @@
     },
     {
       "name": "世嘉飒美凤凰",
+      "shortName": "凤凰",
       "color": "#ae6220",
       "initialScore": 0,
       "players": [

@@ -2,7 +2,6 @@
 
 ## TODO：
 
-- team-table 标题字号、进入动画、转换动画
 - 图片处理
 - 折线图的前后逻辑
 - 折线图label拥挤问题
@@ -121,13 +120,14 @@ games.json ──┘             │                          ↑
 
 ## 数据文件
 
-队伍基础信息从 `data/teams.json` 读取。文件固定包含 10 支队伍，每支队伍包含唯一的队伍名、折线颜色、初始分数和 4 名队员：
+队伍基础信息从 `data/teams.json` 读取。文件固定包含 10 支队伍，每支队伍包含唯一的队伍名、折线标签简称、折线颜色、初始分数和 4 名队员：
 
 ```json
 {
   "teams": [
     {
       "name": "team01",
+      "shortName": "T01",
       "color": "#cf3f27",
       "initialScore": 0,
       "players": ["player01", "player02", "player03", "player04"]
@@ -173,13 +173,13 @@ games.json ──┘             │                          ↑
 绿色 `▲`、红色 `▼` 或灰色 `=` 显示，并附带上升或下降的名次数。队标文件约定为
 `assets/images/icons/<team>.png`；缺少图片时会隐藏破损图像但保留布局。
 
-排行榜在重排前使用 `teamTable.initialTitle`，重排开始后使用 `teamTable.finalTitle`，两个标题均左对齐。可在 `teamTable` 配置中调整 `itemHeightRatio`、`itemGapRatio`、`teamImageHeight`、`reorderScaleAmplitude`（重排时条目的最大缩放比例），以及
+排行榜在重排前使用 `teamTable.initialTitle`，重排开始后使用 `teamTable.finalTitle`，两个标题均左对齐并以淡出、淡入动画切换。可通过 `teamTable.titleFontSize` 设置标题字号，通过 `teamTable.titleTransitionDuration` 设置单次淡出或淡入的毫秒数。另可在 `teamTable` 配置中调整 `itemHeightRatio`、`itemGapRatio`、`teamImageHeight`、`reorderScaleAmplitude`（重排时条目的最大缩放比例），以及
 `itemFontSizes.rank`、`itemFontSizes.teamName`、`itemFontSizes.score`、
 `itemFontSizes.rankChange`。队标、排名、队伍名称、分数和排名变化文字均与条目的竖直中心对齐。
 
 ## 折线标签
 
-每条折线的末端会显示 `teams.json` 中的队伍名称。标签会跟随当前分数，并在分数接近时自动上下偏移以避免重叠；当队伍的分数大小关系互换时，标签的上下顺序也会互换。当最长的队伍名称连同预留空间无法完整放入折线末端与绘图区右边界之间时，所有队伍标签会同步渐隐。
+每条折线的末端会显示 `teams.json` 中的 `shortName` 队伍简称。标签会跟随当前分数，并在分数接近时自动上下偏移以避免重叠；当队伍的分数大小关系互换时，标签的上下顺序也会互换。当最长的队伍简称连同预留空间无法完整放入折线末端与绘图区右边界之间时，所有队伍标签会同步渐隐。
 
 可在 `src/config/config.js` 的 `labels` 中调整：
 
