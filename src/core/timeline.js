@@ -19,13 +19,14 @@
 
     // 计算当前播放状态并通知所有订阅者
     function frame(now) {
-      const animationDuration = finalGame * gameDuration;
+      // 每轮从 game -1（初始积分）开始，用一个完整时长过渡到 game0。
+      const animationDuration = (finalGame + 1) * gameDuration;
       const lastGameHoldEnd = animationDuration + gameDuration;
       const overviewEnd = lastGameHoldEnd + overviewDuration;
       const cycleDuration = overviewEnd + restartDelay;
       const elapsed = Math.max(0, now - startTime);
       const cycleElapsed = cycleDuration > 0 ? elapsed % cycleDuration : 0;
-      const playhead = Math.min(finalGame, cycleElapsed / gameDuration);
+      const playhead = Math.min(finalGame, cycleElapsed / gameDuration - 1);
       const didRestart = elapsed >= cycleDuration && cycleElapsed < previousCycleElapsed;
       // 折线图在队伍表进场阶段完成全景展开，之后保持最终视图不动。
       const overviewProgress = overview.teamTableEnterDuration > 0
@@ -72,7 +73,9 @@
         overviewStage,
         overviewStageProgress,
         phase,
-        playhead
+        playhead,
+        // 比赛详情维持原有节奏，不随新增的 -1 → game0 时段整体后移。
+        tableCompletedGame: Math.min(finalGame, Math.floor(playhead + 1))
       });
 
       subscribers.forEach(subscriber => subscriber(state));

@@ -247,7 +247,10 @@
         const isOverview = state.phase === "overview" || state.phase === "restart-hold";
         setOverviewVisibility(isOverview);
         if (isOverview) return;
-        showGamePair(Math.floor(state.completedGame / 2), activeIndex >= 0 && !state.didRestart);
+        showGamePair(
+            Math.floor(state.tableCompletedGame / 2),
+            activeIndex >= 0 && !state.didRestart
+        );
       }
     });
   }
