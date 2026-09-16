@@ -92,6 +92,8 @@ games.json ──┘             │                          ↑
 
 右上区域的 `game-table` 从 `data/games.json` 读取按 `gameId` 连续排列的 game 数据，并使用每个 game 的 `info` 字符串作为表头。详情表与折线图订阅同一条公共时间轴：积分图每个 game 更新一次，详情表则将相邻的两个 game 组成一组，每两个 game 更新一次。切换时，旧的八个条目按照两个 game 各自从上到下的顺序向左滑出，新条目随后从右滑入。时间轴进入 `overview` 后会隐藏比赛详情并启用预留的 `team-table` 容器，循环重启时恢复前两个 game。
 
+每轮新增的 `game -1` 到 `game0` 折线动画不会延后比赛详情：`game-table` 的内容及换组动画相对公共播放头前移一个 `gameDuration`。该偏移不影响总览切换，最后一组比赛仍会额外展示一个 `gameDuration`，直到时间轴真正进入 `overview` 后才切换到 `team-table`。
+
 可在 `src/config/config.js` 的 `gameTable.itemFontSizes` 中调整选手条目内的字号，数值单位均为 CSS 像素：
 
 - `playerName`：选手名字号。
@@ -140,11 +142,11 @@ games.json ──┘             │                          ↑
 
 调试时可将 `debug.finalGameId` 设为大于 `0` 且小于 game 总场数的整数 `x`，页面将只演示 `game0` 到 `gamex`（包含 `gamex`），并据此计算最终积分和排名。默认值 `-1` 表示使用完整数据。
 
-积分时间序列从各队的 `initialScore` 开始计算。每场比赛结束时，程序根据选手名找到 `teams.json` 中的所属队伍，将该选手的 `teamPoint` 累加到队伍当前分数；没有选手出场的队伍保持原分数。同一场中每支队伍至多有一名选手，因此图表在 `x = 0` 的第一个点已经是“初始分数 + game0 的 teamPoint”，不会单独绘制纯初始分数点。最后一个 game 播放完并停留数秒后，图表会重新播放。
+积分时间序列从各队的 `initialScore` 开始计算。每场比赛结束时，程序根据选手名找到 `teams.json` 中的所属队伍，将该选手的 `teamPoint` 累加到队伍当前分数；没有选手出场的队伍保持原分数。同一场中每支队伍至多有一名选手。图表使用 `x = -1` 完整显示纯初始分数，并在每轮开始后的第一个 `gameDuration` 内过渡到 `x = 0` 的“初始分数 + game0 的 teamPoint”。最后一个 game 播放完并停留数秒后，图表会重新播放。
 
 ## 循环结束动画
 
-正常播放时，折线末端到达 `chart.playheadPosition` 指定的位置后，X 轴开始滚动。最后一个 game 能够落在绘图区右边界时，X 轴停止滚动，折线末端继续向右移动并最终到达右边界。折线到达最后一个 game 后，会先原地停留一个 `gameDuration`；随后 X 轴平滑展开，直至 `game0` 和最后一个 game 分别位于绘图区左右边界，以展示完整折线。展开开始时会隐藏折线末端的队伍名称，展开完成后继续按 `restartDelay` 停留，再开始下一轮播放。
+正常播放时，每轮先用一个 `gameDuration` 让折线从 `game -1` 的初始积分进入 `game0`。折线末端到达 `chart.playheadPosition` 指定的位置后，X 轴开始滚动。最后一个 game 能够落在绘图区右边界时，X 轴停止滚动，折线末端继续向右移动并最终到达右边界。折线到达最后一个 game 后，会先原地停留一个 `gameDuration`；随后 X 轴平滑展开，直至 `game -1` 和最后一个 game 分别位于绘图区左右边界，以展示完整折线。展开开始时会隐藏折线末端的队伍名称，展开完成后继续按 `restartDelay` 停留，再开始下一轮播放。
 
 可在 `src/config/config.js` 的 `chart` 中调整：
 
@@ -154,7 +156,7 @@ games.json ──┘             │                          ↑
 
 可在 `src/config/config.js` 的 `animation` 中调整：
 
-- `gameDuration`：每个 game 的动画时长，也是到达最后一个 game 后的额外停留时长。
+- `gameDuration`：每个 game 的动画时长，也用于每轮的 `game -1` 到 `game0` 动画，以及到达最后一个 game 后的额外停留。
 - `overview.teamTableEnterDuration`：队伍排名表按初始分数进场的动画时长；折线图也会在此阶段完成全景展开。
 - `overview.initialHoldDuration`：初始排名进场后的停留时长。
 - `overview.reorderDuration`：积分数字变化及最终排名重排的动画时长。
