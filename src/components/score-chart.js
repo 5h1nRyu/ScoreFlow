@@ -782,7 +782,7 @@ function render(timelineState) {
     labelItems.push({
       color: team.color,
       index,
-      name: team.name,
+      name: team.shortName,
       tipX,
       tipY,
       value: tipValue
