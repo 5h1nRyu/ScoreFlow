@@ -5,22 +5,22 @@
       "info": "game0",
       "players": [
         {
-          "name": "player01",
+          "name": "二阶堂亚树",
           "score": 42000,
           "teamPoint": 17.0
         },
         {
-          "name": "player09",
+          "name": "铃木大介",
           "score": 31000,
           "teamPoint": 6.0
         },
         {
-          "name": "player21",
+          "name": "石井一马",
           "score": 19000,
           "teamPoint": -6.0
         },
         {
-          "name": "player29",
+          "name": "萩原圣人",
           "score": 8000,
           "teamPoint": -17.0
         }
@@ -31,22 +31,22 @@
       "info": "game1",
       "players": [
         {
-          "name": "player05",
+          "name": "佐佐木寿人",
           "score": 10500,
           "teamPoint": -14.5
         },
         {
-          "name": "player13",
+          "name": "园田贤",
           "score": 39500,
           "teamPoint": 14.5
         },
         {
-          "name": "player25",
+          "name": "堀慎吾",
           "score": 29500,
           "teamPoint": 4.5
         },
         {
-          "name": "player33",
+          "name": "多井隆晴",
           "score": 20500,
           "teamPoint": -4.5
         }
@@ -57,22 +57,22 @@
       "info": "game2",
       "players": [
         {
-          "name": "player10",
+          "name": "中田花奈",
           "score": 22000,
           "teamPoint": -3.0
         },
         {
-          "name": "player17",
+          "name": "仲林圭",
           "score": 13000,
           "teamPoint": -12.0
         },
         {
-          "name": "player30",
+          "name": "濑户熊直树",
           "score": 37000,
           "teamPoint": 12.0
         },
         {
-          "name": "player37",
+          "name": "茅森早香",
           "score": 28000,
           "teamPoint": 3.0
         }
@@ -83,22 +83,22 @@
       "info": "game3",
       "players": [
         {
-          "name": "player14",
+          "name": "铃木太郎",
           "score": 31000,
           "teamPoint": 6.0
         },
         {
-          "name": "player22",
+          "name": "HIRO柴田",
           "score": 19000,
           "teamPoint": -6.0
         },
         {
-          "name": "player34",
+          "name": "松本吉弘",
           "score": 8000,
           "teamPoint": -17.0
         },
         {
-          "name": "player02",
+          "name": "胜又健志",
           "score": 42000,
           "teamPoint": 17.0
         }
@@ -109,22 +109,22 @@
       "info": "game4",
       "players": [
         {
-          "name": "player18",
+          "name": "瑞原明奈",
           "score": 39500,
           "teamPoint": 14.5
         },
         {
-          "name": "player26",
+          "name": "冈田纱佳",
           "score": 29500,
           "teamPoint": 4.5
         },
         {
-          "name": "player38",
+          "name": "竹内元太",
           "score": 20500,
           "teamPoint": -4.5
         },
         {
-          "name": "player06",
+          "name": "泷泽和典",
           "score": 10500,
           "teamPoint": -14.5
         }
@@ -135,22 +135,22 @@
       "info": "game5",
       "players": [
         {
-          "name": "player23",
+          "name": "三浦智博",
           "score": 13000,
           "teamPoint": -12.0
         },
         {
-          "name": "player31",
+          "name": "本田朋广",
           "score": 37000,
           "teamPoint": 12.0
         },
         {
-          "name": "player03",
+          "name": "内川幸太郎",
           "score": 28000,
           "teamPoint": 3.0
         },
         {
-          "name": "player11",
+          "name": "下石戟",
           "score": 22000,
           "teamPoint": -3.0
         }
@@ -161,22 +161,22 @@
       "info": "game6",
       "players": [
         {
-          "name": "player27",
+          "name": "阿久津翔太",
           "score": 19000,
           "teamPoint": -6.0
         },
         {
-          "name": "player35",
+          "name": "白鸟翔",
           "score": 8000,
           "teamPoint": -17.0
         },
         {
-          "name": "player07",
+          "name": "高宫茉莉",
           "score": 42000,
           "teamPoint": 17.0
         },
         {
-          "name": "player15",
+          "name": "渡边太",
           "score": 31000,
           "teamPoint": 6.0
         }
@@ -187,22 +187,22 @@
       "info": "game7",
       "players": [
         {
-          "name": "player32",
+          "name": "黑泽咲",
           "score": 29500,
           "teamPoint": 4.5
         },
         {
-          "name": "player39",
+          "name": "醍醐大",
           "score": 20500,
           "teamPoint": -4.5
         },
         {
-          "name": "player12",
+          "name": "东城理央",
           "score": 10500,
           "teamPoint": -14.5
         },
         {
-          "name": "player19",
+          "name": "铃木优",
           "score": 39500,
           "teamPoint": 14.5
         }
@@ -213,22 +213,22 @@
       "info": "game8",
       "players": [
         {
-          "name": "player36",
+          "name": "日向蓝子",
           "score": 37000,
           "teamPoint": 12.0
         },
         {
-          "name": "player04",
+          "name": "永井孝典",
           "score": 28000,
           "teamPoint": 3.0
         },
         {
-          "name": "player16",
+          "name": "浅见真纪",
           "score": 22000,
           "teamPoint": -3.0
         },
         {
-          "name": "player24",
+          "name": "逢川惠梦",
           "score": 13000,
           "teamPoint": -12.0
         }
@@ -239,22 +239,22 @@
       "info": "game9",
       "players": [
         {
-          "name": "player40",
+          "name": "佐野日向子",
           "score": 8000,
           "teamPoint": -17.0
         },
         {
-          "name": "player08",
+          "name": "伊达朱里纱",
           "score": 42000,
           "teamPoint": 17.0
         },
         {
-          "name": "player20",
+          "name": "朝仓康心",
           "score": 31000,
           "teamPoint": 6.0
         },
         {
-          "name": "player28",
+          "name": "尻无滨航",
           "score": 19000,
           "teamPoint": -6.0
         }
@@ -265,22 +265,22 @@
       "info": "game10",
       "players": [
         {
-          "name": "player01",
+          "name": "二阶堂亚树",
           "score": 20500,
           "teamPoint": -4.5
         },
         {
-          "name": "player09",
+          "name": "铃木大介",
           "score": 10500,
           "teamPoint": -14.5
         },
         {
-          "name": "player21",
+          "name": "石井一马",
           "score": 39500,
           "teamPoint": 14.5
         },
         {
-          "name": "player29",
+          "name": "萩原圣人",
           "score": 29500,
           "teamPoint": 4.5
         }
@@ -291,22 +291,22 @@
       "info": "game11",
       "players": [
         {
-          "name": "player05",
+          "name": "佐佐木寿人",
           "score": 28000,
           "teamPoint": 3.0
         },
         {
-          "name": "player13",
+          "name": "园田贤",
           "score": 22000,
           "teamPoint": -3.0
         },
         {
-          "name": "player25",
+          "name": "堀慎吾",
           "score": 13000,
           "teamPoint": -12.0
         },
         {
-          "name": "player33",
+          "name": "多井隆晴",
           "score": 37000,
           "teamPoint": 12.0
         }
@@ -317,22 +317,22 @@
       "info": "game12",
       "players": [
         {
-          "name": "player10",
+          "name": "中田花奈",
           "score": 42000,
           "teamPoint": 17.0
         },
         {
-          "name": "player17",
+          "name": "仲林圭",
           "score": 31000,
           "teamPoint": 6.0
         },
         {
-          "name": "player30",
+          "name": "濑户熊直树",
           "score": 19000,
           "teamPoint": -6.0
         },
         {
-          "name": "player37",
+          "name": "茅森早香",
           "score": 8000,
           "teamPoint": -17.0
         }
@@ -343,22 +343,22 @@
       "info": "game13",
       "players": [
         {
-          "name": "player14",
+          "name": "铃木太郎",
           "score": 10500,
           "teamPoint": -14.5
         },
         {
-          "name": "player22",
+          "name": "HIRO柴田",
           "score": 39500,
           "teamPoint": 14.5
         },
         {
-          "name": "player34",
+          "name": "松本吉弘",
           "score": 29500,
           "teamPoint": 4.5
         },
         {
-          "name": "player02",
+          "name": "胜又健志",
           "score": 20500,
           "teamPoint": -4.5
         }
@@ -369,22 +369,22 @@
       "info": "game14",
       "players": [
         {
-          "name": "player18",
+          "name": "瑞原明奈",
           "score": 22000,
           "teamPoint": -3.0
         },
         {
-          "name": "player26",
+          "name": "冈田纱佳",
           "score": 13000,
           "teamPoint": -12.0
         },
         {
-          "name": "player38",
+          "name": "竹内元太",
           "score": 37000,
           "teamPoint": 12.0
         },
         {
-          "name": "player06",
+          "name": "泷泽和典",
           "score": 28000,
           "teamPoint": 3.0
         }
@@ -395,22 +395,22 @@
       "info": "game15",
       "players": [
         {
-          "name": "player23",
+          "name": "三浦智博",
           "score": 31000,
           "teamPoint": 6.0
         },
         {
-          "name": "player31",
+          "name": "本田朋广",
           "score": 19000,
           "teamPoint": -6.0
         },
         {
-          "name": "player03",
+          "name": "内川幸太郎",
           "score": 8000,
           "teamPoint": -17.0
         },
         {
-          "name": "player11",
+          "name": "下石戟",
           "score": 42000,
           "teamPoint": 17.0
         }
@@ -421,22 +421,22 @@
       "info": "game16",
       "players": [
         {
-          "name": "player27",
+          "name": "阿久津翔太",
           "score": 39500,
           "teamPoint": 14.5
         },
         {
-          "name": "player35",
+          "name": "白鸟翔",
           "score": 29500,
           "teamPoint": 4.5
         },
         {
-          "name": "player07",
+          "name": "高宫茉莉",
           "score": 20500,
           "teamPoint": -4.5
         },
         {
-          "name": "player15",
+          "name": "渡边太",
           "score": 10500,
           "teamPoint": -14.5
         }
@@ -447,22 +447,22 @@
       "info": "game17",
       "players": [
         {
-          "name": "player32",
+          "name": "黑泽咲",
           "score": 13000,
           "teamPoint": -12.0
         },
         {
-          "name": "player39",
+          "name": "醍醐大",
           "score": 37000,
           "teamPoint": 12.0
         },
         {
-          "name": "player12",
+          "name": "东城理央",
           "score": 28000,
           "teamPoint": 3.0
         },
         {
-          "name": "player19",
+          "name": "铃木优",
           "score": 22000,
           "teamPoint": -3.0
         }
@@ -473,22 +473,22 @@
       "info": "game18",
       "players": [
         {
-          "name": "player36",
+          "name": "日向蓝子",
           "score": 19000,
           "teamPoint": -6.0
         },
         {
-          "name": "player04",
+          "name": "永井孝典",
           "score": 8000,
           "teamPoint": -17.0
         },
         {
-          "name": "player16",
+          "name": "浅见真纪",
           "score": 42000,
           "teamPoint": 17.0
         },
         {
-          "name": "player24",
+          "name": "逢川惠梦",
           "score": 31000,
           "teamPoint": 6.0
         }
@@ -499,22 +499,22 @@
       "info": "game19",
       "players": [
         {
-          "name": "player40",
+          "name": "佐野日向子",
           "score": 29500,
           "teamPoint": 4.5
         },
         {
-          "name": "player08",
+          "name": "伊达朱里纱",
           "score": 20500,
           "teamPoint": -4.5
         },
         {
-          "name": "player20",
+          "name": "朝仓康心",
           "score": 10500,
           "teamPoint": -14.5
         },
         {
-          "name": "player28",
+          "name": "尻无滨航",
           "score": 39500,
           "teamPoint": 14.5
         }
@@ -525,22 +525,22 @@
       "info": "game20",
       "players": [
         {
-          "name": "player01",
+          "name": "二阶堂亚树",
           "score": 37000,
           "teamPoint": 12.0
         },
         {
-          "name": "player09",
+          "name": "铃木大介",
           "score": 28000,
           "teamPoint": 3.0
         },
         {
-          "name": "player21",
+          "name": "石井一马",
           "score": 22000,
           "teamPoint": -3.0
         },
         {
-          "name": "player29",
+          "name": "萩原圣人",
           "score": 13000,
           "teamPoint": -12.0
         }
@@ -551,22 +551,22 @@
       "info": "game21",
       "players": [
         {
-          "name": "player05",
+          "name": "佐佐木寿人",
           "score": 8000,
           "teamPoint": -17.0
         },
         {
-          "name": "player13",
+          "name": "园田贤",
           "score": 42000,
           "teamPoint": 17.0
         },
         {
-          "name": "player25",
+          "name": "堀慎吾",
           "score": 31000,
           "teamPoint": 6.0
         },
         {
-          "name": "player33",
+          "name": "多井隆晴",
           "score": 19000,
           "teamPoint": -6.0
         }
@@ -577,22 +577,22 @@
       "info": "game22",
       "players": [
         {
-          "name": "player10",
+          "name": "中田花奈",
           "score": 20500,
           "teamPoint": -4.5
         },
         {
-          "name": "player17",
+          "name": "仲林圭",
           "score": 10500,
           "teamPoint": -14.5
         },
         {
-          "name": "player30",
+          "name": "濑户熊直树",
           "score": 39500,
           "teamPoint": 14.5
         },
         {
-          "name": "player37",
+          "name": "茅森早香",
           "score": 29500,
           "teamPoint": 4.5
         }
@@ -603,22 +603,22 @@
       "info": "game23",
       "players": [
         {
-          "name": "player14",
+          "name": "铃木太郎",
           "score": 28000,
           "teamPoint": 3.0
         },
         {
-          "name": "player22",
+          "name": "HIRO柴田",
           "score": 22000,
           "teamPoint": -3.0
         },
         {
-          "name": "player34",
+          "name": "松本吉弘",
           "score": 13000,
           "teamPoint": -12.0
         },
         {
-          "name": "player02",
+          "name": "胜又健志",
           "score": 37000,
           "teamPoint": 12.0
         }
