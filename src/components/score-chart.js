@@ -293,25 +293,37 @@ function layoutLabels(items, top, bottom) {
     second.value - first.value || first.index - second.index
   );
 
-  arranged[0].labelY = Math.max(top, arranged[0].tipY);
+  // 去除标签之间必须保留的间距后，对目标坐标做单调回归。发生碰撞的
+  // 标签会合并成同一组并共享平均位移，因此避让量由组的上下两侧承担。
+  const blocks = [];
+  arranged.forEach((item, index) => {
+    const target = item.tipY - index * effectiveGap;
+    blocks.push({ end: index, mean: target, size: 1, start: index });
 
-  for (let index = 1; index < arranged.length; index += 1) {
-    arranged[index].labelY = Math.max(
-        arranged[index].tipY,
-        arranged[index - 1].labelY + effectiveGap
-    );
-  }
-
-  if (arranged.at(-1).labelY > bottom) {
-    arranged.at(-1).labelY = bottom;
-
-    for (let index = arranged.length - 2; index >= 0; index -= 1) {
-      arranged[index].labelY = Math.min(
-          arranged[index].labelY,
-          arranged[index + 1].labelY - effectiveGap
-      );
+    while (
+        blocks.length > 1 &&
+        blocks.at(-2).mean > blocks.at(-1).mean
+    ) {
+      const lower = blocks.pop();
+      const upper = blocks.pop();
+      const size = upper.size + lower.size;
+      blocks.push({
+        end: lower.end,
+        mean: (upper.mean * upper.size + lower.mean * lower.size) / size,
+        size,
+        start: upper.start
+      });
     }
-  }
+  });
+
+  const minimumBase = top;
+  const maximumBase = bottom - (arranged.length - 1) * effectiveGap;
+  blocks.forEach((block) => {
+    const base = Math.min(maximumBase, Math.max(minimumBase, block.mean));
+    for (let index = block.start; index <= block.end; index += 1) {
+      arranged[index].labelY = base + index * effectiveGap;
+    }
+  });
 
   return arranged;
 }
