@@ -25,7 +25,9 @@
       if (!team || typeof team !== "object" || Array.isArray(team)) {
         throw new Error(`${path} 必须是对象`);
       }
-      ["name", "color"].forEach(field => assertNonEmptyString(team[field], `${path}.${field}`));
+      ["name", "shortName", "color"].forEach(field =>
+        assertNonEmptyString(team[field], `${path}.${field}`)
+      );
       if (teamNames.has(team.name)) throw new Error(`${path}.name“${team.name}”重复`);
       teamNames.add(team.name);
       if (!Number.isFinite(team.initialScore)) {
@@ -45,6 +47,7 @@
       });
       return Object.freeze({
         name: team.name,
+        shortName: team.shortName,
         color: team.color,
         initialScore: team.initialScore,
         players: Object.freeze(players)

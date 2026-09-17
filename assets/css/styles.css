@@ -301,10 +301,18 @@ body {
   flex: 0 0 auto;
   margin: 0;
   color: #18232d;
-  font-size: clamp(22px, 1.7vw, 32px);
+  font-size: var(--team-table-title-font-size);
   font-weight: 900;
   line-height: 1.15;
   text-align: left;
+}
+
+.team-table__title--outgoing {
+  animation: game-table-header-out var(--team-table-title-transition-duration) ease both;
+}
+
+.team-table__title--incoming {
+  animation: game-table-header-in var(--team-table-title-transition-duration) ease both;
 }
 
 .team-table__list {

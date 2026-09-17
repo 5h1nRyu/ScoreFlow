@@ -61,10 +61,10 @@ function lineDash(style) {
 function overviewGridStep() {
   const target = xAxis.overviewTargetGridLineCount;
   let bestStep = 1;
-  let bestDifference = Math.abs(finalGame + 1 - target);
+  let bestDifference = Math.abs(finalGame + 2 - target);
 
-  for (let step = 2; step <= Math.max(1, finalGame); step *= 2) {
-    const lineCount = Math.floor(finalGame / step) + 1;
+  for (let step = 2; step <= Math.max(1, finalGame + 1); step *= 2) {
+    const lineCount = Math.floor((finalGame + 1) / step) + 1;
     const difference = Math.abs(lineCount - target);
 
     if (difference < bestDifference) {
@@ -79,7 +79,7 @@ function overviewGridStep() {
 const fixedOverviewGridStep = overviewGridStep();
 
 const initialDisplayedRange = rangeForPeak(
-    Math.max(...teams.map(team => Math.abs(team.values[0])))
+    Math.max(...teams.map(team => Math.abs(team.initialScore)))
 );
 let displayedRange = initialDisplayedRange;
 let labelOpacity = 1;
@@ -167,13 +167,20 @@ function parameterForXProgress(progress) {
 }
 
 
+// 获取整数 game 对应的分数；game -1 表示尚未计入 game0 的初始积分。
+function valueAtGame(team, game) {
+  if (game <= -1) return team.initialScore;
+  return team.values[Math.min(game, finalGame)];
+}
+
+
 // 获取固定 Bezier 曲线在指定时间位置上的分数
 function valueOnFixedCurve(team, time) {
   const game = Math.floor(time);
   const progress = time - game;
 
-  const from = team.values[game];
-  const to = team.values[Math.min(game + 1, finalGame)];
+  const from = valueAtGame(team, game);
+  const to = valueAtGame(team, game + 1);
 
   // 整数点直接返回原始数据
   if (progress <= 0) {
@@ -359,15 +366,15 @@ function render(timelineState) {
 
   // 播放点到达配置位置后开始滚动，并在最后一个窗口处停止
   const movingViewStart = Math.min(
-      Math.max(0, playhead - chart.playheadPosition),
-      Math.max(0, finalGame - chart.windowSize)
+      Math.max(-1, playhead - chart.playheadPosition),
+      Math.max(-1, finalGame - chart.windowSize)
   );
 
   const movingViewEnd =
       movingViewStart + chart.windowSize;
 
   const overviewEase = easeInOut(overviewProgress);
-  const viewStart = movingViewStart * (1 - overviewEase);
+  const viewStart = movingViewStart + (-1 - movingViewStart) * overviewEase;
   const viewEnd = movingViewEnd + (finalGame - movingViewEnd) * overviewEase;
   const viewSpan = viewEnd - viewStart;
 
@@ -386,11 +393,10 @@ function render(timelineState) {
         const first =
             Math.ceil(viewStart);
 
-        const values =
-            team.values.slice(
-                first,
-                completedGame + 1
-            );
+        const values = [];
+        for (let game = first; game <= completedGame; game += 1) {
+          values.push(valueAtGame(team, game));
+        }
 
         // 加入窗口左边界上的曲线值
         values.push(
@@ -613,7 +619,8 @@ function render(timelineState) {
 
   // 仅在全景展开阶段减少竖线；普通播放阶段仍逐个显示 game
   const xGridStep = phase === "overview" ? fixedOverviewGridStep : 1;
-  const firstGridGame = Math.ceil(viewStart / xGridStep) * xGridStep;
+  // 所有档位都以 game -1 为起点，确保初始积分刻度始终完整显示。
+  const firstGridGame = -1 + Math.ceil((viewStart + 1) / xGridStep) * xGridStep;
 
   // 绘制垂直网格线
   for (
@@ -695,7 +702,7 @@ function render(timelineState) {
     // 多取一个左侧点保证边缘曲线连续
     const firstGame =
         Math.max(
-            0,
+            -1,
             Math.floor(
                 viewStart
             ) - 1
@@ -717,11 +724,7 @@ function render(timelineState) {
     ) {
       points.push({
         x: xAt(game),
-        y: yAt(
-            team.values[
-                game
-                ]
-        )
+        y: yAt(valueAtGame(team, game))
       });
     }
 
@@ -782,7 +785,7 @@ function render(timelineState) {
     labelItems.push({
       color: team.color,
       index,
-      name: team.name,
+      name: team.shortName,
       tipX,
       tipY,
       value: tipValue

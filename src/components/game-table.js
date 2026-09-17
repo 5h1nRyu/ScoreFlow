@@ -65,7 +65,9 @@
         createElement("h2", "game-table__title", game.info)
     );
     const list = createElement("ol", "game-table__list");
-    game.players.forEach((player, index) => {
+    const orderedPlayers = game.players.map((player, sourceIndex) => ({ player, sourceIndex }))
+        .sort((a, b) => b.player.score - a.player.score || a.sourceIndex - b.sourceIndex);
+    orderedPlayers.forEach(({ player }, index) => {
       list.append(createPlayerRow(player, startOrder + index, config));
     });
     section.append(header, list);
@@ -245,7 +247,10 @@
         const isOverview = state.phase === "overview" || state.phase === "restart-hold";
         setOverviewVisibility(isOverview);
         if (isOverview) return;
-        showGamePair(Math.floor(state.completedGame / 2), activeIndex >= 0 && !state.didRestart);
+        showGamePair(
+            Math.floor(state.tableCompletedGame / 2),
+            activeIndex >= 0 && !state.didRestart
+        );
       }
     });
   }

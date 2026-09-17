@@ -47,7 +47,7 @@
         throw new Error(`teamTable.${name} 必须是非空字符串`);
       }
     });
-    ["itemHeightRatio", "teamImageHeight"].forEach(name => {
+    ["itemHeightRatio", "teamImageHeight", "titleFontSize"].forEach(name => {
       if (!Number.isFinite(config[name]) || config[name] <= 0) {
         throw new Error(`teamTable.${name} 必须是大于 0 的数字`);
       }
@@ -57,6 +57,9 @@
     }
     if (!Number.isFinite(config.reorderScaleAmplitude) || config.reorderScaleAmplitude < 0) {
       throw new Error("teamTable.reorderScaleAmplitude 必须是大于或等于 0 的数字");
+    }
+    if (!Number.isFinite(config.titleTransitionDuration) || config.titleTransitionDuration < 0) {
+      throw new Error("teamTable.titleTransitionDuration 必须是大于或等于 0 的数字");
     }
     ["rank", "teamName", "score", "rankChange"].forEach(name => {
       if (!Number.isFinite(config.itemFontSizes?.[name]) || config.itemFontSizes[name] <= 0) {
@@ -73,6 +76,9 @@
     const rows = new Map();
     let itemHeight = 0;
     let itemGap = 0;
+    let desiredTitle = config.initialTitle;
+    let titleTimer = 0;
+    let titleIsVisible = false;
 
     root.classList.add("team-table");
     root.style.setProperty("--team-table-rank-font-size", `${config.itemFontSizes.rank}px`);
@@ -80,6 +86,11 @@
     root.style.setProperty("--team-table-score-font-size", `${config.itemFontSizes.score}px`);
     root.style.setProperty("--team-table-change-font-size", `${config.itemFontSizes.rankChange}px`);
     root.style.setProperty("--team-table-logo-height", `${config.teamImageHeight}px`);
+    root.style.setProperty("--team-table-title-font-size", `${config.titleFontSize}px`);
+    root.style.setProperty(
+        "--team-table-title-transition-duration",
+        `${config.titleTransitionDuration}ms`
+    );
 
     initialOrder.forEach(entry => {
       const row = createElement("li", "team-table__row");
@@ -128,12 +139,62 @@
     const resizeObserver = new ResizeObserver(updateDimensions);
     resizeObserver.observe(root);
 
+    function updateTitle(nextTitle) {
+      if (nextTitle === desiredTitle) return;
+      desiredTitle = nextTitle;
+      window.clearTimeout(titleTimer);
+      title.classList.remove("team-table__title--incoming");
+
+      if (config.titleTransitionDuration === 0) {
+        title.classList.remove("team-table__title--outgoing");
+        title.textContent = desiredTitle;
+        return;
+      }
+
+      title.classList.add("team-table__title--outgoing");
+      titleTimer = window.setTimeout(() => {
+        title.textContent = desiredTitle;
+        title.classList.remove("team-table__title--outgoing");
+        title.classList.add("team-table__title--incoming");
+        titleTimer = window.setTimeout(() => {
+          title.classList.remove("team-table__title--incoming");
+          titleTimer = 0;
+        }, config.titleTransitionDuration);
+      }, config.titleTransitionDuration);
+    }
+
+    function showTitle() {
+      if (titleIsVisible) return;
+      titleIsVisible = true;
+      if (config.titleTransitionDuration === 0) return;
+
+      title.classList.add("team-table__title--incoming");
+      titleTimer = window.setTimeout(() => {
+        title.classList.remove("team-table__title--incoming");
+        titleTimer = 0;
+      }, config.titleTransitionDuration);
+    }
+
     function render(state) {
-      if (state.phase !== "overview" && state.phase !== "restart-hold") return;
+      if (state.phase !== "overview" && state.phase !== "restart-hold") {
+        if (titleIsVisible) {
+          window.clearTimeout(titleTimer);
+          titleTimer = 0;
+          desiredTitle = config.initialTitle;
+          title.textContent = desiredTitle;
+          title.classList.remove(
+              "team-table__title--incoming",
+              "team-table__title--outgoing"
+          );
+        }
+        titleIsVisible = false;
+        return;
+      }
+      showTitle();
       const isReordered = state.overviewStage === "reorder"
           || state.overviewStage === "final-hold"
           || state.phase === "restart-hold";
-      title.textContent = isReordered ? config.finalTitle : config.initialTitle;
+      updateTitle(isReordered ? config.finalTitle : config.initialTitle);
       const rawProgress = state.overviewStage === "reorder"
           ? state.overviewStageProgress
           : Number(isReordered);

@@ -1,113 +1,123 @@
 {
   "teams": [
     {
-      "name": "team01",
-      "color": "#cf3f27",
+      "name": "EX风林火山",
+      "shortName": "火山",
+      "color": "#000000",
       "initialScore": 0,
       "players": [
-        "player01",
-        "player02",
-        "player03",
-        "player04"
+        "二阶堂亚树",
+        "胜又健志",
+        "内川幸太郎",
+        "永井孝典"
       ]
     },
     {
-      "name": "team02",
-      "color": "#126783",
+      "name": "科乐美麻将格斗俱乐部",
+      "shortName": "格斗",
+      "color": "#920101",
       "initialScore": 0,
       "players": [
-        "player05",
-        "player06",
-        "player07",
-        "player08"
+        "佐佐木寿人",
+        "泷泽和典",
+        "高宫茉莉",
+        "伊达朱里纱"
       ]
     },
     {
-      "name": "team03",
-      "color": "#ce9215",
+      "name": "野兽X",
+      "shortName": "野兽",
+      "color": "#002953",
       "initialScore": 0,
       "players": [
-        "player09",
-        "player10",
-        "player11",
-        "player12"
+        "铃木大介",
+        "中田花奈",
+        "下石戟",
+        "东城理央"
       ]
     },
     {
-      "name": "team04",
-      "color": "#39714e",
+      "name": "赤坂驱动力",
+      "shortName": "赤坂",
+      "color": "#9cb832",
       "initialScore": 0,
       "players": [
-        "player13",
-        "player14",
-        "player15",
-        "player16"
+        "园田贤",
+        "铃木太郎",
+        "渡边太",
+        "浅见真纪"
       ]
     },
     {
-      "name": "team05",
-      "color": "#745087",
+      "name": "U-NEXT海盗",
+      "shortName": "海盗",
+      "color": "#0582c8",
       "initialScore": 0,
       "players": [
-        "player17",
-        "player18",
-        "player19",
-        "player20"
+        "仲林圭",
+        "瑞原明奈",
+        "铃木优",
+        "朝仓康心"
       ]
     },
     {
-      "name": "team06",
-      "color": "#db655d",
+      "name": "地球喷射机",
+      "shortName": "地球",
+      "color": "#006934",
       "initialScore": 0,
       "players": [
-        "player21",
-        "player22",
-        "player23",
-        "player24"
+        "石井一马",
+        "HIRO柴田",
+        "三浦智博",
+        "逢川惠梦"
       ]
     },
     {
-      "name": "team07",
-      "color": "#59666e",
+      "name": "角川樱花骑士",
+      "shortName": "樱花",
+      "color": "#f895b5",
       "initialScore": 0,
       "players": [
-        "player25",
-        "player26",
-        "player27",
-        "player28"
+        "堀慎吾",
+        "冈田纱佳",
+        "阿久津翔太",
+        "尻无滨航"
       ]
     },
     {
-      "name": "team08",
-      "color": "#718a31",
+      "name": "雷电",
+      "shortName": "雷电",
+      "color": "#dbb400",
       "initialScore": 0,
       "players": [
-        "player29",
-        "player30",
-        "player31",
-        "player32"
+        "萩原圣人",
+        "濑户熊直树",
+        "本田朋广",
+        "黑泽咲"
       ]
     },
     {
-      "name": "team09",
-      "color": "#30467d",
+      "name": "涩谷ABEMAS",
+      "shortName": "AB",
+      "color": "#c6ae6f",
       "initialScore": 0,
       "players": [
-        "player33",
-        "player34",
-        "player35",
-        "player36"
+        "多井隆晴",
+        "松本吉弘",
+        "白鸟翔",
+        "日向蓝子"
       ]
     },
     {
-      "name": "team10",
-      "color": "#ae6220",
+      "name": "世嘉飒美凤凰",
+      "shortName": "凤凰",
+      "color": "#b74801",
       "initialScore": 0,
       "players": [
-        "player37",
-        "player38",
-        "player39",
-        "player40"
+        "茅森早香",
+        "竹内元太",
+        "醍醐大",
+        "佐野日向子"
       ]
     }
   ]
