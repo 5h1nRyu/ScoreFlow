@@ -45,7 +45,7 @@ const APP_CONFIG = Object.freeze({
 
   debug: Object.freeze({
     // -1 使用完整数据；正整数 x 只演示到 gameId 为 x 的 game（包含该 game）
-    finalGameId: -1
+    finalGameId: 9
   }),
 
   gameTable: Object.freeze({
@@ -85,7 +85,7 @@ const APP_CONFIG = Object.freeze({
     itemHeightRatio: 0.075,
     itemGapRatio: 0.018,
     // 队标高度与各类文字字号均使用 CSS 像素
-    teamImageHeight: 42,
+    teamImageHeight: 120,
     // 控制重排后是否显示排名变化图标，并始终保留其布局空间
     showRankChange: true,
     // 设置重排过程中条目放大或缩小的最大比例
