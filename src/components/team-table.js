@@ -61,6 +61,9 @@
     if (!Number.isFinite(config.titleTransitionDuration) || config.titleTransitionDuration < 0) {
       throw new Error("teamTable.titleTransitionDuration 必须是大于或等于 0 的数字");
     }
+    if (typeof config.showRankChange !== "boolean") {
+      throw new Error("teamTable.showRankChange 必须是布尔值");
+    }
     ["rank", "teamName", "score", "rankChange"].forEach(name => {
       if (!Number.isFinite(config.itemFontSizes?.[name]) || config.itemFontSizes[name] <= 0) {
         throw new Error(`teamTable.itemFontSizes.${name} 必须是大于 0 的数字`);
@@ -222,7 +225,10 @@
             : rankText(initialOrder, initialEntry);
         const shownScore = initialEntry.score + (finalEntry.score - initialEntry.score) * progress;
         elements.score.textContent = scoreFormatter(shownScore);
-        elements.change.classList.toggle("team-table__change--visible", isReordered);
+        elements.change.classList.toggle(
+            "team-table__change--visible",
+            config.showRankChange && isReordered
+        );
       });
     }
 

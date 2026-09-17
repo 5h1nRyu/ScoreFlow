@@ -331,6 +331,8 @@ body {
   left: 0;
   display: grid;
   grid-template-columns: 2.3ch var(--team-table-logo-height) minmax(0, 1fr) max-content 4.2ch;
+  /* 固定网格行高，避免超高队标撑开隐式行并使自身中心偏离条目中心 */
+  grid-template-rows: 100%;
   align-items: center;
   gap: clamp(7px, 0.65vw, 12px);
   width: 100%;
@@ -343,6 +345,7 @@ body {
   border-left: clamp(5px, 0.45vw, 9px) solid var(--team-color);
   border-radius: clamp(7px, 0.65vw, 12px);
   box-shadow: 0 2px 8px rgba(35, 48, 57, 0.1);
+  overflow: hidden;
   transform-origin: center;
   will-change: transform, opacity;
 }
@@ -367,6 +370,7 @@ body {
 
 .team-table__logo {
   display: block;
+  align-self: center;
   justify-self: start;
   width: auto;
   height: var(--team-table-logo-height);
