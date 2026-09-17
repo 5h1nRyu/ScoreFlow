@@ -343,6 +343,7 @@ body {
   border-left: clamp(5px, 0.45vw, 9px) solid var(--team-color);
   border-radius: clamp(7px, 0.65vw, 12px);
   box-shadow: 0 2px 8px rgba(35, 48, 57, 0.1);
+  overflow: hidden;
   transform-origin: center;
   will-change: transform, opacity;
 }
