@@ -10,19 +10,20 @@
   </head>
   <body>
     <main id="dashboard" class="dashboard">
-      <section class="dashboard__region dashboard__region--top-left" aria-label="积分走势区域">
-        <canvas id="scoreChart" role="img" aria-label="各队伍随 game 进度连续变化的积分折线图"></canvas>
+      <header class="dashboard__title" aria-label="主标题区"></header>
+      <section class="dashboard__chart-area" aria-label="图表区">
+        <section class="dashboard__region" aria-label="积分走势区域">
+          <canvas id="scoreChart" role="img" aria-label="各队伍随 game 进度连续变化的积分折线图"></canvas>
+        </section>
+        <div class="dashboard__middle-decoration" aria-hidden="true"></div>
+        <section class="dashboard__region" aria-label="比赛详情区域">
+          <div id="tableStage" class="table-stage">
+            <section id="gameTable" class="game-table" aria-label="当前两个 game 的比赛详情"></section>
+            <section id="teamTableSlot" class="team-table-slot" aria-label="队伍总览" hidden></section>
+          </div>
+        </section>
       </section>
-      <section class="dashboard__region dashboard__region--top-right" aria-label="比赛详情区域">
-        <div id="tableStage" class="table-stage">
-          <section id="gameTable" class="game-table" aria-label="当前两个 game 的比赛详情"></section>
-          <section id="teamTableSlot" class="team-table-slot" aria-label="队伍总览" hidden></section>
-        </div>
-      </section>
-      <section class="dashboard__region dashboard__region--bottom-left" aria-label="左下区域"></section>
-      <section class="dashboard__region dashboard__region--bottom-right" aria-label="右下区域"></section>
-      <span class="dashboard__divider dashboard__divider--vertical" aria-hidden="true"></span>
-      <span class="dashboard__divider dashboard__divider--horizontal" aria-hidden="true"></span>
+      <footer class="dashboard__footer-decoration" aria-label="底部装饰区"></footer>
     </main>
     <p id="dataError" role="alert" hidden></p>
     <script src="src/data/team-data.js"></script>

@@ -13,17 +13,12 @@ const APP_CONFIG = Object.freeze({
   backgroundColor: "#ffffff",
 
   layout: Object.freeze({
-    // 纵向分隔位置为 0.7 时左侧占页面宽度的 70%
-    verticalSplit: 0.75,
-    // 横向分隔位置为 0.7 时上方占页面高度的 70%
-    horizontalSplit: 0.8,
-    divider: Object.freeze({
-      // 控制分隔线显示且不影响四区域布局
-      visible: true,
-      // 设置分隔线的 CSS 像素粗细
-      thickness: 1,
-      color: "rgba(28, 30, 25, 0.35)"
-    })
+    // 页面四周留白分别相对于视口宽度和高度计算
+    pageMargin: Object.freeze({ horizontal: 0.025, vertical: 0.025 }),
+    // 页面主体按标题、图表和底部装饰区从上到下紧凑排列
+    rows: Object.freeze({ title: 0.1, chart: 0.8, footerDecoration: 0.05 }),
+    // 图表区按折线图、装饰和数据表从左到右紧凑排列
+    chartColumns: Object.freeze({ scoreChart: 0.65, decoration: 0.05, dataTable: 0.25 })
   }),
 
   animation: Object.freeze({
