@@ -20,18 +20,54 @@ body {
   background-color: var(--background-color);
 }
 
-/* 使用可配置分割比例构建四区域网格 */
+/* 使用可配置比例构建页面的纵向主布局 */
 .dashboard {
-  --vertical-split: 70%;
-  --horizontal-split: 70%;
-  --divider-thickness: 1px;
-  --divider-color: rgba(28, 30, 25, 0.35);
-  position: relative;
+  --page-horizontal-margin: 2.5%;
+  --page-vertical-margin: 2.5%;
+  --title-height: 10%;
+  --chart-height: 80%;
+  --footer-decoration-height: 5%;
+  --score-chart-width: 0.65fr;
+  --middle-decoration-width: 0.05fr;
+  --data-table-width: 0.25fr;
   display: grid;
-  grid-template-columns: var(--vertical-split) minmax(0, 1fr);
-  grid-template-rows: var(--horizontal-split) minmax(0, 1fr);
+  grid-template-columns: var(--page-horizontal-margin) minmax(0, 1fr) var(--page-horizontal-margin);
+  grid-template-rows:
+    var(--page-vertical-margin)
+    var(--title-height)
+    var(--chart-height)
+    var(--footer-decoration-height)
+    var(--page-vertical-margin);
+  gap: 0;
   width: 100%;
   height: 100%;
+  background-color: var(--background-color);
+}
+
+.dashboard__title,
+.dashboard__chart-area,
+.dashboard__footer-decoration {
+  grid-column: 2;
+  min-width: 0;
+  min-height: 0;
+}
+
+.dashboard__title {
+  grid-row: 2;
+}
+
+.dashboard__chart-area {
+  display: grid;
+  grid-row: 3;
+  grid-template-columns:
+    var(--score-chart-width)
+    var(--middle-decoration-width)
+    var(--data-table-width);
+  gap: 0;
+}
+
+.dashboard__footer-decoration {
+  grid-row: 4;
 }
 
 .dashboard__region {
@@ -448,35 +484,6 @@ body {
 
 @keyframes game-table-header-out {
   to { opacity: 0; }
-}
-
-.dashboard__divider {
-  position: absolute;
-  z-index: 1;
-  display: none;
-  pointer-events: none;
-  background: var(--divider-color);
-}
-
-/* 仅在配置开启时显示布局分隔线 */
-.dashboard--dividers-visible .dashboard__divider {
-  display: block;
-}
-
-.dashboard__divider--vertical {
-  top: 0;
-  bottom: 0;
-  left: var(--vertical-split);
-  width: var(--divider-thickness);
-  transform: translateX(-50%);
-}
-
-.dashboard__divider--horizontal {
-  right: 0;
-  bottom: calc(100% - var(--horizontal-split));
-  left: 0;
-  height: var(--divider-thickness);
-  transform: translateY(50%);
 }
 
 #dataError {

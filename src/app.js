@@ -11,6 +11,12 @@
     return `${value * 100}%`;
   }
 
+  // 将相对于整个页面的宽度比例作为网格权重
+  function fraction(value, name) {
+    percentage(value, name);
+    return `${value}fr`;
+  }
+
   // 校验并将页面外观配置写入样式表
   function applyAppearance() {
     if (!CSS.supports("color", backgroundColor)) {
@@ -22,19 +28,36 @@
   // 校验配置并把布局参数写入页面
   function applyLayout() {
     const dashboard = document.getElementById("dashboard");
-    const thickness = layout.divider.thickness;
-    if (!Number.isFinite(thickness) || thickness < 0) {
-      throw new Error("layout.divider.thickness 必须是大于或等于 0 的数字");
+    const { pageMargin, rows, chartColumns } = layout;
+    const verticalTotal = pageMargin.vertical * 2 + rows.title + rows.chart + rows.footerDecoration;
+    const horizontalTotal = pageMargin.horizontal * 2
+        + chartColumns.scoreChart + chartColumns.decoration + chartColumns.dataTable;
+    if (Math.abs(verticalTotal - 1) > Number.EPSILON * 10) {
+      throw new Error("layout 的纵向比例之和必须为 1");
     }
-    if (!CSS.supports("color", layout.divider.color)) {
-      throw new Error(`分隔线颜色“${layout.divider.color}”无效`);
+    if (Math.abs(horizontalTotal - 1) > Number.EPSILON * 10) {
+      throw new Error("layout 的水平比例之和必须为 1");
     }
 
-    dashboard.style.setProperty("--vertical-split", percentage(layout.verticalSplit, "layout.verticalSplit"));
-    dashboard.style.setProperty("--horizontal-split", percentage(layout.horizontalSplit, "layout.horizontalSplit"));
-    dashboard.style.setProperty("--divider-thickness", `${thickness}px`);
-    dashboard.style.setProperty("--divider-color", layout.divider.color);
-    dashboard.classList.toggle("dashboard--dividers-visible", layout.divider.visible);
+    const variables = {
+      "--page-horizontal-margin": [pageMargin.horizontal, "layout.pageMargin.horizontal"],
+      "--page-vertical-margin": [pageMargin.vertical, "layout.pageMargin.vertical"],
+      "--title-height": [rows.title, "layout.rows.title"],
+      "--chart-height": [rows.chart, "layout.rows.chart"],
+      "--footer-decoration-height": [rows.footerDecoration, "layout.rows.footerDecoration"]
+    };
+    Object.entries(variables).forEach(([property, [value, name]]) => {
+      dashboard.style.setProperty(property, percentage(value, name));
+    });
+    dashboard.style.setProperty(
+        "--score-chart-width", fraction(chartColumns.scoreChart, "layout.chartColumns.scoreChart")
+    );
+    dashboard.style.setProperty(
+        "--middle-decoration-width", fraction(chartColumns.decoration, "layout.chartColumns.decoration")
+    );
+    dashboard.style.setProperty(
+        "--data-table-width", fraction(chartColumns.dataTable, "layout.chartColumns.dataTable")
+    );
   }
 
   // 调试时保留从 game0 到指定 gameId 的数据，并同步截断各队积分序列。
