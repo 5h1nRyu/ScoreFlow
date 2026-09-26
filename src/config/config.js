@@ -25,7 +25,7 @@ const APP_CONFIG = Object.freeze({
     text: "9月积分演变",
     // Noto Sans SC 采用 SIL Open Font License，可免费商用；其余字体为回退项
     fontFamily: '"Noto Sans SC", "Source Han Sans SC", system-ui, sans-serif',
-    fontSize: 48,
+    fontSize: 60,
     // 图标槽位暂不放置实际资源；三列宽度之和必须为 1
     columns: Object.freeze({ icon1: 0.3, text: 0.5, icon2: 0.2 })
   }),
@@ -112,22 +112,6 @@ const APP_CONFIG = Object.freeze({
     lineThickness: 6
   }),
 
-  xAxis: Object.freeze({
-    labels: Object.freeze({
-      showInNormal: true,
-      showInOverview: true,
-      fontSize: 14
-    }),
-    // 全景阶段期望显示的竖直网格线数量
-    overviewTargetGridLineCount: 12,
-    gridLine: Object.freeze({
-      // 设置竖直网格虚线的粗细、线段长度和间隔长度
-      thickness: 1.3,
-      dashLength: 3,
-      dashGap: 6
-    })
-  }),
-
   labels: Object.freeze({
     // 控制折线末端的队伍名称显示
     enabled: true,
@@ -145,11 +129,27 @@ const APP_CONFIG = Object.freeze({
     verticalGap: 4
   }),
 
+  xAxis: Object.freeze({
+    labels: Object.freeze({
+      showInNormal: true,
+      showInOverview: true,
+      fontSize: 24
+    }),
+    // 全景阶段期望显示的竖直网格线数量
+    overviewTargetGridLineCount: 12,
+    gridLine: Object.freeze({
+      // 设置竖直网格虚线的粗细、线段长度和间隔长度
+      thickness: 1.3,
+      dashLength: 3,
+      dashGap: 6
+    })
+  }),
+
   yAxis: Object.freeze({
     labels: Object.freeze({
       showInNormal: true,
       showInOverview: true,
-      fontSize: 14
+      fontSize: 24
     }),
     // 限制动态 Y 轴范围的下限
     minimumRange: 20,
