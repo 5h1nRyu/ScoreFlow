@@ -35,7 +35,6 @@ body {
   --title-text-width: 0.5fr;
   --title-icon-2-width: 0.2fr;
   --title-font-size: 48px;
-  --title-font-family: "Noto Sans SC", "Source Han Sans SC", system-ui, sans-serif;
   display: grid;
   grid-template-columns: var(--page-horizontal-margin) minmax(0, 1fr) var(--page-horizontal-margin);
   grid-template-rows:
@@ -76,7 +75,7 @@ body {
 .dashboard__title-text {
   margin: 0;
   color: #18232d;
-  font-family: var(--title-font-family);
+  font-family: "Noto Sans SC", "Source Han Sans SC", system-ui, sans-serif;
   font-size: var(--title-font-size);
   font-weight: 700;
   line-height: 1.2;
