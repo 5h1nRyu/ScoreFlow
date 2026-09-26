@@ -5,17 +5,23 @@
 - 图片处理
 - 折线图的前后逻辑
 - 折线图label拥挤问题
-- 下方两个区域
 
 ## 页面布局
 
-页面由横、纵两个分割位置划分为四个区域，积分折线图位于左上区域，其余区域预留给后续组件。可在 `src/config/config.js` 的 `layout` 中调整：
+页面使用统一背景的纵向布局，顶部留白、主标题区、图表区和底部留白从上到下紧凑排列；图表区内的折线图和数据表从左到右排列，两者之间保留由 CSS 控制的间距。可在 `src/config/config.js` 的 `layout` 中调整：
 
-- `verticalSplit`：纵向分割位置，取值须在 `0` 到 `1` 之间；默认 `0.7`，即左侧占页面宽度的 70%。
-- `horizontalSplit`：横向分割位置，取值须在 `0` 到 `1` 之间；默认 `0.7`，即上方占页面高度的 70%。
-- `divider.visible`：是否显示横、纵分隔线，默认不显示。
-- `divider.thickness`：分隔线粗细，单位为 CSS 像素。
-- `divider.color`：分隔线颜色。
+- `pageMargin.horizontal`：页面左右两侧的外围留白。
+- `pageMargin.top`、`pageMargin.bottom`：页面顶部和底部的独立留白。
+- `rows`：主标题区和图表区的高度比例。
+- `chartColumns`：折线图和数据表的宽度比例。
+
+水平与垂直方向的各组比例之和都必须为 `1`。
+
+主标题区从左到右包含图标 1 槽位、标题文字和图标 2 槽位，三个部分均左对齐并竖直居中。图标槽位暂不放置实际资源。可在 `title` 中调整：
+
+- `text`：标题文字，默认为“9月积分演变”。
+- `fontSize`：标题字号，单位为 CSS 像素。
+- `columns.icon1`、`columns.text`、`columns.icon2`：三个标题分区的宽度权重，三者之和必须为 `1`。
 
 `src/core/timeline.js` 提供页面级公共时间轴并统一驱动已注册组件，`src/components/score-chart.js` 只负责折线图本身的尺寸和绘制，`src/app.js` 负责数据加载与模块装配。新增依托比赛进度的组件时，可通过 `timeline.subscribe()` 订阅同一份时间状态。
 
@@ -32,6 +38,16 @@
 - `yAxis.gridLines.minor`：次刻度水平虚线的样式。
 
 每一项 Y 轴线条样式均可分别设置 `thickness`、`dashLength` 和 `dashGap`。`dashLength` 与 `dashGap` 通常须同时为大于 `0` 的数字；零分线可将二者同时设为 `0` 以显示为实线。
+
+## 坐标轴标签
+
+X 轴的 game 编号和 Y 轴的积分刻度文字可分别配置。`xAxis.labels` 与 `yAxis.labels` 均提供：
+
+- `showInNormal`：一般播放阶段是否显示该轴的文字标签。
+- `showInOverview`：全景展开和全景停留阶段是否显示该轴的文字标签。
+- `fontSize`：该轴文字标签的字号，单位为 CSS 像素。
+
+标签开关只控制刻度文字，不会隐藏坐标刻度线或网格线，也不会影响由 `labels.enabled` 控制的折线末端队伍简称。
 
 ## 文件结构
 
@@ -177,7 +193,9 @@ games.json ──┘             │                          ↑
 
 排行榜在重排前使用 `teamTable.initialTitle`，重排开始后使用 `teamTable.finalTitle`，两个标题均左对齐并以淡出、淡入动画切换。可通过 `teamTable.titleFontSize` 设置标题字号，通过 `teamTable.titleTransitionDuration` 设置单次淡出或淡入的毫秒数。另可在 `teamTable` 配置中调整 `itemHeightRatio`、`itemGapRatio`、`teamImageHeight`、`reorderScaleAmplitude`（重排时条目的最大缩放比例），以及
 `itemFontSizes.rank`、`itemFontSizes.teamName`、`itemFontSizes.score`、
-`itemFontSizes.rankChange`。队标、排名、队伍名称、分数和排名变化文字均与条目的竖直中心对齐。
+`itemFontSizes.rankChange`。`teamImageHeight` 是队标高度的 CSS 像素值，可以大于条目高度；队标始终与条目竖直居中，超出条目的上下部分会被裁切。队标、排名、队伍名称、分数和排名变化文字均与条目的竖直中心对齐。
+
+`teamTable.showRankChange` 用于控制重排后是否显示排名变化图标，默认为 `true`。设为 `false` 时图标不可见，但仍保留原有布局空间。
 
 ## 折线标签
 

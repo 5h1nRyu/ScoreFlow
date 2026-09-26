@@ -13,17 +13,19 @@ const APP_CONFIG = Object.freeze({
   backgroundColor: "#ffffff",
 
   layout: Object.freeze({
-    // 纵向分隔位置为 0.7 时左侧占页面宽度的 70%
-    verticalSplit: 0.75,
-    // 横向分隔位置为 0.7 时上方占页面高度的 70%
-    horizontalSplit: 0.8,
-    divider: Object.freeze({
-      // 控制分隔线显示且不影响四区域布局
-      visible: true,
-      // 设置分隔线的 CSS 像素粗细
-      thickness: 1,
-      color: "rgba(28, 30, 25, 0.35)"
-    })
+    // 页面外围留白分别相对于视口宽度和高度计算
+    pageMargin: Object.freeze({ horizontal: 0.025, top: 0.025, bottom: 0.05 }),
+    // 页面主体按标题和图表区从上到下紧凑排列
+    rows: Object.freeze({ title: 0.125, chart: 0.8 }),
+    // 图表区按折线图和数据表从左到右排列，二者之间的间距由 CSS 控制
+    chartColumns: Object.freeze({ scoreChart: 0.7, dataTable: 0.25 })
+  }),
+
+  title: Object.freeze({
+    text: "9月积分演变",
+    fontSize: 60,
+    // 图标槽位暂不放置实际资源；三列宽度之和必须为 1
+    columns: Object.freeze({ icon1: 0.3, text: 0.5, icon2: 0.2 })
   }),
 
   animation: Object.freeze({
@@ -85,7 +87,9 @@ const APP_CONFIG = Object.freeze({
     itemHeightRatio: 0.075,
     itemGapRatio: 0.018,
     // 队标高度与各类文字字号均使用 CSS 像素
-    teamImageHeight: 42,
+    teamImageHeight: 120,
+    // 控制重排后是否显示排名变化图标，并始终保留其布局空间
+    showRankChange: true,
     // 设置重排过程中条目放大或缩小的最大比例
     reorderScaleAmplitude: 0.012,
     itemFontSizes: Object.freeze({
@@ -106,17 +110,6 @@ const APP_CONFIG = Object.freeze({
     lineThickness: 6
   }),
 
-  xAxis: Object.freeze({
-    // 全景阶段期望显示的竖直网格线数量
-    overviewTargetGridLineCount: 12,
-    gridLine: Object.freeze({
-      // 设置竖直网格虚线的粗细、线段长度和间隔长度
-      thickness: 1.3,
-      dashLength: 3,
-      dashGap: 6
-    })
-  }),
-
   labels: Object.freeze({
     // 控制折线末端的队伍名称显示
     enabled: true,
@@ -134,9 +127,30 @@ const APP_CONFIG = Object.freeze({
     verticalGap: 4
   }),
 
+  xAxis: Object.freeze({
+    labels: Object.freeze({
+      showInNormal: true,
+      showInOverview: true,
+      fontSize: 24
+    }),
+    // 全景阶段期望显示的竖直网格线数量
+    overviewTargetGridLineCount: 12,
+    gridLine: Object.freeze({
+      // 设置竖直网格虚线的粗细、线段长度和间隔长度
+      thickness: 1.3,
+      dashLength: 3,
+      dashGap: 6
+    })
+  }),
+
   yAxis: Object.freeze({
+    labels: Object.freeze({
+      showInNormal: true,
+      showInOverview: true,
+      fontSize: 24
+    }),
     // 限制动态 Y 轴范围的下限
-    minimumRange: 20,
+    minimumRange: 60,
     // 设置最高分数之外的显示空间倍率
     paddingFactor: 1.12,
     // 设置 Y 轴期望显示的主刻度数量

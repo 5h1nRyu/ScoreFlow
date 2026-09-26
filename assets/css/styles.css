@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@700&display=swap");
+
 :root {
   color-scheme: light;
   --background-color: #ffffff;
@@ -20,18 +22,72 @@ body {
   background-color: var(--background-color);
 }
 
-/* 使用可配置分割比例构建四区域网格 */
+/* 使用可配置比例构建页面的纵向主布局 */
 .dashboard {
-  --vertical-split: 70%;
-  --horizontal-split: 70%;
-  --divider-thickness: 1px;
-  --divider-color: rgba(28, 30, 25, 0.35);
-  position: relative;
+  --page-horizontal-margin: 2.5%;
+  --page-top-margin: 2.5%;
+  --page-bottom-margin: 5%;
+  --title-height: 12.5%;
+  --chart-height: 80%;
+  --score-chart-width: 0.7fr;
+  --data-table-width: 0.25fr;
+  --title-icon-1-width: 0.3fr;
+  --title-text-width: 0.5fr;
+  --title-icon-2-width: 0.2fr;
+  --title-font-size: 48px;
   display: grid;
-  grid-template-columns: var(--vertical-split) minmax(0, 1fr);
-  grid-template-rows: var(--horizontal-split) minmax(0, 1fr);
+  grid-template-columns: var(--page-horizontal-margin) minmax(0, 1fr) var(--page-horizontal-margin);
+  grid-template-rows:
+    var(--page-top-margin)
+    var(--title-height)
+    var(--chart-height)
+    var(--page-bottom-margin);
+  gap: 0;
   width: 100%;
   height: 100%;
+  background-color: var(--background-color);
+}
+
+.dashboard__title,
+.dashboard__chart-area {
+  grid-column: 2;
+  min-width: 0;
+  min-height: 0;
+}
+
+.dashboard__title {
+  display: grid;
+  grid-row: 2;
+  grid-template-columns:
+    var(--title-icon-1-width)
+    var(--title-text-width)
+    var(--title-icon-2-width);
+}
+
+.dashboard__title-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  min-height: 0;
+}
+
+.dashboard__title-text {
+  margin: 0;
+  color: #18232d;
+  font-family: "Noto Sans SC", "Source Han Sans SC", system-ui, sans-serif;
+  font-size: var(--title-font-size);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.dashboard__chart-area {
+  display: grid;
+  grid-row: 3;
+  grid-template-columns:
+    var(--score-chart-width)
+    var(--data-table-width);
+  column-gap: clamp(10px, 1.2vw, 22px);
 }
 
 .dashboard__region {
@@ -57,7 +113,7 @@ body {
 
 .table-stage {
   position: relative;
-  padding: clamp(10px, 1.2vw, 22px);
+  padding: clamp(10px, 1.2vw, 22px) 0 clamp(10px, 1.2vw, 22px) clamp(10px, 1.2vw, 22px);
   background-color: var(--background-color);
 }
 
@@ -331,6 +387,8 @@ body {
   left: 0;
   display: grid;
   grid-template-columns: 2.3ch var(--team-table-logo-height) minmax(0, 1fr) max-content 4.2ch;
+  /* 固定网格行高，避免超高队标撑开隐式行并使自身中心偏离条目中心 */
+  grid-template-rows: 100%;
   align-items: center;
   gap: clamp(7px, 0.65vw, 12px);
   width: 100%;
@@ -343,6 +401,7 @@ body {
   border-left: clamp(5px, 0.45vw, 9px) solid var(--team-color);
   border-radius: clamp(7px, 0.65vw, 12px);
   box-shadow: 0 2px 8px rgba(35, 48, 57, 0.1);
+  overflow: hidden;
   transform-origin: center;
   will-change: transform, opacity;
 }
@@ -367,6 +426,7 @@ body {
 
 .team-table__logo {
   display: block;
+  align-self: center;
   justify-self: start;
   width: auto;
   height: var(--team-table-logo-height);
@@ -444,35 +504,6 @@ body {
 
 @keyframes game-table-header-out {
   to { opacity: 0; }
-}
-
-.dashboard__divider {
-  position: absolute;
-  z-index: 1;
-  display: none;
-  pointer-events: none;
-  background: var(--divider-color);
-}
-
-/* 仅在配置开启时显示布局分隔线 */
-.dashboard--dividers-visible .dashboard__divider {
-  display: block;
-}
-
-.dashboard__divider--vertical {
-  top: 0;
-  bottom: 0;
-  left: var(--vertical-split);
-  width: var(--divider-thickness);
-  transform: translateX(-50%);
-}
-
-.dashboard__divider--horizontal {
-  right: 0;
-  bottom: calc(100% - var(--horizontal-split));
-  left: 0;
-  height: var(--divider-thickness);
-  transform: translateY(50%);
 }
 
 #dataError {
