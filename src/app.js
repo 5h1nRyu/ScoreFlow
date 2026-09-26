@@ -31,7 +31,7 @@
     const { pageMargin, rows, chartColumns } = layout;
     const verticalTotal = pageMargin.vertical * 2 + rows.title + rows.chart + rows.footerDecoration;
     const horizontalTotal = pageMargin.horizontal * 2
-        + chartColumns.scoreChart + chartColumns.decoration + chartColumns.dataTable;
+        + chartColumns.scoreChart + chartColumns.dataTable;
     if (Math.abs(verticalTotal - 1) > Number.EPSILON * 10) {
       throw new Error("layout 的纵向比例之和必须为 1");
     }
@@ -51,9 +51,6 @@
     });
     dashboard.style.setProperty(
         "--score-chart-width", fraction(chartColumns.scoreChart, "layout.chartColumns.scoreChart")
-    );
-    dashboard.style.setProperty(
-        "--middle-decoration-width", fraction(chartColumns.decoration, "layout.chartColumns.decoration")
     );
     dashboard.style.setProperty(
         "--data-table-width", fraction(chartColumns.dataTable, "layout.chartColumns.dataTable")
