@@ -123,6 +123,7 @@
       });
 
       const finalGame = data.games.length - 1;
+      const playbackTasks = ScoreTimeline.createPlaybackTasks();
       const chart = ScoreChart.createScoreChart(
           document.getElementById("scoreChart"), data.teams, finalGame, APP_CONFIG
       );
@@ -130,16 +131,45 @@
           document.getElementById("gameTable"),
           document.getElementById("teamTableSlot"),
           data.games,
-          APP_CONFIG.gameTable
+          APP_CONFIG.gameTable,
+          playbackTasks
       );
       const teamTable = TeamTable.createTeamTable(
-          document.getElementById("teamTableSlot"), data.teams, APP_CONFIG.teamTable
+          document.getElementById("teamTableSlot"), data.teams, APP_CONFIG.teamTable, playbackTasks
       );
       const timeline = ScoreTimeline.createTimeline({ animation, finalGame });
       // 使用同一时间状态驱动折线图和比赛详情
       timeline.subscribe(chart.render);
       timeline.subscribe(gameTable.render);
       timeline.subscribe(teamTable.render);
+      const dashboard = document.getElementById("dashboard");
+      let paused = false;
+      let pausedAnimations = [];
+      document.addEventListener("keydown", event => {
+        if (event.code !== "Space" || event.altKey || event.ctrlKey || event.metaKey) return;
+        // 编辑控件中的空格保留原有输入行为。
+        const target = event.target;
+        if (target instanceof HTMLElement
+            && (target.isContentEditable || target.closest("input, textarea, select, button"))) return;
+        event.preventDefault();
+        if (event.repeat) return;
+
+        paused = !paused;
+        if (paused) {
+          timeline.pause();
+          playbackTasks.pause();
+          // getAnimations 同时包含 CSS animation 和 transition，保留各自的当前进度。
+          pausedAnimations = dashboard.getAnimations({ subtree: true }).filter(animation =>
+            animation.playState === "running" || animation.pending
+          );
+          pausedAnimations.forEach(animation => animation.pause());
+        } else {
+          pausedAnimations.forEach(animation => animation.play());
+          pausedAnimations = [];
+          playbackTasks.resume();
+          timeline.resume();
+        }
+      });
       timeline.start();
     } catch (error) {
       // 将初始化错误同时展示给用户和开发者

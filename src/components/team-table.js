@@ -37,7 +37,7 @@
         : 1 - Math.pow(-2 * value + 2, 3) / 2;
   }
 
-  function createTeamTable(root, teams, config) {
+  function createTeamTable(root, teams, config, playbackTasks) {
     if (!(root instanceof HTMLElement)) throw new Error("team-table 需要有效的挂载元素");
     if (!Array.isArray(teams) || teams.length !== 10) {
       throw new Error("team-table 必须恰好接收 10 支队伍");
@@ -145,7 +145,7 @@
     function updateTitle(nextTitle) {
       if (nextTitle === desiredTitle) return;
       desiredTitle = nextTitle;
-      window.clearTimeout(titleTimer);
+      playbackTasks.clearTimeout(titleTimer);
       title.classList.remove("team-table__title--incoming");
 
       if (config.titleTransitionDuration === 0) {
@@ -155,11 +155,11 @@
       }
 
       title.classList.add("team-table__title--outgoing");
-      titleTimer = window.setTimeout(() => {
+      titleTimer = playbackTasks.setTimeout(() => {
         title.textContent = desiredTitle;
         title.classList.remove("team-table__title--outgoing");
         title.classList.add("team-table__title--incoming");
-        titleTimer = window.setTimeout(() => {
+        titleTimer = playbackTasks.setTimeout(() => {
           title.classList.remove("team-table__title--incoming");
           titleTimer = 0;
         }, config.titleTransitionDuration);
@@ -172,7 +172,7 @@
       if (config.titleTransitionDuration === 0) return;
 
       title.classList.add("team-table__title--incoming");
-      titleTimer = window.setTimeout(() => {
+      titleTimer = playbackTasks.setTimeout(() => {
         title.classList.remove("team-table__title--incoming");
         titleTimer = 0;
       }, config.titleTransitionDuration);
@@ -181,7 +181,7 @@
     function render(state) {
       if (state.phase !== "overview" && state.phase !== "restart-hold") {
         if (titleIsVisible) {
-          window.clearTimeout(titleTimer);
+          playbackTasks.clearTimeout(titleTimer);
           titleTimer = 0;
           desiredTitle = config.initialTitle;
           title.textContent = desiredTitle;

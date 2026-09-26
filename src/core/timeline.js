@@ -16,6 +16,7 @@
     let startTime = 0;
     let lastFrameTime = 0;
     let previousCycleElapsed = 0;
+    let pausedAt = null;
 
     // 计算当前播放状态并通知所有订阅者
     function frame(now) {
@@ -91,18 +92,93 @@
         return () => subscribers.delete(subscriber);
       },
       start() {
-        if (animationFrame) return;
+        if (animationFrame || pausedAt !== null) return;
         startTime = performance.now();
         lastFrameTime = startTime;
         previousCycleElapsed = 0;
         animationFrame = requestAnimationFrame(frame);
       },
+      pause() {
+        if (!animationFrame || pausedAt !== null) return;
+        pausedAt = performance.now();
+        cancelAnimationFrame(animationFrame);
+        animationFrame = 0;
+      },
+      resume() {
+        if (pausedAt === null) return;
+        const pauseDuration = performance.now() - pausedAt;
+        // 同时移动起点和上一帧时间，避免恢复时进度跳跃或产生超大帧间隔。
+        startTime += pauseDuration;
+        lastFrameTime += pauseDuration;
+        pausedAt = null;
+        animationFrame = requestAnimationFrame(frame);
+      },
       stop() {
         cancelAnimationFrame(animationFrame);
         animationFrame = 0;
+        pausedAt = null;
       }
     });
   }
 
-  global.ScoreTimeline = Object.freeze({ createTimeline });
+  // 表格的延迟切换和两帧入场准备也使用可暂停的任务队列。
+  function createPlaybackTasks() {
+    const tasks = new Map();
+    let nextId = 1;
+    let paused = false;
+
+    function arm(id, task) {
+      task.startedAt = performance.now();
+      const run = () => {
+        tasks.delete(id);
+        task.callback();
+      };
+      task.handle = task.isFrame
+          ? requestAnimationFrame(run)
+          : window.setTimeout(run, task.remaining);
+    }
+
+    function cancel(task) {
+      if (task.isFrame) cancelAnimationFrame(task.handle);
+      else window.clearTimeout(task.handle);
+    }
+
+    function schedule(callback, delay, isFrame) {
+      const id = nextId++;
+      const task = { callback, remaining: delay, isFrame, handle: 0, startedAt: 0 };
+      tasks.set(id, task);
+      if (!paused) arm(id, task);
+      return id;
+    }
+
+    function clear(id) {
+      const task = tasks.get(id);
+      if (!task) return;
+      cancel(task);
+      tasks.delete(id);
+    }
+
+    return Object.freeze({
+      setTimeout: (callback, delay) => schedule(callback, delay, false),
+      requestAnimationFrame: callback => schedule(callback, 0, true),
+      clearTimeout: clear,
+      cancelAnimationFrame: clear,
+      pause() {
+        if (paused) return;
+        paused = true;
+        const now = performance.now();
+        tasks.forEach(task => {
+          cancel(task);
+          if (!task.isFrame) task.remaining = Math.max(0, task.remaining - (now - task.startedAt));
+        });
+      },
+      resume() {
+        if (!paused) return;
+        paused = false;
+        tasks.forEach((task, id) => arm(id, task));
+      }
+    });
+  }
+
+  global.ScoreTimeline = Object.freeze({ createTimeline, createPlaybackTasks });
 }(globalThis));

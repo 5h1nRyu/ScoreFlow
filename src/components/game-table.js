@@ -82,7 +82,7 @@
     return panel;
   }
 
-  function createGameTable(root, teamTableSlot, games, config) {
+  function createGameTable(root, teamTableSlot, games, config, playbackTasks) {
     if (!(root instanceof HTMLElement) || !(teamTableSlot instanceof HTMLElement)) {
       throw new Error("game-table 需要有效的挂载元素");
     }
@@ -167,8 +167,8 @@
     resizeObserver.observe(root);
 
     function finishTransition(nextPanel) {
-      clearTimeout(transitionTimer);
-      cancelAnimationFrame(transitionFrame);
+      playbackTasks.clearTimeout(transitionTimer);
+      playbackTasks.cancelAnimationFrame(transitionFrame);
       transitionTimer = 0;
       transitionFrame = 0;
 
@@ -190,13 +190,13 @@
       activePanel = null;
 
       // 分两帧应用入场状态，让浏览器先处理面板的初始样式。
-      transitionFrame = requestAnimationFrame(() => {
-        transitionFrame = requestAnimationFrame(() => {
+      transitionFrame = playbackTasks.requestAnimationFrame(() => {
+        transitionFrame = playbackTasks.requestAnimationFrame(() => {
           transitionFrame = 0;
           if (pendingPanel !== nextPanel) return;
 
           nextPanel.classList.add("game-table__panel--entering");
-          transitionTimer = window.setTimeout(() => {
+          transitionTimer = playbackTasks.setTimeout(() => {
             if (pendingPanel === nextPanel) finishTransition(nextPanel);
           }, transitionLength);
         });
@@ -228,7 +228,7 @@
       activePanel.classList.add("game-table__panel--outgoing");
       pendingPanel = nextPanel;
       // 旧面板完全退场并移除后才挂载新面板，避免两套文字同时存在。
-      transitionTimer = window.setTimeout(() => startIncomingTransition(nextPanel), transitionLength);
+      transitionTimer = playbackTasks.setTimeout(() => startIncomingTransition(nextPanel), transitionLength);
     }
 
     function setOverviewVisibility(isOverview) {
