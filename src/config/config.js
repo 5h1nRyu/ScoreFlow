@@ -89,7 +89,7 @@ const APP_CONFIG = Object.freeze({
     // 队标高度与各类文字字号均使用 CSS 像素
     teamImageHeight: 120,
     // 控制重排后是否显示排名变化图标，并始终保留其布局空间
-    showRankChange: true,
+    showRankChange: false,
     // 设置重排过程中条目放大或缩小的最大比例
     reorderScaleAmplitude: 0.012,
     itemFontSizes: Object.freeze({
