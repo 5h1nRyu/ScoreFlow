@@ -43,6 +43,18 @@ if (!Number.isFinite(labels.fadeOutDuration) || labels.fadeOutDuration < 0) {
   throw new Error("labels.fadeOutDuration 必须是大于或等于 0 的数字");
 }
 validateLineStyle(xAxis.gridLine, "xAxis.gridLine");
+function validateAxisLabels(axis, name) {
+  if (typeof axis.labels.showInNormal !== "boolean") {
+    throw new Error(`${name}.labels.showInNormal 必须是布尔值`);
+  }
+  if (typeof axis.labels.showInOverview !== "boolean") {
+    throw new Error(`${name}.labels.showInOverview 必须是布尔值`);
+  }
+  if (!Number.isFinite(axis.labels.fontSize) || axis.labels.fontSize <= 0) {
+    throw new Error(`${name}.labels.fontSize 必须是大于 0 的数字`);
+  }
+}
+validateAxisLabels(xAxis, "xAxis");
 if (
     !Number.isInteger(xAxis.overviewTargetGridLineCount) ||
     xAxis.overviewTargetGridLineCount <= 0
@@ -52,6 +64,7 @@ if (
 validateLineStyle(yAxis.gridLines.zero, "yAxis.gridLines.zero", true);
 validateLineStyle(yAxis.gridLines.major, "yAxis.gridLines.major");
 validateLineStyle(yAxis.gridLines.minor, "yAxis.gridLines.minor");
+validateAxisLabels(yAxis, "yAxis");
 
 function lineDash(style) {
   return style.dashLength === 0 ? [] : [style.dashLength, style.dashGap];
@@ -496,11 +509,16 @@ function render(timelineState) {
   );
 
 
-  // 设置坐标文字样式
-  ctx.font =
-      `600 ${
-          width < 520 ? 11 : 14
-      }px "Courier New", monospace`;
+  const usesOverviewLabels = phase === "overview" || phase === "restart-hold";
+  const showYAxisLabels = usesOverviewLabels
+      ? yAxis.labels.showInOverview
+      : yAxis.labels.showInNormal;
+  const showXAxisLabels = usesOverviewLabels
+      ? xAxis.labels.showInOverview
+      : xAxis.labels.showInNormal;
+
+  // 设置 Y 轴文字样式
+  ctx.font = `600 ${yAxis.labels.fontSize}px "Courier New", monospace`;
 
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
@@ -594,7 +612,7 @@ function render(timelineState) {
     ctx.stroke();
 
 
-    // 主刻度显示数值
+    // 主刻度保留刻度线，并按当前阶段配置显示数值
     if (isMajor) {
       ctx.setLineDash([]);
 
@@ -612,14 +630,16 @@ function render(timelineState) {
 
       ctx.stroke();
 
-      ctx.fillStyle =
-          "rgba(28,30,25,.82)";
+      if (showYAxisLabels) {
+        ctx.fillStyle =
+            "rgba(28,30,25,.82)";
 
-      ctx.fillText(
-          Math.round(score),
-          margin.left - 12,
-          y
-      );
+        ctx.fillText(
+            Math.round(score),
+            margin.left - 12,
+            y
+        );
+      }
     }
   }
 
@@ -627,6 +647,7 @@ function render(timelineState) {
   // 设置 X 轴文字样式
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
+  ctx.font = `600 ${xAxis.labels.fontSize}px "Courier New", monospace`;
 
 
   // 仅在全景展开阶段减少竖线；普通播放阶段仍逐个显示 game
@@ -666,16 +687,18 @@ function render(timelineState) {
 
 
     // 绘制 game 编号
-    ctx.fillStyle =
-        "rgba(28,30,25,.78)";
+    if (showXAxisLabels) {
+      ctx.fillStyle =
+          "rgba(28,30,25,.78)";
 
-    ctx.fillText(
-        String(game),
-        x,
-        height -
-        margin.bottom +
-        14
-    );
+      ctx.fillText(
+          String(game),
+          x,
+          height -
+          margin.bottom +
+          14
+      );
+    }
   }
 
 

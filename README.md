@@ -8,13 +8,21 @@
 
 ## 页面布局
 
-页面使用统一背景的纵向布局，主标题区、图表区和底部装饰区从上到下紧凑排列；图表区内的折线图和数据表从左到右排列，两者之间保留由 CSS 控制的间距。可在 `src/config/config.js` 的 `layout` 中调整：
+页面使用统一背景的纵向布局，顶部留白、主标题区、图表区和底部留白从上到下紧凑排列；图表区内的折线图和数据表从左到右排列，两者之间保留由 CSS 控制的间距。可在 `src/config/config.js` 的 `layout` 中调整：
 
-- `pageMargin`：页面水平和垂直方向的外围留白。
-- `rows`：主标题区、图表区和底部装饰区的高度比例。
+- `pageMargin.horizontal`：页面左右两侧的外围留白。
+- `pageMargin.top`、`pageMargin.bottom`：页面顶部和底部的独立留白。
+- `rows`：主标题区和图表区的高度比例。
 - `chartColumns`：折线图和数据表的宽度比例。
 
 水平与垂直方向的各组比例之和都必须为 `1`。
+
+主标题区从左到右包含图标 1 槽位、标题文字和图标 2 槽位，三个部分均左对齐并竖直居中。图标槽位暂不放置实际资源。可在 `title` 中调整：
+
+- `text`：标题文字，默认为“9月积分演变”。
+- `fontSize`：标题字号，单位为 CSS 像素。
+- `fontFamily`：标题字体栈；默认优先使用可免费商用的 Noto Sans SC，并通过 Google Fonts 加载。
+- `columns.icon1`、`columns.text`、`columns.icon2`：三个标题分区的宽度权重，三者之和必须为 `1`。
 
 `src/core/timeline.js` 提供页面级公共时间轴并统一驱动已注册组件，`src/components/score-chart.js` 只负责折线图本身的尺寸和绘制，`src/app.js` 负责数据加载与模块装配。新增依托比赛进度的组件时，可通过 `timeline.subscribe()` 订阅同一份时间状态。
 
@@ -31,6 +39,16 @@
 - `yAxis.gridLines.minor`：次刻度水平虚线的样式。
 
 每一项 Y 轴线条样式均可分别设置 `thickness`、`dashLength` 和 `dashGap`。`dashLength` 与 `dashGap` 通常须同时为大于 `0` 的数字；零分线可将二者同时设为 `0` 以显示为实线。
+
+## 坐标轴标签
+
+X 轴的 game 编号和 Y 轴的积分刻度文字可分别配置。`xAxis.labels` 与 `yAxis.labels` 均提供：
+
+- `showInNormal`：一般播放阶段是否显示该轴的文字标签。
+- `showInOverview`：全景展开和全景停留阶段是否显示该轴的文字标签。
+- `fontSize`：该轴文字标签的字号，单位为 CSS 像素。
+
+标签开关只控制刻度文字，不会隐藏坐标刻度线或网格线，也不会影响由 `labels.enabled` 控制的折线末端队伍简称。
 
 ## 文件结构
 
