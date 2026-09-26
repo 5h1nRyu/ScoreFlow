@@ -47,7 +47,7 @@ const APP_CONFIG = Object.freeze({
 
   debug: Object.freeze({
     // -1 使用完整数据；正整数 x 只演示到 gameId 为 x 的 game（包含该 game）
-    finalGameId: 9
+    finalGameId: -1
   }),
 
   gameTable: Object.freeze({
@@ -150,7 +150,7 @@ const APP_CONFIG = Object.freeze({
       fontSize: 24
     }),
     // 限制动态 Y 轴范围的下限
-    minimumRange: 20,
+    minimumRange: 60,
     // 设置最高分数之外的显示空间倍率
     paddingFactor: 1.12,
     // 设置 Y 轴期望显示的主刻度数量

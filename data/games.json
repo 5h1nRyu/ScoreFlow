@@ -2,625 +2,625 @@
   "games": [
     {
       "gameId": 0,
-      "info": "game0",
+      "info": "9月14日A桌第一半庄",
       "players": [
         {
-          "name": "二阶堂亚树",
-          "score": 42000,
-          "teamPoint": 17.0
+          "name": "逢川惠梦",
+          "score": 38000,
+          "teamPoint": 58
         },
         {
-          "name": "铃木大介",
-          "score": 31000,
-          "teamPoint": 6.0
+          "name": "仲林圭",
+          "score": 23800,
+          "teamPoint": 3.8
         },
         {
-          "name": "石井一马",
-          "score": 19000,
-          "teamPoint": -6.0
+          "name": "日向蓝子",
+          "score": 20500,
+          "teamPoint": -19.5
         },
         {
-          "name": "萩原圣人",
-          "score": 8000,
-          "teamPoint": -17.0
+          "name": "泷泽和典",
+          "score": 17700,
+          "teamPoint": -42.3
         }
       ]
     },
     {
       "gameId": 1,
-      "info": "game1",
+      "info": "9月14日A桌第二半庄",
       "players": [
         {
+          "name": "朝仓康心",
+          "score": 34700,
+          "teamPoint": 54.7
+        },
+        {
+          "name": "松本吉弘",
+          "score": 27400,
+          "teamPoint": 7.4
+        },
+        {
           "name": "佐佐木寿人",
-          "score": 10500,
-          "teamPoint": -14.5
+          "score": 26000,
+          "teamPoint": -14
         },
         {
-          "name": "园田贤",
-          "score": 39500,
-          "teamPoint": 14.5
-        },
-        {
-          "name": "堀慎吾",
-          "score": 29500,
-          "teamPoint": 4.5
-        },
-        {
-          "name": "多井隆晴",
-          "score": 20500,
-          "teamPoint": -4.5
+          "name": "三浦智博",
+          "score": 11900,
+          "teamPoint": -48.1
         }
       ]
     },
     {
       "gameId": 2,
-      "info": "game2",
+      "info": "9月15日A桌第一半庄",
       "players": [
         {
-          "name": "中田花奈",
-          "score": 22000,
-          "teamPoint": -3.0
+          "name": "尻无滨航",
+          "score": 44900,
+          "teamPoint": 64.9
         },
         {
-          "name": "仲林圭",
-          "score": 13000,
-          "teamPoint": -12.0
+          "name": "醍醐大",
+          "score": 33200,
+          "teamPoint": 13.2
         },
         {
-          "name": "濑户熊直树",
-          "score": 37000,
-          "teamPoint": 12.0
+          "name": "二阶堂亚树",
+          "score": 17100,
+          "teamPoint": -22.9
         },
         {
-          "name": "茅森早香",
-          "score": 28000,
-          "teamPoint": 3.0
+          "name": "铃木太郎",
+          "score": 4800,
+          "teamPoint": -55.2
         }
       ]
     },
     {
       "gameId": 3,
-      "info": "game3",
+      "info": "9月15日A桌第二半庄",
       "players": [
         {
-          "name": "铃木太郎",
-          "score": 31000,
-          "teamPoint": 6.0
+          "name": "茅森早香",
+          "score": 49700,
+          "teamPoint": 69.7
         },
         {
-          "name": "HIRO柴田",
-          "score": 19000,
-          "teamPoint": -6.0
+          "name": "内川幸太郎",
+          "score": 46300,
+          "teamPoint": 26.3
         },
         {
-          "name": "松本吉弘",
-          "score": 8000,
-          "teamPoint": -17.0
+          "name": "浅见真纪",
+          "score": 25800,
+          "teamPoint": -14.2
         },
         {
-          "name": "胜又健志",
-          "score": 42000,
-          "teamPoint": 17.0
+          "name": "冈田纱佳",
+          "score": -21800,
+          "teamPoint": -81.8
         }
       ]
     },
     {
       "gameId": 4,
-      "info": "game4",
+      "info": "9月17日A桌第一半庄",
       "players": [
         {
-          "name": "瑞原明奈",
-          "score": 39500,
-          "teamPoint": 14.5
+          "name": "本田朋广",
+          "score": 36700,
+          "teamPoint": 56.7
         },
         {
-          "name": "冈田纱佳",
-          "score": 29500,
-          "teamPoint": 4.5
+          "name": "HIRO柴田",
+          "score": 33200,
+          "teamPoint": 13.2
         },
         {
-          "name": "竹内元太",
-          "score": 20500,
-          "teamPoint": -4.5
+          "name": "东城理央",
+          "score": 25900,
+          "teamPoint": -14.1
         },
         {
-          "name": "泷泽和典",
-          "score": 10500,
-          "teamPoint": -14.5
+          "name": "渡边太",
+          "score": 4200,
+          "teamPoint": -55.8
         }
       ]
     },
     {
       "gameId": 5,
-      "info": "game5",
+      "info": "9月17日A桌第二半庄",
       "players": [
         {
-          "name": "三浦智博",
-          "score": 13000,
-          "teamPoint": -12.0
+          "name": "石井一马",
+          "score": 35600,
+          "teamPoint": 55.6
         },
         {
-          "name": "本田朋广",
-          "score": 37000,
-          "teamPoint": 12.0
+          "name": "园田贤",
+          "score": 35500,
+          "teamPoint": 15.5
         },
         {
-          "name": "内川幸太郎",
-          "score": 28000,
-          "teamPoint": 3.0
+          "name": "铃木大介",
+          "score": 29900,
+          "teamPoint": -10.1
         },
         {
-          "name": "下石戟",
-          "score": 22000,
-          "teamPoint": -3.0
+          "name": "萩原圣人",
+          "score": -1000,
+          "teamPoint": -61
         }
       ]
     },
     {
       "gameId": 6,
-      "info": "game6",
+      "info": "9月18日A桌第一半庄",
       "players": [
         {
-          "name": "阿久津翔太",
-          "score": 19000,
-          "teamPoint": -6.0
+          "name": "黑泽咲",
+          "score": 42500,
+          "teamPoint": 62.5
         },
         {
-          "name": "白鸟翔",
-          "score": 8000,
-          "teamPoint": -17.0
+          "name": "尻无滨航",
+          "score": 34600,
+          "teamPoint": 14.6
         },
         {
-          "name": "高宫茉莉",
-          "score": 42000,
-          "teamPoint": 17.0
+          "name": "瑞原明奈",
+          "score": 13500,
+          "teamPoint": -26.5
         },
         {
-          "name": "渡边太",
-          "score": 31000,
-          "teamPoint": 6.0
+          "name": "佐佐木寿人",
+          "score": 9400,
+          "teamPoint": -50.6
         }
       ]
     },
     {
       "gameId": 7,
-      "info": "game7",
+      "info": "9月18日A桌第二半庄",
       "players": [
         {
-          "name": "黑泽咲",
-          "score": 29500,
-          "teamPoint": 4.5
-        },
-        {
-          "name": "醍醐大",
-          "score": 20500,
-          "teamPoint": -4.5
-        },
-        {
-          "name": "东城理央",
-          "score": 10500,
-          "teamPoint": -14.5
+          "name": "堀慎吾",
+          "score": 31000,
+          "teamPoint": 51
         },
         {
           "name": "铃木优",
-          "score": 39500,
-          "teamPoint": 14.5
+          "score": 27700,
+          "teamPoint": 7.7
+        },
+        {
+          "name": "本田朋广",
+          "score": 22900,
+          "teamPoint": -17.1
+        },
+        {
+          "name": "伊达朱里纱",
+          "score": 18400,
+          "teamPoint": -41.6
         }
       ]
     },
     {
       "gameId": 8,
-      "info": "game8",
+      "info": "9月21日A桌第一半庄",
       "players": [
         {
-          "name": "日向蓝子",
-          "score": 37000,
-          "teamPoint": 12.0
+          "name": "渡边太",
+          "score": 47500,
+          "teamPoint": 67.5
         },
         {
-          "name": "永井孝典",
-          "score": 28000,
-          "teamPoint": 3.0
+          "name": "白鸟翔",
+          "score": 30600,
+          "teamPoint": 10.6
         },
         {
-          "name": "浅见真纪",
-          "score": 22000,
-          "teamPoint": -3.0
+          "name": "阿久津翔太",
+          "score": 24800,
+          "teamPoint": -15.2
         },
         {
-          "name": "逢川惠梦",
-          "score": 13000,
-          "teamPoint": -12.0
+          "name": "中田花奈",
+          "score": -2900,
+          "teamPoint": -62.9
         }
       ]
     },
     {
       "gameId": 9,
-      "info": "game9",
+      "info": "9月21日A桌第二半庄",
       "players": [
         {
-          "name": "佐野日向子",
-          "score": 8000,
-          "teamPoint": -17.0
+          "name": "多井隆晴",
+          "score": 50900,
+          "teamPoint": 70.9
         },
         {
-          "name": "伊达朱里纱",
-          "score": 42000,
-          "teamPoint": 17.0
+          "name": "下石戟",
+          "score": 28500,
+          "teamPoint": 8.5
         },
         {
-          "name": "朝仓康心",
-          "score": 31000,
-          "teamPoint": 6.0
+          "name": "园田贤",
+          "score": 15300,
+          "teamPoint": -24.7
         },
         {
-          "name": "尻无滨航",
-          "score": 19000,
-          "teamPoint": -6.0
+          "name": "堀慎吾",
+          "score": 5300,
+          "teamPoint": -54.7
         }
       ]
     },
     {
       "gameId": 10,
-      "info": "game10",
+      "info": "9月21日B桌第一半庄",
       "players": [
         {
-          "name": "二阶堂亚树",
-          "score": 20500,
-          "teamPoint": -4.5
+          "name": "濑户熊直树",
+          "score": 81900,
+          "teamPoint": 101.9
         },
         {
-          "name": "铃木大介",
-          "score": 10500,
-          "teamPoint": -14.5
+          "name": "逢川惠梦",
+          "score": 15900,
+          "teamPoint": -4.1
         },
         {
-          "name": "石井一马",
-          "score": 39500,
-          "teamPoint": 14.5
+          "name": "佐野日向子",
+          "score": 9500,
+          "teamPoint": -30.5
         },
         {
-          "name": "萩原圣人",
-          "score": 29500,
-          "teamPoint": 4.5
+          "name": "永井孝典",
+          "score": -7300,
+          "teamPoint": -67.3
         }
       ]
     },
     {
       "gameId": 11,
-      "info": "game11",
+      "info": "9月21日B桌第二半庄",
       "players": [
         {
-          "name": "佐佐木寿人",
-          "score": 28000,
-          "teamPoint": 3.0
+          "name": "胜又健志",
+          "score": 45300,
+          "teamPoint": 65.3
         },
         {
-          "name": "园田贤",
-          "score": 22000,
-          "teamPoint": -3.0
+          "name": "竹内元太",
+          "score": 34700,
+          "teamPoint": 14.7
         },
         {
-          "name": "堀慎吾",
-          "score": 13000,
-          "teamPoint": -12.0
+          "name": "本田朋广",
+          "score": 20400,
+          "teamPoint": -19.6
         },
         {
-          "name": "多井隆晴",
-          "score": 37000,
-          "teamPoint": 12.0
+          "name": "石井一马",
+          "score": -400,
+          "teamPoint": -60.4
         }
       ]
     },
     {
       "gameId": 12,
-      "info": "game12",
+      "info": "9月22日A桌第一半庄",
       "players": [
         {
-          "name": "中田花奈",
-          "score": 42000,
-          "teamPoint": 17.0
+          "name": "冈田纱佳",
+          "score": 40800,
+          "teamPoint": 60.8
         },
         {
-          "name": "仲林圭",
-          "score": 31000,
-          "teamPoint": 6.0
+          "name": "内川幸太郎",
+          "score": 34100,
+          "teamPoint": 14.1
         },
         {
-          "name": "濑户熊直树",
-          "score": 19000,
-          "teamPoint": -6.0
+          "name": "日向蓝子",
+          "score": 13000,
+          "teamPoint": -27
         },
         {
-          "name": "茅森早香",
-          "score": 8000,
-          "teamPoint": -17.0
+          "name": "萩原圣人",
+          "score": 12100,
+          "teamPoint": -47.9
         }
       ]
     },
     {
       "gameId": 13,
-      "info": "game13",
+      "info": "9月22日A桌第二半庄",
       "players": [
         {
-          "name": "铃木太郎",
-          "score": 10500,
-          "teamPoint": -14.5
-        },
-        {
-          "name": "HIRO柴田",
-          "score": 39500,
-          "teamPoint": 14.5
-        },
-        {
           "name": "松本吉弘",
-          "score": 29500,
-          "teamPoint": 4.5
+          "score": 58200,
+          "teamPoint": 78.2
         },
         {
           "name": "胜又健志",
-          "score": 20500,
-          "teamPoint": -4.5
+          "score": 22800,
+          "teamPoint": 2.8
+        },
+        {
+          "name": "阿久津翔太",
+          "score": 15100,
+          "teamPoint": -24.9
+        },
+        {
+          "name": "黑泽咲",
+          "score": 3900,
+          "teamPoint": -56.1
         }
       ]
     },
     {
       "gameId": 14,
-      "info": "game14",
+      "info": "9月22日B桌第一半庄",
       "players": [
         {
-          "name": "瑞原明奈",
-          "score": 22000,
-          "teamPoint": -3.0
+          "name": "佐佐木寿人",
+          "score": 62200,
+          "teamPoint": 82.2
         },
         {
-          "name": "冈田纱佳",
-          "score": 13000,
-          "teamPoint": -12.0
+          "name": "铃木优",
+          "score": 17900,
+          "teamPoint": -2.1
         },
         {
-          "name": "竹内元太",
-          "score": 37000,
-          "teamPoint": 12.0
+          "name": "茅森早香",
+          "score": 10600,
+          "teamPoint": -29.4
         },
         {
-          "name": "泷泽和典",
-          "score": 28000,
-          "teamPoint": 3.0
+          "name": "铃木大介",
+          "score": 9300,
+          "teamPoint": -50.7
         }
       ]
     },
     {
       "gameId": 15,
-      "info": "game15",
+      "info": "9月22日B桌第二半庄",
       "players": [
         {
-          "name": "三浦智博",
-          "score": 31000,
-          "teamPoint": 6.0
+          "name": "中田花奈",
+          "score": 69300,
+          "teamPoint": 89.3
         },
         {
-          "name": "本田朋广",
-          "score": 19000,
-          "teamPoint": -6.0
+          "name": "泷泽和典",
+          "score": 18200,
+          "teamPoint": -1.8
         },
         {
-          "name": "内川幸太郎",
-          "score": 8000,
-          "teamPoint": -17.0
+          "name": "仲林圭",
+          "score": 12700,
+          "teamPoint": -27.3
         },
         {
-          "name": "下石戟",
-          "score": 42000,
-          "teamPoint": 17.0
+          "name": "佐野日向子",
+          "score": -200,
+          "teamPoint": -60.2
         }
       ]
     },
     {
       "gameId": 16,
-      "info": "game16",
+      "info": "9月24日A桌第一半庄",
       "players": [
         {
-          "name": "阿久津翔太",
-          "score": 39500,
-          "teamPoint": 14.5
+          "name": "东城理央",
+          "score": 82700,
+          "teamPoint": 102.7
+        },
+        {
+          "name": "逢川惠梦",
+          "score": 14300,
+          "teamPoint": -5.7
         },
         {
           "name": "白鸟翔",
-          "score": 29500,
-          "teamPoint": 4.5
+          "score": 4100,
+          "teamPoint": -35.9
         },
         {
-          "name": "高宫茉莉",
-          "score": 20500,
-          "teamPoint": -4.5
-        },
-        {
-          "name": "渡边太",
-          "score": 10500,
-          "teamPoint": -14.5
+          "name": "醍醐大",
+          "score": -1100,
+          "teamPoint": -61.1
         }
       ]
     },
     {
       "gameId": 17,
-      "info": "game17",
+      "info": "9月24日A桌第二半庄",
       "players": [
         {
-          "name": "黑泽咲",
-          "score": 13000,
-          "teamPoint": -12.0
+          "name": "多井隆晴",
+          "score": 81600,
+          "teamPoint": 101.6
         },
         {
-          "name": "醍醐大",
-          "score": 37000,
-          "teamPoint": 12.0
+          "name": "铃木大介",
+          "score": 36200,
+          "teamPoint": 16.2
         },
         {
-          "name": "东城理央",
-          "score": 28000,
-          "teamPoint": 3.0
+          "name": "竹内元太",
+          "score": 3400,
+          "teamPoint": -36.6
         },
         {
-          "name": "铃木优",
-          "score": 22000,
-          "teamPoint": -3.0
+          "name": "HIRO柴田",
+          "score": -21200,
+          "teamPoint": -81.2
         }
       ]
     },
     {
       "gameId": 18,
-      "info": "game18",
+      "info": "9月24日B桌第一半庄",
       "players": [
         {
-          "name": "日向蓝子",
-          "score": 19000,
-          "teamPoint": -6.0
+          "name": "佐佐木寿人",
+          "score": 42700,
+          "teamPoint": 62.7
+        },
+        {
+          "name": "瑞原明奈",
+          "score": 35200,
+          "teamPoint": 15.2
+        },
+        {
+          "name": "铃木太郎",
+          "score": 22500,
+          "teamPoint": -17.5
         },
         {
           "name": "永井孝典",
-          "score": 8000,
-          "teamPoint": -17.0
-        },
-        {
-          "name": "浅见真纪",
-          "score": 42000,
-          "teamPoint": 17.0
-        },
-        {
-          "name": "逢川惠梦",
-          "score": 31000,
-          "teamPoint": 6.0
+          "score": -400,
+          "teamPoint": -60.4
         }
       ]
     },
     {
       "gameId": 19,
-      "info": "game19",
+      "info": "9月24日B桌第二半庄",
       "players": [
         {
-          "name": "佐野日向子",
-          "score": 29500,
-          "teamPoint": 4.5
+          "name": "二阶堂亚树",
+          "score": 41900,
+          "teamPoint": 61.9
+        },
+        {
+          "name": "仲林圭",
+          "score": 30800,
+          "teamPoint": 10.8
+        },
+        {
+          "name": "园田贤",
+          "score": 28300,
+          "teamPoint": -11.7
         },
         {
           "name": "伊达朱里纱",
-          "score": 20500,
-          "teamPoint": -4.5
-        },
-        {
-          "name": "朝仓康心",
-          "score": 10500,
-          "teamPoint": -14.5
-        },
-        {
-          "name": "尻无滨航",
-          "score": 39500,
-          "teamPoint": 14.5
+          "score": -1000,
+          "teamPoint": -61
         }
       ]
     },
     {
       "gameId": 20,
-      "info": "game20",
+      "info": "9月25日A桌第一半庄",
       "players": [
         {
-          "name": "二阶堂亚树",
-          "score": 37000,
-          "teamPoint": 12.0
+          "name": "朝仓康心",
+          "score": 54000,
+          "teamPoint": 74
         },
         {
-          "name": "铃木大介",
-          "score": 28000,
-          "teamPoint": 3.0
-        },
-        {
-          "name": "石井一马",
-          "score": 22000,
-          "teamPoint": -3.0
+          "name": "浅见真纪",
+          "score": 18200,
+          "teamPoint": -1.8
         },
         {
           "name": "萩原圣人",
-          "score": 13000,
-          "teamPoint": -12.0
+          "score": 14900,
+          "teamPoint": -25.1
+        },
+        {
+          "name": "日向蓝子",
+          "score": 12900,
+          "teamPoint": -47.1
         }
       ]
     },
     {
       "gameId": 21,
-      "info": "game21",
+      "info": "9月25日A桌第二半庄",
       "players": [
         {
-          "name": "佐佐木寿人",
-          "score": 8000,
-          "teamPoint": -17.0
+          "name": "松本吉弘",
+          "score": 33200,
+          "teamPoint": 53.2
         },
         {
-          "name": "园田贤",
-          "score": 42000,
-          "teamPoint": 17.0
+          "name": "仲林圭",
+          "score": 25500,
+          "teamPoint": 5.5
         },
         {
-          "name": "堀慎吾",
-          "score": 31000,
-          "teamPoint": 6.0
+          "name": "濑户熊直树",
+          "score": 21900,
+          "teamPoint": -18.1
         },
         {
-          "name": "多井隆晴",
-          "score": 19000,
-          "teamPoint": -6.0
+          "name": "铃木太郎",
+          "score": 19400,
+          "teamPoint": -40.6
         }
       ]
     },
     {
       "gameId": 22,
-      "info": "game22",
+      "info": "9月25日B桌第一半庄",
       "players": [
         {
-          "name": "中田花奈",
-          "score": 20500,
-          "teamPoint": -4.5
+          "name": "堀慎吾",
+          "score": 40900,
+          "teamPoint": 60.9
         },
         {
-          "name": "仲林圭",
-          "score": 10500,
-          "teamPoint": -14.5
+          "name": "下石戟",
+          "score": 25900,
+          "teamPoint": 5.9
         },
         {
-          "name": "濑户熊直树",
-          "score": 39500,
-          "teamPoint": 14.5
+          "name": "逢川惠梦",
+          "score": 23400,
+          "teamPoint": -16.6
         },
         {
-          "name": "茅森早香",
-          "score": 29500,
-          "teamPoint": 4.5
+          "name": "内川幸太郎",
+          "score": 9800,
+          "teamPoint": -50.2
         }
       ]
     },
     {
       "gameId": 23,
-      "info": "game23",
+      "info": "9月25日B桌第二半庄",
       "players": [
         {
-          "name": "铃木太郎",
-          "score": 28000,
-          "teamPoint": 3.0
-        },
-        {
-          "name": "HIRO柴田",
-          "score": 22000,
-          "teamPoint": -3.0
-        },
-        {
-          "name": "松本吉弘",
-          "score": 13000,
-          "teamPoint": -12.0
+          "name": "尻无滨航",
+          "score": 37700,
+          "teamPoint": 57.7
         },
         {
           "name": "胜又健志",
-          "score": 37000,
-          "teamPoint": 12.0
+          "score": 29500,
+          "teamPoint": 9.5
+        },
+        {
+          "name": "石井一马",
+          "score": 16600,
+          "teamPoint": -23.4
+        },
+        {
+          "name": "中田花奈",
+          "score": 16200,
+          "teamPoint": -43.8
         }
       ]
     }
