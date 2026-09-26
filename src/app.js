@@ -1,7 +1,7 @@
 (function startApplication() {
   "use strict";
 
-  const { animation, backgroundColor, debug, teamsDataUrl, layout, gamesDataUrl } = APP_CONFIG;
+  const { animation, backgroundColor, debug, teamsDataUrl, layout, gamesDataUrl, title } = APP_CONFIG;
 
   // 将布局比例转换为 CSS 百分比
   function percentage(value, name) {
@@ -29,22 +29,35 @@
   function applyLayout() {
     const dashboard = document.getElementById("dashboard");
     const { pageMargin, rows, chartColumns } = layout;
-    const verticalTotal = pageMargin.vertical * 2 + rows.title + rows.chart + rows.footerDecoration;
+    const verticalTotal = pageMargin.top + rows.title + rows.chart + pageMargin.bottom;
     const horizontalTotal = pageMargin.horizontal * 2
         + chartColumns.scoreChart + chartColumns.dataTable;
+    const titleColumnsTotal = title.columns.icon1 + title.columns.text + title.columns.icon2;
     if (Math.abs(verticalTotal - 1) > Number.EPSILON * 10) {
       throw new Error("layout 的纵向比例之和必须为 1");
     }
     if (Math.abs(horizontalTotal - 1) > Number.EPSILON * 10) {
       throw new Error("layout 的水平比例之和必须为 1");
     }
+    if (Math.abs(titleColumnsTotal - 1) > Number.EPSILON * 10) {
+      throw new Error("title.columns 的比例之和必须为 1");
+    }
+    if (!Number.isFinite(title.fontSize) || title.fontSize <= 0) {
+      throw new Error("title.fontSize 必须是大于 0 的数字");
+    }
+    if (typeof title.text !== "string" || title.text.length === 0) {
+      throw new Error("title.text 必须是非空字符串");
+    }
+    if (typeof title.fontFamily !== "string" || title.fontFamily.length === 0) {
+      throw new Error("title.fontFamily 必须是非空字符串");
+    }
 
     const variables = {
       "--page-horizontal-margin": [pageMargin.horizontal, "layout.pageMargin.horizontal"],
-      "--page-vertical-margin": [pageMargin.vertical, "layout.pageMargin.vertical"],
+      "--page-top-margin": [pageMargin.top, "layout.pageMargin.top"],
+      "--page-bottom-margin": [pageMargin.bottom, "layout.pageMargin.bottom"],
       "--title-height": [rows.title, "layout.rows.title"],
-      "--chart-height": [rows.chart, "layout.rows.chart"],
-      "--footer-decoration-height": [rows.footerDecoration, "layout.rows.footerDecoration"]
+      "--chart-height": [rows.chart, "layout.rows.chart"]
     };
     Object.entries(variables).forEach(([property, [value, name]]) => {
       dashboard.style.setProperty(property, percentage(value, name));
@@ -55,6 +68,18 @@
     dashboard.style.setProperty(
         "--data-table-width", fraction(chartColumns.dataTable, "layout.chartColumns.dataTable")
     );
+    dashboard.style.setProperty(
+        "--title-icon-1-width", fraction(title.columns.icon1, "title.columns.icon1")
+    );
+    dashboard.style.setProperty(
+        "--title-text-width", fraction(title.columns.text, "title.columns.text")
+    );
+    dashboard.style.setProperty(
+        "--title-icon-2-width", fraction(title.columns.icon2, "title.columns.icon2")
+    );
+    dashboard.style.setProperty("--title-font-size", `${title.fontSize}px`);
+    dashboard.style.setProperty("--title-font-family", title.fontFamily);
+    document.getElementById("dashboardTitleText").textContent = title.text;
   }
 
   // 调试时保留从 game0 到指定 gameId 的数据，并同步截断各队积分序列。

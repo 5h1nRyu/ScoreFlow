@@ -13,12 +13,21 @@ const APP_CONFIG = Object.freeze({
   backgroundColor: "#ffffff",
 
   layout: Object.freeze({
-    // 页面四周留白分别相对于视口宽度和高度计算
-    pageMargin: Object.freeze({ horizontal: 0.025, vertical: 0.025 }),
-    // 页面主体按标题、图表和底部装饰区从上到下紧凑排列
-    rows: Object.freeze({ title: 0.1, chart: 0.8, footerDecoration: 0.05 }),
+    // 页面外围留白分别相对于视口宽度和高度计算
+    pageMargin: Object.freeze({ horizontal: 0.025, top: 0.025, bottom: 0.05 }),
+    // 页面主体按标题和图表区从上到下紧凑排列
+    rows: Object.freeze({ title: 0.125, chart: 0.8 }),
     // 图表区按折线图和数据表从左到右排列，二者之间的间距由 CSS 控制
     chartColumns: Object.freeze({ scoreChart: 0.7, dataTable: 0.25 })
+  }),
+
+  title: Object.freeze({
+    text: "9月积分演变",
+    // Noto Sans SC 采用 SIL Open Font License，可免费商用；其余字体为回退项
+    fontFamily: '"Noto Sans SC", "Source Han Sans SC", system-ui, sans-serif',
+    fontSize: 48,
+    // 图标槽位暂不放置实际资源；三列宽度之和必须为 1
+    columns: Object.freeze({ icon1: 0.3, text: 0.5, icon2: 0.2 })
   }),
 
   animation: Object.freeze({
@@ -104,6 +113,11 @@ const APP_CONFIG = Object.freeze({
   }),
 
   xAxis: Object.freeze({
+    labels: Object.freeze({
+      showInNormal: true,
+      showInOverview: true,
+      fontSize: 14
+    }),
     // 全景阶段期望显示的竖直网格线数量
     overviewTargetGridLineCount: 12,
     gridLine: Object.freeze({
@@ -132,6 +146,11 @@ const APP_CONFIG = Object.freeze({
   }),
 
   yAxis: Object.freeze({
+    labels: Object.freeze({
+      showInNormal: true,
+      showInOverview: true,
+      fontSize: 14
+    }),
     // 限制动态 Y 轴范围的下限
     minimumRange: 20,
     // 设置最高分数之外的显示空间倍率

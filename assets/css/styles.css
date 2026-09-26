@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@700&display=swap");
+
 :root {
   color-scheme: light;
   --background-color: #ffffff;
@@ -23,20 +25,24 @@ body {
 /* 使用可配置比例构建页面的纵向主布局 */
 .dashboard {
   --page-horizontal-margin: 2.5%;
-  --page-vertical-margin: 2.5%;
-  --title-height: 10%;
+  --page-top-margin: 2.5%;
+  --page-bottom-margin: 5%;
+  --title-height: 12.5%;
   --chart-height: 80%;
-  --footer-decoration-height: 5%;
   --score-chart-width: 0.7fr;
   --data-table-width: 0.25fr;
+  --title-icon-1-width: 0.3fr;
+  --title-text-width: 0.5fr;
+  --title-icon-2-width: 0.2fr;
+  --title-font-size: 48px;
+  --title-font-family: "Noto Sans SC", "Source Han Sans SC", system-ui, sans-serif;
   display: grid;
   grid-template-columns: var(--page-horizontal-margin) minmax(0, 1fr) var(--page-horizontal-margin);
   grid-template-rows:
-    var(--page-vertical-margin)
+    var(--page-top-margin)
     var(--title-height)
     var(--chart-height)
-    var(--footer-decoration-height)
-    var(--page-vertical-margin);
+    var(--page-bottom-margin);
   gap: 0;
   width: 100%;
   height: 100%;
@@ -44,15 +50,36 @@ body {
 }
 
 .dashboard__title,
-.dashboard__chart-area,
-.dashboard__footer-decoration {
+.dashboard__chart-area {
   grid-column: 2;
   min-width: 0;
   min-height: 0;
 }
 
 .dashboard__title {
+  display: grid;
   grid-row: 2;
+  grid-template-columns:
+    var(--title-icon-1-width)
+    var(--title-text-width)
+    var(--title-icon-2-width);
+}
+
+.dashboard__title-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+  min-height: 0;
+}
+
+.dashboard__title-text {
+  margin: 0;
+  color: #18232d;
+  font-family: var(--title-font-family);
+  font-size: var(--title-font-size);
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .dashboard__chart-area {
@@ -62,10 +89,6 @@ body {
     var(--score-chart-width)
     var(--data-table-width);
   column-gap: clamp(10px, 1.2vw, 22px);
-}
-
-.dashboard__footer-decoration {
-  grid-row: 4;
 }
 
 .dashboard__region {
