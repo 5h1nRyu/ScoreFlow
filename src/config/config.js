@@ -23,7 +23,6 @@ const APP_CONFIG = Object.freeze({
 
   title: Object.freeze({
     text: "9月积分演变",
-    // Noto Sans SC 采用 SIL Open Font License，可免费商用；其余字体为回退项
     fontFamily: '"Noto Sans SC", "Source Han Sans SC", system-ui, sans-serif',
     fontSize: 60,
     // 图标槽位暂不放置实际资源；三列宽度之和必须为 1
