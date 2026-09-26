@@ -48,10 +48,6 @@
     if (typeof title.text !== "string" || title.text.length === 0) {
       throw new Error("title.text 必须是非空字符串");
     }
-    if (typeof title.fontFamily !== "string" || title.fontFamily.length === 0) {
-      throw new Error("title.fontFamily 必须是非空字符串");
-    }
-
     const variables = {
       "--page-horizontal-margin": [pageMargin.horizontal, "layout.pageMargin.horizontal"],
       "--page-top-margin": [pageMargin.top, "layout.pageMargin.top"],
@@ -78,7 +74,6 @@
         "--title-icon-2-width", fraction(title.columns.icon2, "title.columns.icon2")
     );
     dashboard.style.setProperty("--title-font-size", `${title.fontSize}px`);
-    dashboard.style.setProperty("--title-font-family", title.fontFamily);
     document.getElementById("dashboardTitleText").textContent = title.text;
   }
 

@@ -21,7 +21,6 @@
 
 - `text`：标题文字，默认为“9月积分演变”。
 - `fontSize`：标题字号，单位为 CSS 像素。
-- `fontFamily`：标题字体栈；默认优先使用可免费商用的 Noto Sans SC，并通过 Google Fonts 加载。
 - `columns.icon1`、`columns.text`、`columns.icon2`：三个标题分区的宽度权重，三者之和必须为 `1`。
 
 `src/core/timeline.js` 提供页面级公共时间轴并统一驱动已注册组件，`src/components/score-chart.js` 只负责折线图本身的尺寸和绘制，`src/app.js` 负责数据加载与模块装配。新增依托比赛进度的组件时，可通过 `timeline.subscribe()` 订阅同一份时间状态。
