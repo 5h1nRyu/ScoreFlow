@@ -27,8 +27,7 @@ body {
   --title-height: 10%;
   --chart-height: 80%;
   --footer-decoration-height: 5%;
-  --score-chart-width: 0.65fr;
-  --middle-decoration-width: 0.05fr;
+  --score-chart-width: 0.7fr;
   --data-table-width: 0.25fr;
   display: grid;
   grid-template-columns: var(--page-horizontal-margin) minmax(0, 1fr) var(--page-horizontal-margin);
@@ -61,9 +60,8 @@ body {
   grid-row: 3;
   grid-template-columns:
     var(--score-chart-width)
-    var(--middle-decoration-width)
     var(--data-table-width);
-  gap: 0;
+  column-gap: clamp(10px, 1.2vw, 22px);
 }
 
 .dashboard__footer-decoration {
@@ -93,7 +91,7 @@ body {
 
 .table-stage {
   position: relative;
-  padding: clamp(10px, 1.2vw, 22px);
+  padding: clamp(10px, 1.2vw, 22px) 0 clamp(10px, 1.2vw, 22px) clamp(10px, 1.2vw, 22px);
   background-color: var(--background-color);
 }
 
