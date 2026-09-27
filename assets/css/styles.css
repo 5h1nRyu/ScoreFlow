@@ -519,3 +519,40 @@ body {
   border: 2px solid #cf3f27;
   transform: translate(-50%, -50%);
 }
+
+/* 布局调试：轮廓向内绘制，避免被 overflow 裁掉，且不参与尺寸计算。 */
+.dashboard--debug-layout,
+.dashboard--debug-layout :is(.dashboard__title, .dashboard__chart-area, .dashboard__region) {
+  outline: 2px solid #e63946;
+  outline-offset: -2px;
+}
+
+.dashboard--debug-layout :is(.dashboard__title-section, #scoreChart, .table-stage,
+    .game-table, .team-table-slot) {
+  outline: 1px dashed #2563eb;
+  outline-offset: -4px;
+}
+
+.dashboard--debug-layout :is(.game-table__panel, .game-table__section, .game-table__header,
+    .game-table__list, .team-table__title, .team-table__list) {
+  outline: 1px dashed #08916c;
+  outline-offset: -1px;
+}
+
+.dashboard--debug-layout :is(.game-table__row, .team-table__row) {
+  outline: 1px solid #d97706;
+  outline-offset: -2px;
+}
+
+.dashboard--debug-layout :is(.game-table__identity, .game-table__score,
+    .team-table__rank, .team-table__logo, .team-table__name,
+    .team-table__score, .team-table__change) {
+  outline: 1px dotted #9333ea;
+  outline-offset: -1px;
+}
+
+/* 隐藏的排名变化列仍占空间：调试时只显示其轮廓，文字继续隐藏。 */
+.dashboard--debug-layout .team-table__change:not(.team-table__change--visible) {
+  opacity: 1;
+  color: transparent;
+}

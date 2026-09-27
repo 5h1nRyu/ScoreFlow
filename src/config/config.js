@@ -46,6 +46,8 @@ const APP_CONFIG = Object.freeze({
   gamesDataUrl: "data/games.json",
 
   debug: Object.freeze({
+    // 显示布局区域与表格内容列的调试边框，不影响实际布局尺寸
+    showLayoutBorders: false,
     // -1 使用完整数据；正整数 x 只演示到 gameId 为 x 的 game（包含该 game）
     finalGameId: -1
   }),

@@ -23,6 +23,12 @@
       throw new Error(`背景颜色“${backgroundColor}”无效`);
     }
     document.documentElement.style.setProperty("--background-color", backgroundColor);
+    if (typeof debug.showLayoutBorders !== "boolean") {
+      throw new Error("debug.showLayoutBorders 必须是布尔值");
+    }
+    document.getElementById("dashboard").classList.toggle(
+        "dashboard--debug-layout", debug.showLayoutBorders
+    );
   }
 
   // 校验配置并把布局参数写入页面
