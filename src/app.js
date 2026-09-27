@@ -11,7 +11,7 @@
     return `${value * 100}%`;
   }
 
-  // 将相对于整个页面的宽度比例作为网格权重
+  // 将标题内部的宽度比例作为网格权重
   function fraction(value, name) {
     percentage(value, name);
     return `${value}fr`;
@@ -65,10 +65,10 @@
       dashboard.style.setProperty(property, percentage(value, name));
     });
     dashboard.style.setProperty(
-        "--score-chart-width", fraction(chartColumns.scoreChart, "layout.chartColumns.scoreChart")
+        "--score-chart-width", percentage(chartColumns.scoreChart, "layout.chartColumns.scoreChart")
     );
     dashboard.style.setProperty(
-        "--data-table-width", fraction(chartColumns.dataTable, "layout.chartColumns.dataTable")
+        "--data-table-width", percentage(chartColumns.dataTable, "layout.chartColumns.dataTable")
     );
     dashboard.style.setProperty(
         "--title-icon-1-width", fraction(title.columns.icon1, "title.columns.icon1")

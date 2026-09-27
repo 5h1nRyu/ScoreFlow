@@ -17,7 +17,7 @@ const APP_CONFIG = Object.freeze({
     pageMargin: Object.freeze({ horizontal: 0.025, top: 0.025, bottom: 0.05 }),
     // 页面主体按标题和图表区从上到下紧凑排列
     rows: Object.freeze({ title: 0.125, chart: 0.8 }),
-    // 图表区按折线图和数据表从左到右排列，二者之间的间距由 CSS 控制
+    // 两列宽度均相对于整页；加上左右边距之和必须为 1，列间距包含在折线图区内
     chartColumns: Object.freeze({ scoreChart: 0.7, dataTable: 0.25 })
   }),
 

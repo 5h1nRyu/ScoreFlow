@@ -29,8 +29,8 @@ body {
   --page-bottom-margin: 5%;
   --title-height: 12.5%;
   --chart-height: 80%;
-  --score-chart-width: 0.7fr;
-  --data-table-width: 0.25fr;
+  --score-chart-width: 70%;
+  --data-table-width: 25%;
   --title-icon-1-width: 0.3fr;
   --title-text-width: 0.5fr;
   --title-icon-2-width: 0.2fr;
@@ -84,10 +84,24 @@ body {
 .dashboard__chart-area {
   display: grid;
   grid-row: 3;
+  /* 跨越整页，四列都以整页宽度为基准，左右边距只计算一次。 */
+  grid-column: 1 / -1;
   grid-template-columns:
+    var(--page-horizontal-margin)
     var(--score-chart-width)
-    var(--data-table-width);
-  column-gap: clamp(10px, 1.2vw, 22px);
+    var(--data-table-width)
+    var(--page-horizontal-margin);
+  column-gap: 0;
+}
+
+.dashboard__chart-area > .dashboard__region:first-child {
+  grid-column: 2;
+  /* 原列间距放在折线图区内部，不额外占用页面宽度。 */
+  padding-right: clamp(10px, 1.2vw, 22px);
+}
+
+.dashboard__chart-area > .dashboard__region:last-child {
+  grid-column: 3;
 }
 
 .dashboard__region {
