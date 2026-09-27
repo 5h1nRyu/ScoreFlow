@@ -18,7 +18,7 @@ const APP_CONFIG = Object.freeze({
     // 页面主体按标题和图表区从上到下紧凑排列
     rows: Object.freeze({ title: 0.125, chart: 0.8 }),
     // 两列宽度均相对于整页；加上左右边距之和必须为 1，列间距包含在折线图区内
-    chartColumns: Object.freeze({ scoreChart: 0.7, dataTable: 0.25 })
+    chartColumns: Object.freeze({ scoreChart: 0.65, dataTable: 0.3 })
   }),
 
   title: Object.freeze({
@@ -49,7 +49,7 @@ const APP_CONFIG = Object.freeze({
     // 显示布局区域与表格内容列的调试边框，不影响实际布局尺寸
     showLayoutBorders: false,
     // -1 使用完整数据；正整数 x 只演示到 gameId 为 x 的 game（包含该 game）
-    finalGameId: -1
+    finalGameId: 9
   }),
 
   gameTable: Object.freeze({
@@ -83,13 +83,13 @@ const APP_CONFIG = Object.freeze({
     initialTitle: "9月13日队伍排名",
     finalTitle: "9月30日队伍排名",
     // 设置标题字号与单次淡出或淡入动画时长
-    titleFontSize: 32,
+    titleFontSize: 20,
     titleTransitionDuration: 180,
     // 条目高度和间距均相对于 team-table 区域高度计算
     itemHeightRatio: 0.075,
     itemGapRatio: 0.018,
-    // 队标高度与各类文字字号均使用 CSS 像素
-    teamImageHeight: 120,
+    // 队标高使用 CSS 像素
+    teamImageHeight: 80,
     // 控制重排后是否显示排名变化图标，并始终保留其布局空间
     showRankChange: false,
     // 设置重排过程中条目放大或缩小的最大比例
@@ -109,7 +109,7 @@ const APP_CONFIG = Object.freeze({
     // 设置滚动期间当前 game 位于从左侧起第几个 X 轴间隔
     playheadPosition: 4,
     // 控制 initialHoldDuration 阶段的小球巡线动画；false 时停留在右侧端点
-    initialHoldTraversalEnabled: true,
+    initialHoldTraversalEnabled: false,
     // 设置所有屏幕尺寸下的积分折线粗细
     lineThickness: 6
   }),

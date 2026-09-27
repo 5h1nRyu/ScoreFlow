@@ -2,11 +2,7 @@
 
 ## TODO：
 
-- teamtable内部空间不足问题，右侧还有位置
 - x轴标签在最后阶段会突变
-- 加入overview阶段的动画
-- teamtable队伍icon调整
-- chart中label加上分数
 - 标题部分字体和图标
 - x轴标签文字
 - teamtable排名变化区域空间
