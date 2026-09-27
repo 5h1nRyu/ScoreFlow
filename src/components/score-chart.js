@@ -349,6 +349,8 @@ function render(timelineState) {
     deltaSeconds,
     didRestart,
     overviewProgress,
+    overviewStage,
+    overviewStageProgress,
     phase,
     playhead
   } = timelineState;
@@ -730,6 +732,12 @@ function render(timelineState) {
 
   const labelItems = [];
 
+  // 全景初始停留时仅让圆点巡线，保留完整折线及真实比赛进度。
+  // 共用时间轴的阶段进度，使所有圆点同步缓入缓出并支持暂停恢复。
+  const dotPlayhead = phase === "overview" && overviewStage === "initial-hold"
+      ? -1 + (finalGame + 1) * easeInOut(overviewStageProgress)
+      : playhead;
+
   // 绘制每支队伍的分数曲线
   teams.forEach((team, index) => {
     const points = [];
@@ -820,17 +828,22 @@ function render(timelineState) {
     labelItems.push({
       color: team.color,
       index,
-      name: team.shortName,
+      // 固定一位小数，并避免过零时显示 -0.0。
+      text: `${team.shortName} ${Number(tipValue.toFixed(1)).toFixed(1)}`,
       tipX,
       tipY,
       value: tipValue
     });
 
 
-    // 绘制曲线末端圆点
+    // 巡线时沿同一条固定 Bezier 曲线定位，其余阶段跟随真实端点。
+    const dotX = xAt(dotPlayhead);
+    const dotY = yAt(valueOnFixedCurve(team, dotPlayhead));
+
+    // 绘制圆点
     if (
-        tipX >= margin.left &&
-        tipX <=
+        dotX >= margin.left &&
+        dotX <=
         width -
         margin.right
     ) {
@@ -840,8 +853,8 @@ function render(timelineState) {
       ctx.beginPath();
 
       ctx.arc(
-          tipX,
-          tipY,
+          dotX,
+          dotY,
           chart.lineThickness * (
               width < 520
                   ? 8 / 9
@@ -871,7 +884,7 @@ function render(timelineState) {
 
     // 最长标签放不进绘图区时，所有标签同步隐藏
     const longestLabelWidth = arrangedLabels.reduce(
-        (maximum, label) => Math.max(maximum, ctx.measureText(label.name).width),
+        (maximum, label) => Math.max(maximum, ctx.measureText(label.text).width),
         0
     );
     const labelsFit = arrangedLabels.every(label =>
@@ -890,7 +903,7 @@ function render(timelineState) {
       arrangedLabels.forEach((label) => {
         ctx.fillStyle = label.color;
         ctx.fillText(
-            label.name,
+            label.text,
             label.tipX + labels.horizontalGap,
             label.labelY
         );
