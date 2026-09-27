@@ -25,6 +25,18 @@
       ]
     },
     {
+      "name": "雷电",
+      "shortName": "雷电",
+      "color": "#dbb400",
+      "initialScore": 0,
+      "players": [
+        "萩原圣人",
+        "濑户熊直树",
+        "本田朋广",
+        "黑泽咲"
+      ]
+    },
+    {
       "name": "野兽X",
       "shortName": "野兽",
       "color": "#002953",
@@ -34,6 +46,18 @@
         "中田花奈",
         "下石戟",
         "东城理央"
+      ]
+    },
+    {
+      "name": "世嘉飒美凤凰",
+      "shortName": "凤凰",
+      "color": "#b74801",
+      "initialScore": 0,
+      "players": [
+        "茅森早香",
+        "竹内元太",
+        "醍醐大",
+        "佐野日向子"
       ]
     },
     {
@@ -49,6 +73,18 @@
       ]
     },
     {
+      "name": "涩谷ABEMAS",
+      "shortName": "AB",
+      "color": "#c6ae6f",
+      "initialScore": 0,
+      "players": [
+        "多井隆晴",
+        "松本吉弘",
+        "白鸟翔",
+        "日向蓝子"
+      ]
+    },
+    {
       "name": "U-NEXT海盗",
       "shortName": "海盗",
       "color": "#0582c8",
@@ -58,18 +94,6 @@
         "瑞原明奈",
         "铃木优",
         "朝仓康心"
-      ]
-    },
-    {
-      "name": "地球喷射机",
-      "shortName": "地球",
-      "color": "#006934",
-      "initialScore": 0,
-      "players": [
-        "石井一马",
-        "HIRO柴田",
-        "三浦智博",
-        "逢川惠梦"
       ]
     },
     {
@@ -85,39 +109,15 @@
       ]
     },
     {
-      "name": "雷电",
-      "shortName": "雷电",
-      "color": "#dbb400",
+      "name": "地球喷射机",
+      "shortName": "地球",
+      "color": "#006934",
       "initialScore": 0,
       "players": [
-        "萩原圣人",
-        "濑户熊直树",
-        "本田朋广",
-        "黑泽咲"
-      ]
-    },
-    {
-      "name": "涩谷ABEMAS",
-      "shortName": "AB",
-      "color": "#c6ae6f",
-      "initialScore": 0,
-      "players": [
-        "多井隆晴",
-        "松本吉弘",
-        "白鸟翔",
-        "日向蓝子"
-      ]
-    },
-    {
-      "name": "世嘉飒美凤凰",
-      "shortName": "凤凰",
-      "color": "#b74801",
-      "initialScore": 0,
-      "players": [
-        "茅森早香",
-        "竹内元太",
-        "醍醐大",
-        "佐野日向子"
+        "石井一马",
+        "HIRO柴田",
+        "三浦智博",
+        "逢川惠梦"
       ]
     }
   ]

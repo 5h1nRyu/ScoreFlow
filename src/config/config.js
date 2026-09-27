@@ -35,7 +35,7 @@ const APP_CONFIG = Object.freeze({
     // 限制单帧参与缩放计算的最大秒数
     maximumFrameDelta: 0.05,
     // 比赛表退场与布局宽度变化同步完成，结束后才开始队伍表进场；0 表示立即切换
-    gameTableExitDuration: 240,
+    gameTableExitDuration: 400,
     // 四段时长之和作为完整的队伍表总览阶段时间
     overview: OVERVIEW_PHASES,
     overviewDuration: OVERVIEW_DURATION,
@@ -52,7 +52,7 @@ const APP_CONFIG = Object.freeze({
     // 显示布局区域与表格内容列的调试边框，不影响实际布局尺寸
     showLayoutBorders: false,
     // -1 使用完整数据；正整数 x 只演示到 gameId 为 x 的 game（包含该 game）
-    finalGameId: 9
+    finalGameId: -1
   }),
 
   gameTable: Object.freeze({
@@ -83,10 +83,10 @@ const APP_CONFIG = Object.freeze({
 
   teamTable: Object.freeze({
     // 分别设置重排前后的排行榜标题
-    initialTitle: "9月13日队伍排名",
-    finalTitle: "9月30日队伍排名",
+    initialTitle: "初始队伍排名",
+    finalTitle: "月末队伍排名",
     // 设置标题字号与单次淡出或淡入动画时长
-    titleFontSize: 20,
+    titleFontSize: 40,
     titleTransitionDuration: 180,
     // 条目高度和间距均相对于 team-table 区域高度计算
     itemHeightRatio: 0.075,
@@ -127,9 +127,9 @@ const APP_CONFIG = Object.freeze({
     // 设置标签与折线末端圆点的水平间距
     horizontalGap: 10,
     // 右边界渐变区域的宽度，单位为 CSS 像素，必须大于 0；文字越靠右越透明
-    fadeOutDistance: 80,
+    fadeOutDistance: 120,
     // 距右边界达到此距离时文字已完全透明；必须大于 0 且小于 fadeOutDistance
-    fadeOutEndDistance: 1,
+    fadeOutEndDistance: 40,
     // 设置标签之间的额外垂直间距
     verticalGap: 4
   }),
@@ -157,7 +157,7 @@ const APP_CONFIG = Object.freeze({
       fontSize: 24
     }),
     // 限制动态 Y 轴范围的下限
-    minimumRange: 60,
+    minimumRange: 50,
     // 设置最高分数之外的显示空间倍率
     paddingFactor: 1.12,
     // 设置 Y 轴期望显示的主刻度数量
