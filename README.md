@@ -218,7 +218,8 @@ games.json ──┘             │                          ↑
 - `fontSize`：标签字号。
 - `fontWeight`：标签加粗程度。
 - `horizontalGap`：标签与折线末端的水平间距。
-- `fadeOutDistance`：右边界渐变区域的宽度，单位为 CSS 像素，默认 `80`，必须为有限且大于 `0` 的数字。通常在边框前 `1px` 完全透明；更小的配置使用半个渐变区域宽度作为透明间距。此配置替代原有的 `rightSafetyMargin` 和 `fadeOutDuration`。
+- `fadeOutDistance`：开始渐变的位置到右边界的距离，单位为 CSS 像素，默认 `80`，必须为有限且大于 `0` 的数字。此配置替代原有的 `rightSafetyMargin` 和 `fadeOutDuration`。
+- `fadeOutEndDistance`：完全透明的位置到右边界的距离，单位为 CSS 像素，默认 `1`，必须为有限且大于 `0`、小于 `fadeOutDistance` 的数字。文字在这两个距离之间连续渐变，距离右边界小于等于此值的部分完全透明。
 - `verticalGap`：避让时标签之间的额外垂直间距。
 
 由于浏览器需要通过 HTTP 加载 JSON，请不要直接以 `file://` 打开页面。例如可在项目目录运行：
@@ -230,4 +231,3 @@ python3 -m http.server 8000
 然后访问 `http://localhost:8000/`。
 
 播放过程中按空格键可暂停整个动画，再按一次从原位置继续。暂停同时冻结折线图、比赛表格切换、队伍总览及循环等待，不显示额外控件或状态提示；长按空格不会重复切换。
-

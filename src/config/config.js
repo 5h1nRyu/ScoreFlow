@@ -128,6 +128,8 @@ const APP_CONFIG = Object.freeze({
     horizontalGap: 10,
     // 右边界渐变区域的宽度，单位为 CSS 像素，必须大于 0；文字越靠右越透明
     fadeOutDistance: 80,
+    // 距右边界达到此距离时文字已完全透明；必须大于 0 且小于 fadeOutDistance
+    fadeOutEndDistance: 1,
     // 设置标签之间的额外垂直间距
     verticalGap: 4
   }),
@@ -186,4 +188,3 @@ const APP_CONFIG = Object.freeze({
     })
   })
 });
-

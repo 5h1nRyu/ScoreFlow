@@ -39,6 +39,13 @@ if (
 if (!Number.isFinite(labels.fadeOutDistance) || labels.fadeOutDistance <= 0) {
   throw new Error("labels.fadeOutDistance 必须是大于 0 的数字");
 }
+if (
+    !Number.isFinite(labels.fadeOutEndDistance) ||
+    labels.fadeOutEndDistance <= 0 ||
+    labels.fadeOutEndDistance >= labels.fadeOutDistance
+) {
+  throw new Error("labels.fadeOutEndDistance 必须是大于 0 且小于 labels.fadeOutDistance 的数字");
+}
 validateLineStyle(xAxis.gridLine, "xAxis.gridLine");
 function validateAxisLabels(axis, name) {
   if (typeof axis.labels.showInNormal !== "boolean") {
@@ -910,12 +917,11 @@ function render(timelineState) {
     });
 
     // 同一标签内部按水平位置连续变透明；渐变区以外保持原样。
-    // 在边框前预留至多 1px 的全透明区域，小于 1px 的配置也保留渐变区间。
+    // 在配置的结束距离处完全透明，更靠近边框的文字保持透明。
     const plotRight = width - margin.right;
-    const transparentInset = Math.min(1, labels.fadeOutDistance / 2);
     const fadeMask = labelCtx.createLinearGradient(
         plotRight - labels.fadeOutDistance, 0,
-        plotRight - transparentInset, 0
+        plotRight - labels.fadeOutEndDistance, 0
     );
     fadeMask.addColorStop(0, "rgba(0,0,0,1)");
     fadeMask.addColorStop(1, "rgba(0,0,0,0)");
@@ -946,4 +952,3 @@ return Object.freeze({
 
 global.ScoreChart = Object.freeze({ createScoreChart });
 }(globalThis));
-
