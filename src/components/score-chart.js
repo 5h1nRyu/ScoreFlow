@@ -734,7 +734,8 @@ function render(timelineState) {
 
   // 全景初始停留时仅让圆点巡线，保留完整折线及真实比赛进度。
   // 共用时间轴的阶段进度，使所有圆点同步缓入缓出并支持暂停恢复。
-  const dotPlayhead = phase === "overview" && overviewStage === "initial-hold"
+  const dotPlayhead = chart.initialHoldTraversalEnabled
+      && phase === "overview" && overviewStage === "initial-hold"
       ? -1 + (finalGame + 1) * easeInOut(overviewStageProgress)
       : playhead;
 

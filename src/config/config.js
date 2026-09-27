@@ -106,6 +106,8 @@ const APP_CONFIG = Object.freeze({
     windowSize: 6,
     // 设置滚动期间当前 game 位于从左侧起第几个 X 轴间隔
     playheadPosition: 4,
+    // 控制 initialHoldDuration 阶段的小球巡线动画；false 时停留在右侧端点
+    initialHoldTraversalEnabled: true,
     // 设置所有屏幕尺寸下的积分折线粗细
     lineThickness: 6
   }),
