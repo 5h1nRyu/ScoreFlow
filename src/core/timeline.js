@@ -6,11 +6,15 @@
     const {
       gameDuration,
       maximumFrameDelta,
+      gameTableExitDuration,
       overview,
       overviewDuration,
       restartDelay
     } = options.animation;
     const finalGame = options.finalGame;
+    if (!Number.isFinite(gameTableExitDuration) || gameTableExitDuration < 0) {
+      throw new Error("animation.gameTableExitDuration 必须是大于或等于 0 的数字");
+    }
     const subscribers = new Set();
     let animationFrame = 0;
     let startTime = 0;
@@ -23,7 +27,8 @@
       // 每轮从 game -1（初始积分）开始，用一个完整时长过渡到 game0。
       const animationDuration = (finalGame + 1) * gameDuration;
       const lastGameHoldEnd = animationDuration + gameDuration;
-      const overviewEnd = lastGameHoldEnd + overviewDuration;
+      const overviewStart = lastGameHoldEnd + gameTableExitDuration;
+      const overviewEnd = overviewStart + overviewDuration;
       const cycleDuration = overviewEnd + restartDelay;
       const elapsed = Math.max(0, now - startTime);
       const cycleElapsed = cycleDuration > 0 ? elapsed % cycleDuration : 0;
@@ -32,10 +37,14 @@
       // 折线图在队伍表进场阶段完成全景展开，之后保持最终视图不动。
       const overviewProgress = overview.teamTableEnterDuration > 0
           ? Math.min(1, Math.max(0,
-              (cycleElapsed - lastGameHoldEnd) / overview.teamTableEnterDuration
+              (cycleElapsed - overviewStart) / overview.teamTableEnterDuration
           ))
+          : Number(cycleElapsed >= overviewStart);
+      const overviewElapsed = Math.max(0, cycleElapsed - overviewStart);
+      // 退场时从比赛表布局平滑过渡到队伍表布局，重播时直接回到 0。
+      const tableLayoutProgress = gameTableExitDuration > 0
+          ? Math.min(1, Math.max(0, (cycleElapsed - lastGameHoldEnd) / gameTableExitDuration))
           : Number(cycleElapsed >= lastGameHoldEnd);
-      const overviewElapsed = Math.max(0, cycleElapsed - lastGameHoldEnd);
       const overviewStages = [
         ["team-table-enter", overview.teamTableEnterDuration],
         ["initial-hold", overview.initialHoldDuration],
@@ -45,7 +54,7 @@
       let overviewStage = null;
       let overviewStageProgress = 0;
       let stageStart = 0;
-      if (cycleElapsed >= lastGameHoldEnd) {
+      if (cycleElapsed >= overviewStart) {
         for (const [name, duration] of overviewStages) {
           if (overviewElapsed < stageStart + duration || name === "final-hold") {
             overviewStage = name;
@@ -61,9 +70,11 @@
           ? "playing"
           : cycleElapsed < lastGameHoldEnd
               ? "last-game-hold"
-              : cycleElapsed < overviewEnd
-                  ? "overview"
-                  : "restart-hold";
+              : cycleElapsed < overviewStart
+                  ? "game-table-exit"
+                  : cycleElapsed < overviewEnd
+                      ? "overview"
+                      : "restart-hold";
       const state = Object.freeze({
         completedGame: Math.floor(playhead),
         deltaSeconds: Math.min(maximumFrameDelta, Math.max(0, now - lastFrameTime) / 1000),
@@ -75,6 +86,7 @@
         overviewStageProgress,
         phase,
         playhead,
+        tableLayoutProgress,
         // 比赛详情维持原有节奏，不随新增的 -1 → game0 时段整体后移。
         tableCompletedGame: Math.min(finalGame, Math.floor(playhead + 1))
       });
@@ -182,3 +194,4 @@
 
   global.ScoreTimeline = Object.freeze({ createTimeline, createPlaybackTasks });
 }(globalThis));
+

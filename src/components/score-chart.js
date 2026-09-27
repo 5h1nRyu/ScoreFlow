@@ -98,6 +98,7 @@ let displayedRange = initialDisplayedRange;
 let labelOpacity = 1;
 let width = 0;
 let height = 0;
+let lastTimelineState = null;
 
 
 // 为全景展开提供起止平滑的缓动进度
@@ -114,8 +115,13 @@ function resizeCanvas() {
       2
   );
 
-  width = canvas.clientWidth;
-  height = canvas.clientHeight;
+  const nextWidth = canvas.clientWidth;
+  const nextHeight = canvas.clientHeight;
+  if (width === nextWidth && height === nextHeight
+      && canvas.width === Math.round(nextWidth * dpr)
+      && canvas.height === Math.round(nextHeight * dpr)) return false;
+  width = nextWidth;
+  height = nextHeight;
 
   canvas.width = Math.round(width * dpr);
   canvas.height = Math.round(height * dpr);
@@ -129,6 +135,7 @@ function resizeCanvas() {
       0,
       0
   );
+  return true;
 }
 
 
@@ -344,6 +351,9 @@ function layoutLabels(items, top, bottom) {
 
 // 绘制当前动画帧
 function render(timelineState) {
+  lastTimelineState = timelineState;
+  // 布局在同一帧先更新，立即匹配真实尺寸，避免先拉伸上一帧的画面。
+  resizeCanvas();
   const {
     completedGame,
     deltaSeconds,
@@ -916,7 +926,12 @@ function render(timelineState) {
 
 }
 
-const resizeObserver = new ResizeObserver(resizeCanvas);
+const resizeObserver = new ResizeObserver(() => {
+  if (resizeCanvas() && lastTimelineState) {
+    // 暂停时调整窗口也要重绘，但不推进动画或重复执行循环重置。
+    render({ ...lastTimelineState, deltaSeconds: 0, didRestart: false });
+  }
+});
 resizeObserver.observe(canvas);
 resizeCanvas();
 
@@ -928,3 +943,4 @@ return Object.freeze({
 
 global.ScoreChart = Object.freeze({ createScoreChart });
 }(globalThis));
+

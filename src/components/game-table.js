@@ -236,7 +236,6 @@
       hiddenForOverview = isOverview;
       root.classList.toggle("game-table--hidden", isOverview);
       root.setAttribute("aria-hidden", String(isOverview));
-      teamTableSlot.hidden = !isOverview;
 
       // 隐藏前完成切换，避免动画回调跨越总览和重播阶段。
       if (isOverview && pendingPanel) finishTransition(pendingPanel);
@@ -245,8 +244,15 @@
     return Object.freeze({
       render(state) {
         const isOverview = state.phase === "overview" || state.phase === "restart-hold";
-        setOverviewVisibility(isOverview);
-        if (isOverview) return;
+        const isExiting = state.phase === "game-table-exit";
+        setOverviewVisibility(isExiting || isOverview);
+        // 队伍表在退场和宽度变化完成后才显示，避免进场时挤占空间。
+        teamTableSlot.hidden = !isOverview;
+        const progress = state.tableLayoutProgress;
+        const easedProgress = progress * progress * (3 - 2 * progress);
+        root.style.opacity = String(1 - easedProgress);
+        root.style.transform = `translateX(${-5 * easedProgress}%)`;
+        if (isExiting || isOverview) return;
         showGamePair(
             Math.floor(state.tableCompletedGame / 2),
             activeIndex >= 0 && !state.didRestart
@@ -257,3 +263,4 @@
 
   global.GameTable = Object.freeze({ createGameTable });
 }(globalThis));
+

@@ -16,9 +16,12 @@
 - `pageMargin.horizontal`：页面左右两侧的外围留白。
 - `pageMargin.top`、`pageMargin.bottom`：页面顶部和底部的独立留白。
 - `rows`：主标题区和图表区的高度比例。
-- `chartColumns`：折线图和数据表相对于整页的宽度比例，计算前不扣除左右边距。默认布局为左边距 2.5% + 折线图区 70% + 数据表区 25% + 右边距 2.5%。
+- `chartColumns.gameTable`：比赛详情表相对于整页的宽度比例，默认 `0.25`。
+- `chartColumns.teamTable`：队伍排名表相对于整页的宽度比例，默认 `0.3`。
 
-水平与垂直方向的各组比例之和都必须为 `1`。
+折线图区比例自动计算为 `1 - 2 * pageMargin.horizontal - 当前表格比例`，不再配置 `scoreChart` 或 `dataTable`。默认左右边距各为 2.5%，比赛表阶段为折线图 70% + 比赛表 25%，队伍表阶段为折线图 65% + 队伍表 30%。所有列均以整页宽度为基准，边距只计算一次。两个表格比例分别校验，必须为有限正数且给折线图留下正的宽度；纵向各组比例之和仍必须为 `1`。
+
+比赛表开始退场时，折线图区同步平滑调整宽度；退场结束且宽度调整完成后，队伍表才开始进场。每轮重播时直接恢复比赛表对应的布局，不播放反向宽度动画。两个表格宽度相同时保持布局不动，队伍表更窄时折线图平滑变宽。
 
 主标题区从左到右包含图标 1 槽位、标题文字和图标 2 槽位，三个部分均左对齐并竖直居中。图标槽位暂不放置实际资源。可在 `title` 中调整：
 
@@ -109,9 +112,9 @@ games.json ──┘             │                          ↑
 
 ## 比赛详情表
 
-右上区域的 `game-table` 从 `data/games.json` 读取按 `gameId` 连续排列的 game 数据，并使用每个 game 的 `info` 字符串作为表头。详情表与折线图订阅同一条公共时间轴：积分图每个 game 更新一次，详情表则将相邻的两个 game 组成一组，每两个 game 更新一次。切换时，旧的八个条目按照两个 game 各自从上到下的顺序向左滑出，新条目随后从右滑入。时间轴进入 `overview` 后会隐藏比赛详情并启用预留的 `team-table` 容器，循环重启时恢复前两个 game。
+右上区域的 `game-table` 从 `data/games.json` 读取按 `gameId` 连续排列的 game 数据，并使用每个 game 的 `info` 字符串作为表头。详情表与折线图订阅同一条公共时间轴：积分图每个 game 更新一次，详情表则将相邻的两个 game 组成一组，每两个 game 更新一次。切换时，旧的八个条目按照两个 game 各自从上到下的顺序向左滑出，新条目随后从右滑入。时间轴进入 `game-table-exit` 后比赛详情开始退场，随后进入 `overview` 才显示 `team-table` 容器；循环重启时恢复前两个 game。
 
-每轮新增的 `game -1` 到 `game0` 折线动画不会延后比赛详情：`game-table` 的内容及换组动画相对公共播放头前移一个 `gameDuration`。该偏移不影响总览切换，最后一组比赛仍会额外展示一个 `gameDuration`，直到时间轴真正进入 `overview` 后才切换到 `team-table`。
+每轮新增的 `game -1` 到 `game0` 折线动画不会延后比赛详情：`game-table` 的内容及换组动画相对公共播放头前移一个 `gameDuration`。该偏移不影响总览切换，最后一组比赛仍会额外展示一个 `gameDuration`，再经过独立的比赛表退场阶段，才进入 `overview` 并切换到 `team-table`。
 
 可在 `src/config/config.js` 的 `gameTable.itemFontSizes` 中调整选手条目内的字号，数值单位均为 CSS 像素：
 
@@ -178,6 +181,7 @@ games.json ──┘             │                          ↑
 可在 `src/config/config.js` 的 `animation` 中调整：
 
 - `gameDuration`：每个 game 的动画时长，也用于每轮的 `game -1` 到 `game0` 动画，以及到达最后一个 game 后的额外停留。
+- `gameTableExitDuration`：比赛表整体退场及折线图宽度调整的共同时间，默认 `240` 毫秒；必须为有限非负数，设为 `0` 时立即完成。此阶段独立于后续四个总览阶段，每轮总时长额外增加该值，并随空格暂停、恢复。
 - `overview.teamTableEnterDuration`：队伍排名表按初始分数进场的动画时长；折线图也会在此阶段完成全景展开。
 - `overview.initialHoldDuration`：初始排名进场后的停留时长。
 - `overview.reorderDuration`：积分数字变化及最终排名重排的动画时长。
@@ -225,3 +229,4 @@ python3 -m http.server 8000
 然后访问 `http://localhost:8000/`。
 
 播放过程中按空格键可暂停整个动画，再按一次从原位置继续。暂停同时冻结折线图、比赛表格切换、队伍总览及循环等待，不显示额外控件或状态提示；长按空格不会重复切换。
+

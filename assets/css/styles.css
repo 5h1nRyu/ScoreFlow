@@ -143,13 +143,11 @@ body {
   position: relative;
   overflow: hidden;
   opacity: 1;
-  transition: opacity 240ms ease, transform 240ms ease;
+  /* 整体退场由公共时间轴驱动，与布局宽度变化同步暂停、恢复。 */
 }
 
 .game-table--hidden {
   pointer-events: none;
-  opacity: 0;
-  transform: translateX(-5%);
 }
 
 .game-table__panel {
@@ -570,3 +568,4 @@ body {
   opacity: 1;
   color: transparent;
 }
+
