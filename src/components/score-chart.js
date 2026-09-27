@@ -36,11 +36,8 @@ if (
 ) {
   throw new Error("chart.playheadPosition 必须是大于 0 且小于 chart.windowSize 的整数");
 }
-if (!Number.isFinite(labels.rightSafetyMargin) || labels.rightSafetyMargin < 0) {
-  throw new Error("labels.rightSafetyMargin 必须是大于或等于 0 的数字");
-}
-if (!Number.isFinite(labels.fadeOutDuration) || labels.fadeOutDuration < 0) {
-  throw new Error("labels.fadeOutDuration 必须是大于或等于 0 的数字");
+if (!Number.isFinite(labels.fadeOutDistance) || labels.fadeOutDistance <= 0) {
+  throw new Error("labels.fadeOutDistance 必须是大于 0 的数字");
 }
 validateLineStyle(xAxis.gridLine, "xAxis.gridLine");
 function validateAxisLabels(axis, name) {
@@ -95,7 +92,9 @@ const initialDisplayedRange = rangeForPeak(
     Math.max(...teams.map(team => Math.abs(team.initialScore)))
 );
 let displayedRange = initialDisplayedRange;
-let labelOpacity = 1;
+// 标签使用独立画布，空间渐变遮罩只影响文字，不影响折线、圆点和网格。
+const labelCanvas = document.createElement("canvas");
+const labelCtx = labelCanvas.getContext("2d");
 let width = 0;
 let height = 0;
 let lastTimelineState = null;
@@ -125,6 +124,9 @@ function resizeCanvas() {
 
   canvas.width = Math.round(width * dpr);
   canvas.height = Math.round(height * dpr);
+  labelCanvas.width = canvas.width;
+  labelCanvas.height = canvas.height;
+  labelCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   // 后续继续使用 CSS 像素坐标
   ctx.setTransform(
@@ -398,7 +400,6 @@ function render(timelineState) {
 
   if (didRestart) {
     displayedRange = initialDisplayedRange;
-    labelOpacity = 1;
   }
 
   // 播放点到达配置位置后开始滚动，并在最后一个窗口处停止
@@ -839,8 +840,9 @@ function render(timelineState) {
     labelItems.push({
       color: team.color,
       index,
+      shortName: team.shortName,
       // 固定一位小数，并避免过零时显示 -0.0。
-      text: `${team.shortName} ${Number(tipValue.toFixed(1)).toFixed(1)}`,
+      scoreText: Number(tipValue.toFixed(1)).toFixed(1),
       tipX,
       tipY,
       value: tipValue
@@ -888,40 +890,41 @@ function render(timelineState) {
         height - margin.bottom - halfLabelHeight
     );
 
-    ctx.save();
-    ctx.font = `${labels.fontWeight} ${labels.fontSize}px "Courier New", monospace`;
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
+    labelCtx.clearRect(0, 0, width, height);
+    labelCtx.save();
+    labelCtx.font = `${labels.fontWeight} ${labels.fontSize}px "Courier New", monospace`;
+    labelCtx.textAlign = "left";
+    labelCtx.textBaseline = "middle";
 
-    // 最长标签放不进绘图区时，所有标签同步隐藏
-    const longestLabelWidth = arrangedLabels.reduce(
-        (maximum, label) => Math.max(maximum, ctx.measureText(label.text).width),
+    // 按实际字体测量所有简称，统一分数起点；保留原来一个空格的间距。
+    const nameColumnWidth = arrangedLabels.reduce(
+        (maximum, label) => Math.max(maximum, labelCtx.measureText(label.shortName).width),
         0
     );
-    const labelsFit = arrangedLabels.every(label =>
-      label.tipX + labels.horizontalGap + longestLabelWidth + labels.rightSafetyMargin <=
-      width - margin.right
+    const scoreOffset = nameColumnWidth + labelCtx.measureText(" ").width;
+    arrangedLabels.forEach((label) => {
+      const labelX = label.tipX + labels.horizontalGap;
+      labelCtx.fillStyle = label.color;
+      labelCtx.fillText(label.shortName, labelX, label.labelY);
+      labelCtx.fillText(label.scoreText, labelX + scoreOffset, label.labelY);
+    });
+
+    // 同一标签内部按水平位置连续变透明；渐变区以外保持原样。
+    // 在边框前预留至多 1px 的全透明区域，小于 1px 的配置也保留渐变区间。
+    const plotRight = width - margin.right;
+    const transparentInset = Math.min(1, labels.fadeOutDistance / 2);
+    const fadeMask = labelCtx.createLinearGradient(
+        plotRight - labels.fadeOutDistance, 0,
+        plotRight - transparentInset, 0
     );
+    fadeMask.addColorStop(0, "rgba(0,0,0,1)");
+    fadeMask.addColorStop(1, "rgba(0,0,0,0)");
+    labelCtx.globalCompositeOperation = "destination-in";
+    labelCtx.fillStyle = fadeMask;
+    labelCtx.fillRect(0, 0, width, height);
+    labelCtx.restore();
 
-    if (!labelsFit) {
-      labelOpacity = labels.fadeOutDuration > 0
-          ? Math.max(0, labelOpacity - deltaSeconds * 1000 / labels.fadeOutDuration)
-          : 0;
-    }
-
-    if (labelOpacity > 0) {
-      ctx.globalAlpha = labelOpacity;
-      arrangedLabels.forEach((label) => {
-        ctx.fillStyle = label.color;
-        ctx.fillText(
-            label.text,
-            label.tipX + labels.horizontalGap,
-            label.labelY
-        );
-      });
-    }
-
-    ctx.restore();
+    ctx.drawImage(labelCanvas, 0, 0, width, height);
   }
 
 }
