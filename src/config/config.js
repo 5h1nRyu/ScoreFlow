@@ -146,7 +146,7 @@ const APP_CONFIG = Object.freeze({
       showInOverview: true,
       fontSize: 24,
       // 初始积分（game -1）处的文字，仅从全景开始显示到本轮结束
-      initialText: "9/13",
+      initialText: "9/14",
       // 从全景开始到本轮结束，最后一场 game 处显示的文字
       finalText: "9/30"
     }),
