@@ -1,6 +1,9 @@
 (function exposeTeamTable(global) {
   "use strict";
 
+  // 队伍排行榜的队标使用固定资源目录。
+  const TEAM_IMAGE_BASE_URL = "assets/images/icons";
+
   function createElement(tagName, className, text) {
     const element = document.createElement(tagName);
     if (className) element.className = className;
@@ -100,7 +103,7 @@
       row.style.setProperty("--team-color", entry.team.color);
       const rank = createElement("span", "team-table__rank", String(entry.rank));
       const logo = createElement("img", "team-table__logo");
-      logo.src = imageUrl(config.teamImageBaseUrl, entry.team.name);
+      logo.src = imageUrl(TEAM_IMAGE_BASE_URL, entry.team.name);
       logo.alt = `${entry.team.name}队标`;
       logo.addEventListener("error", () => logo.classList.add("team-table__logo--missing"), { once: true });
       const name = createElement("strong", "team-table__name", entry.team.name);

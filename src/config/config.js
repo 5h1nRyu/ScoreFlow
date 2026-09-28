@@ -10,6 +10,8 @@ const OVERVIEW_DURATION = Object.values(OVERVIEW_PHASES)
 
 // 集中管理项目公共配置
 const APP_CONFIG = Object.freeze({
+  // 是否使用纸张图片背景；false 时仅使用 backgroundColor
+  useBackgroundImage: true,
   backgroundColor: "#ffffff",
 
   layout: Object.freeze({
@@ -49,11 +51,6 @@ const APP_CONFIG = Object.freeze({
     restartDelay: 3000
   }),
 
-  // 指定队伍、队员归属和初始分数的数据文件
-  teamsDataUrl: "data/teams.json",
-  // 指定每个 game 的选手数据文件
-  gamesDataUrl: "data/games.json",
-
   debug: Object.freeze({
     // 显示布局区域与表格内容列的调试边框，不影响实际布局尺寸
     showLayoutBorders: false,
@@ -82,9 +79,7 @@ const APP_CONFIG = Object.freeze({
       totalScore: 36,
       convertedTeamScore: 20,
       stat: 28
-    }),
-    playerImageBaseUrl: "assets/images/players",
-    teamImageBaseUrl: "assets/images/teams"
+    })
   }),
 
   teamTable: Object.freeze({
@@ -108,8 +103,7 @@ const APP_CONFIG = Object.freeze({
       teamName: 24,
       score: 30,
       rankChange: 20
-    }),
-    teamImageBaseUrl: "assets/images/icons"
+    })
   }),
 
   chart: Object.freeze({

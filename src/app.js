@@ -1,7 +1,10 @@
 (function startApplication() {
   "use strict";
 
-  const { animation, backgroundColor, debug, teamsDataUrl, layout, gamesDataUrl, title } = APP_CONFIG;
+  const { animation, backgroundColor, useBackgroundImage, debug, layout, title } = APP_CONFIG;
+  // 数据文件位置固定，不作为外观配置提供。
+  const TEAMS_DATA_URL = "data/teams.json";
+  const GAMES_DATA_URL = "data/games.json";
 
   // 将布局比例转换为 CSS 百分比
   function percentage(value, name) {
@@ -19,10 +22,14 @@
 
   // 校验并将页面外观配置写入样式表
   function applyAppearance() {
+    if (typeof useBackgroundImage !== "boolean") {
+      throw new Error("useBackgroundImage 必须是布尔值");
+    }
     if (!CSS.supports("color", backgroundColor)) {
       throw new Error(`背景颜色“${backgroundColor}”无效`);
     }
     document.documentElement.style.setProperty("--background-color", backgroundColor);
+    document.body.classList.toggle("page--image-background", useBackgroundImage);
     if (typeof debug.showLayoutBorders !== "boolean") {
       throw new Error("debug.showLayoutBorders 必须是布尔值");
     }
@@ -131,14 +138,14 @@
       applyAppearance();
       applyLayout();
       const [teamsResponse, gamesResponse] = await Promise.all([
-        fetch(teamsDataUrl, { cache: "no-store" }),
-        fetch(gamesDataUrl, { cache: "no-store" })
+        fetch(TEAMS_DATA_URL, { cache: "no-store" }),
+        fetch(GAMES_DATA_URL, { cache: "no-store" })
       ]);
       if (!teamsResponse.ok) {
-        throw new Error(`读取 ${teamsDataUrl} 失败（HTTP ${teamsResponse.status}）`);
+        throw new Error(`读取 ${TEAMS_DATA_URL} 失败（HTTP ${teamsResponse.status}）`);
       }
       if (!gamesResponse.ok) {
-        throw new Error(`读取 ${gamesDataUrl} 失败（HTTP ${gamesResponse.status}）`);
+        throw new Error(`读取 ${GAMES_DATA_URL} 失败（HTTP ${gamesResponse.status}）`);
       }
 
       const teamData = TeamData.parseTeamsJson(await teamsResponse.text());
