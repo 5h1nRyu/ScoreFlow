@@ -3,11 +3,12 @@
 ## TODO：
 
 - 标题部分字体和图标
-- 背景
 - 确认队伍代表色
 - 入场动画
 
 ## 页面布局
+
+在 `src/config/config.js` 中通过 `useBackgroundImage` 切换整页背景，默认 `true`：开启时使用固定图片 `assets/images/background/paper.jpg`，等比例居中铺满、不重复，允许裁切；关闭时仅使用 `backgroundColor` 指定的纯色。主容器与表格舞台透明，整页共用连续背景，表格条目保留自身底色；图片加载失败时也会露出该纯色底色。
 
 页面使用统一背景的纵向布局，顶部留白、主标题区、图表区和底部留白从上到下紧凑排列；图表区内的折线图和数据表从左到右排列，两者之间保留由 CSS 控制的间距，该间距包含在折线图区分配的宽度内。可在 `src/config/config.js` 的 `layout` 中调整：
 
@@ -21,7 +22,7 @@
 
 比赛表开始退场时，折线图区同步平滑调整宽度；退场结束且宽度调整完成后，队伍表才开始进场。每轮重播时直接恢复比赛表对应的布局，不播放反向宽度动画。两个表格宽度相同时保持布局不动，队伍表更窄时折线图平滑变宽。
 
-主标题区从左到右显示 `assets/images/others/hero.png`、标题文字和 `assets/images/others/name.png`，三者均在各自分区内水平居中、竖直底部对齐。标题使用本地字体 `assets/font/阿里妈妈东方大楷.ttf`。两张图片严格保持原始宽高比和配置高度，允许超出槽位，不自动缩小或裁剪；超高时向上溢出。可在 `title` 中调整：
+主标题区从左到右显示 `assets/images/others/hero.png`、标题文字和 `assets/images/others/name.png`，左图在左侧分区内水平右对齐，右图在右侧分区内水平左对齐，中间标题水平居中，三者均竖直底部对齐。标题使用本地字体 `assets/font/阿里妈妈东方大楷.ttf`。两张图片严格保持原始宽高比和配置高度，允许超出槽位，不自动缩小或裁剪；超高时向上溢出。可在 `title` 中调整：
 
 - `text`：标题文字，默认为“9月积分演变”。
 - `fontSize`：标题字号，单位为 CSS 像素。
@@ -30,6 +31,16 @@
 - `columns.icon1`、`columns.text`、`columns.icon2`：三个标题分区的宽度权重，三者之和必须为 `1`。
 
 `src/core/timeline.js` 提供页面级公共时间轴并统一驱动已注册组件，`src/components/score-chart.js` 只负责折线图本身的尺寸和绘制，`src/app.js` 负责数据加载与模块装配。新增依托比赛进度的组件时，可通过 `timeline.subscribe()` 订阅同一份时间状态。
+
+数据及图片路径固定在实现模块内，不再通过 `APP_CONFIG` 配置：
+
+| 用途 | 固定路径 |
+| --- | --- |
+| 队伍数据 | `data/teams.json` |
+| 比赛数据 | `data/games.json` |
+| 选手头像 | `assets/images/players` |
+| 比赛条目背景队标 | `assets/images/teams` |
+| 队伍排行榜队标 | `assets/images/icons` |
 
 ## 图表线条样式
 
@@ -66,7 +77,7 @@ ScoreFlow/
 ├── assets/
 │   ├── css/
 │   │   └── styles.css              # 页面布局和组件样式
-│   └── images/game-table/
+│   └── images/
 │       ├── players/                # 以选手 name 命名的 PNG 头像
 │       └── teams/                  # 以 team 命名的 PNG 队标
 ├── data/
@@ -95,7 +106,7 @@ ScoreFlow/
 
 项目采用无构建工具的浏览器端分层结构，各脚本按依赖顺序由 `index.html` 加载：
 
-1. **配置层**：`src/config/config.js` 创建只读的 `APP_CONFIG`，集中提供布局比例、动画速度、数据地址和图表参数
+1. **配置层**：`src/config/config.js` 创建只读的 `APP_CONFIG`，集中提供布局比例、动画速度、背景和图表参数
 2. **数据层**：`src/data/team-data.js` 和 `src/data/game-data.js` 校验两份 JSON，根据队员名关联队伍，并按 game 累加队伍积分
 3. **时间轴层**：`src/core/timeline.js` 根据配置按 game 计算播放头、帧间隔和循环状态，通过订阅机制向组件广播统一状态
 4. **组件层**：`src/components/score-chart.js` 负责 Canvas 尺寸适配、坐标映射、曲线插值、标签避让和逐帧绘制
@@ -141,8 +152,8 @@ games.json ──┘             │                          ↑
 
 人物头像和队标不存储在 JSON 中，按以下固定约定添加 PNG 文件：
 
-- 人物头像：`assets/images/game-table/players/<name>.png`
-- 队标：`assets/images/game-table/teams/<team>.png`
+- 人物头像：`assets/images/players/<name>.png`
+- 队标：`assets/images/teams/<team>.png`
 
 例如 `name` 为 `player04`、`team` 为 `team04` 时，对应文件分别为 `players/player04.png` 和 `teams/team04.png`。资源尚未添加或加载失败时，组件会保留排版空间并隐藏破损图片。
 

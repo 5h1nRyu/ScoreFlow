@@ -30,6 +30,14 @@ body {
   background-color: var(--background-color);
 }
 
+/* 整页共用一张纸张背景，保持比例居中铺满，允许裁切。 */
+body.page--image-background {
+  background-image: url("../images/background/paper.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 /* 使用可配置比例构建页面的纵向主布局 */
 .dashboard {
   --page-horizontal-margin: 2.5%;
@@ -55,7 +63,7 @@ body {
   gap: 0;
   width: 100%;
   height: 100%;
-  background-color: var(--background-color);
+  background-color: transparent;
 }
 
 .dashboard__title,
@@ -85,7 +93,15 @@ body {
   overflow: visible;
 }
 
-/* 图片严格使用配置高度，禁止收缩；水平居中，超高时从槽位底部向上溢出。 */
+.dashboard__title-section--hero {
+  justify-content: flex-end;
+}
+
+.dashboard__title-section--name {
+  justify-content: flex-start;
+}
+
+/* 图片严格使用配置高度，禁止收缩；向标题靠齐，超高时从槽位底部向上溢出。 */
 .dashboard__title-image {
   display: block;
   flex: 0 0 auto;
@@ -165,7 +181,7 @@ body {
 .table-stage {
   position: relative;
   padding: clamp(10px, 1.2vw, 22px) 0 clamp(10px, 1.2vw, 22px) clamp(10px, 1.2vw, 22px);
-  background-color: var(--background-color);
+  background-color: transparent;
 }
 
 .game-table {

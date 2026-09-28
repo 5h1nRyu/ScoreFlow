@@ -1,6 +1,10 @@
 (function exposeGameTable(global) {
   "use strict";
 
+  // 选手头像和比赛条目背景队标使用固定资源目录。
+  const PLAYER_IMAGE_BASE_URL = "assets/images/players";
+  const TEAM_IMAGE_BASE_URL = "assets/images/teams";
+
   function createElement(tagName, className, text) {
     const element = document.createElement(tagName);
     if (className) element.className = className;
@@ -43,14 +47,14 @@
     row.append(
         createImage(
             "game-table__team-mark",
-            imageUrl(config.teamImageBaseUrl, player.team),
+            imageUrl(TEAM_IMAGE_BASE_URL, player.team),
             ""
         ),
         identity,
         score,
         createImage(
             "game-table__portrait",
-            imageUrl(config.playerImageBaseUrl, player.name),
+            imageUrl(PLAYER_IMAGE_BASE_URL, player.name),
             `${player.name}的头像`
         )
     );
