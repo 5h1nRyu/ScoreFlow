@@ -20,11 +20,12 @@
 
 比赛表开始退场时，折线图区同步平滑调整宽度；退场结束且宽度调整完成后，队伍表才开始进场。每轮重播时直接恢复比赛表对应的布局，不播放反向宽度动画。两个表格宽度相同时保持布局不动，队伍表更窄时折线图平滑变宽。
 
-主标题区从左到右显示 `assets/images/others/hero.png`、标题文字和 `assets/images/others/name.png`，三者均在各自分区内水平、竖直居中。标题使用本地字体 `assets/font/阿里妈妈东方大楷.ttf`。两张图片严格保持原始宽高比和配置高度，允许超出槽位，不自动缩小或裁剪。可在 `title` 中调整：
+主标题区从左到右显示 `assets/images/others/hero.png`、标题文字和 `assets/images/others/name.png`，三者均在各自分区内水平居中、竖直底部对齐。标题使用本地字体 `assets/font/阿里妈妈东方大楷.ttf`。两张图片严格保持原始宽高比和配置高度，允许超出槽位，不自动缩小或裁剪；超高时向上溢出。可在 `title` 中调整：
 
 - `text`：标题文字，默认为“9月积分演变”。
 - `fontSize`：标题字号，单位为 CSS 像素。
 - `heroImageHeight`、`nameImageHeight`：左右图片的显示高度，单位为 CSS 像素，必须为大于 `0` 的有限数字，默认均为 `100`。
+- `showHeroImage`、`showNameImage`：分别控制左右图片是否显示，必须为布尔值，默认均为 `true`。隐藏图片后保留对应槽位宽度，标题位置不变。
 - `columns.icon1`、`columns.text`、`columns.icon2`：三个标题分区的宽度权重，三者之和必须为 `1`。
 
 `src/core/timeline.js` 提供页面级公共时间轴并统一驱动已注册组件，`src/components/score-chart.js` 只负责折线图本身的尺寸和绘制，`src/app.js` 负责数据加载与模块装配。新增依托比赛进度的组件时，可通过 `timeline.subscribe()` 订阅同一份时间状态。
@@ -51,9 +52,9 @@ X 轴的日期标签和 Y 轴的积分刻度文字可分别配置。`xAxis.label
 - `showInOverview`：全景展开和全景停留阶段是否显示该轴的文字标签。
 - `fontSize`：该轴文字标签的字号，单位为 CSS 像素。
 
-普通播放时，X 轴在有 `labelx` 的 game 处显示该字符串，没有此属性的 game 不显示文字；位置仍按 game 编号计算，不按日期间隔缩放。`data/games.json` 中按 `info` 的日期为每天第一场比赛添加 `labelx`（例如 `"9/14"`），同一天的后续比赛不添加。数据解析层保留并校验这个可选的非空字符串，图表直接读取它；后续追加数据时按同样规则填写。
+普通播放时，X 轴在有 `labelx` 的 game 的分数变化起点显示该字符串，即绘制在 `game - 1` 坐标（例如 game0 的标签位于初始积分坐标 -1），没有此属性的 game 不显示文字；位置仍按比赛间隔计算，不按日期间隔缩放。`data/games.json` 中按 `info` 的日期为每天第一场比赛添加 `labelx`（例如 `"9/14"`），同一天的后续比赛不添加。数据解析层保留并校验这个可选的非空字符串，图表直接读取它；后续追加数据时按同样规则填写。
 
-`xAxis.labels.initialText` 设置初始积分（`game -1`）处的文字，默认 `"9/13"`，普通播放和全景阶段共用。`xAxis.labels.finalText` 设置全景阶段最后一场 game 处的文字，默认 `"9/30"`。从进入 `overview` 开始，经过全景各阶段和 `restart-hold`，只显示这两个端点文字，不显示中间日期；端点随坐标移动，处于视窗外时不绘制。下一轮开始时恢复普通日期标签。启用 `debug.finalGameId` 时，右端点为实际演示的最后一场 game，文字仍使用配置值。
+`xAxis.labels.initialText` 设置初始积分（`game -1`）处的文字，默认 `"9/13"`，常规阶段不显示。`xAxis.labels.finalText` 设置全景阶段最后一场 game 处的文字，默认 `"9/30"`。从进入 `overview` 开始，经过全景各阶段和 `restart-hold`，只显示这两个端点文字，不显示中间日期；端点不前移，随坐标移动，处于视窗外时不绘制。下一轮开始时恢复普通日期标签并隐藏 `initialText`。启用 `debug.finalGameId` 时，右端点为实际演示的最后一场 game，文字仍使用配置值。
 
 标签开关只控制刻度文字，不会隐藏坐标刻度线或网格线，也不会影响由 `labels.enabled` 控制的折线末端队伍简称。
 

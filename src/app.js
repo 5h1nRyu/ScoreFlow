@@ -57,6 +57,11 @@
         throw new Error(`title.${name} 必须是大于 0 的数字`);
       }
     });
+    ["showHeroImage", "showNameImage"].forEach(name => {
+      if (typeof title[name] !== "boolean") {
+        throw new Error(`title.${name} 必须是布尔值`);
+      }
+    });
     if (typeof title.text !== "string" || title.text.length === 0) {
       throw new Error("title.text 必须是非空字符串");
     }
@@ -84,6 +89,8 @@
     dashboard.style.setProperty("--title-hero-image-height", `${title.heroImageHeight}px`);
     dashboard.style.setProperty("--title-name-image-height", `${title.nameImageHeight}px`);
     document.getElementById("dashboardTitleText").textContent = title.text;
+    document.querySelector(".dashboard__title-image--hero").hidden = !title.showHeroImage;
+    document.querySelector(".dashboard__title-image--name").hidden = !title.showNameImage;
   }
 
   // 与表格退场共用时间轴，暂停冻结进度，循环首帧立即恢复比赛表布局。

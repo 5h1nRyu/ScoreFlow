@@ -25,6 +25,9 @@ const APP_CONFIG = Object.freeze({
   title: Object.freeze({
     text: "2026-2027赛季 9月积分演变",
     fontSize: 80,
+    // 分别控制左右图片是否显示；隐藏后仍保留各自槽位宽度
+    showHeroImage: true,
+    showNameImage: true,
     // 左右图片的显示高度，单位为 CSS 像素；保持原始比例，允许超出各自槽位
     heroImageHeight: 100,
     nameImageHeight: 100,
@@ -142,7 +145,7 @@ const APP_CONFIG = Object.freeze({
       showInNormal: true,
       showInOverview: true,
       fontSize: 24,
-      // 初始积分（game -1）处的文字，普通播放和全景阶段共用
+      // 初始积分（game -1）处的文字，仅从全景开始显示到本轮结束
       initialText: "9/13",
       // 从全景开始到本轮结束，最后一场 game 处显示的文字
       finalText: "9/30"

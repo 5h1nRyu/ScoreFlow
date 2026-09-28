@@ -78,14 +78,14 @@ body {
 
 .dashboard__title-section {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   min-width: 0;
   min-height: 0;
   overflow: visible;
 }
 
-/* 图片严格使用配置高度，禁止收缩；超出槽位时仍以槽位中心为基准。 */
+/* 图片严格使用配置高度，禁止收缩；水平居中，超高时从槽位底部向上溢出。 */
 .dashboard__title-image {
   display: block;
   flex: 0 0 auto;
@@ -96,6 +96,11 @@ body {
 
 .dashboard__title-image--hero {
   height: var(--title-hero-image-height);
+}
+
+/* 显式覆盖图片的 display，隐藏时由外层槽位继续保留布局空间。 */
+.dashboard__title-image[hidden] {
+  display: none;
 }
 
 .dashboard__title-image--name {

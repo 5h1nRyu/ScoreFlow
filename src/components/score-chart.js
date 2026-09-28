@@ -719,13 +719,14 @@ function render(timelineState) {
       if (!text || game < viewStart || game > viewEnd) return;
       ctx.fillText(text, xAt(game), height - margin.bottom + 14);
     };
-    drawXLabel(-1, xAxis.labels.initialText);
     if (usesOverviewLabels) {
+      drawXLabel(-1, xAxis.labels.initialText);
       drawXLabel(finalGame, xAxis.labels.finalText);
     } else {
-      for (let game = Math.max(0, Math.ceil(viewStart));
-          game <= Math.min(finalGame, Math.floor(viewEnd)); game++) {
-        drawXLabel(game, games[game].labelx);
+      // 每场日期标在该场分数变化的起点，窗口筛选同步前移一格。
+      for (let game = Math.max(0, Math.ceil(viewStart + 1));
+          game <= Math.min(finalGame, Math.floor(viewEnd + 1)); game++) {
+        drawXLabel(game - 1, games[game].labelx);
       }
     }
   }
