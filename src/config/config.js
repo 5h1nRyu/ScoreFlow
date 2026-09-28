@@ -23,13 +23,13 @@ const APP_CONFIG = Object.freeze({
   }),
 
   title: Object.freeze({
-    text: "9月积分演变",
-    fontSize: 60,
+    text: "2026-2027赛季 9月积分演变",
+    fontSize: 80,
     // 左右图片的显示高度，单位为 CSS 像素；保持原始比例，允许超出各自槽位
     heroImageHeight: 100,
     nameImageHeight: 100,
     // 左侧图片、中间标题、右侧图片的三列宽度之和必须为 1
-    columns: Object.freeze({ icon1: 0.3, text: 0.5, icon2: 0.2 })
+    columns: Object.freeze({ icon1: 0.2, text: 0.6, icon2: 0.2 })
   }),
 
   animation: Object.freeze({
