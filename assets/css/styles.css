@@ -1,5 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@700&display=swap");
 
+@font-face {
+  font-family: "Alimama DongFangDaKai";
+  src: url("../font/阿里妈妈东方大楷.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   color-scheme: light;
   --background-color: #ffffff;
@@ -35,6 +43,8 @@ body {
   --title-text-width: 0.5fr;
   --title-icon-2-width: 0.2fr;
   --title-font-size: 48px;
+  --title-hero-image-height: 100px;
+  --title-name-image-height: 100px;
   display: grid;
   grid-template-columns: var(--page-horizontal-margin) minmax(0, 1fr) var(--page-horizontal-margin);
   grid-template-rows:
@@ -58,27 +68,49 @@ body {
 .dashboard__title {
   display: grid;
   grid-row: 2;
+  grid-template-rows: 100%;
+  overflow: visible;
   grid-template-columns:
-    var(--title-icon-1-width)
-    var(--title-text-width)
-    var(--title-icon-2-width);
+    minmax(0, var(--title-icon-1-width))
+    minmax(0, var(--title-text-width))
+    minmax(0, var(--title-icon-2-width));
 }
 
 .dashboard__title-section {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   min-width: 0;
   min-height: 0;
+  overflow: visible;
+}
+
+/* 图片严格使用配置高度，禁止收缩；超出槽位时仍以槽位中心为基准。 */
+.dashboard__title-image {
+  display: block;
+  flex: 0 0 auto;
+  width: auto;
+  max-width: none;
+  max-height: none;
+}
+
+.dashboard__title-image--hero {
+  height: var(--title-hero-image-height);
+}
+
+.dashboard__title-image--name {
+  height: var(--title-name-image-height);
 }
 
 .dashboard__title-text {
   margin: 0;
   color: #18232d;
-  font-family: "Noto Sans SC", "Source Han Sans SC", system-ui, sans-serif;
+  font-family: "Alimama DongFangDaKai", serif;
   font-size: var(--title-font-size);
-  font-weight: 700;
+  font-weight: 400;
+  font-synthesis: none;
   line-height: 1.2;
+  text-align: center;
 }
 
 .dashboard__chart-area {

@@ -20,10 +20,11 @@
 
 比赛表开始退场时，折线图区同步平滑调整宽度；退场结束且宽度调整完成后，队伍表才开始进场。每轮重播时直接恢复比赛表对应的布局，不播放反向宽度动画。两个表格宽度相同时保持布局不动，队伍表更窄时折线图平滑变宽。
 
-主标题区从左到右包含图标 1 槽位、标题文字和图标 2 槽位，三个部分均左对齐并竖直居中。图标槽位暂不放置实际资源。可在 `title` 中调整：
+主标题区从左到右显示 `assets/images/others/hero.png`、标题文字和 `assets/images/others/name.png`，三者均在各自分区内水平、竖直居中。标题使用本地字体 `assets/font/阿里妈妈东方大楷.ttf`。两张图片严格保持原始宽高比和配置高度，允许超出槽位，不自动缩小或裁剪。可在 `title` 中调整：
 
 - `text`：标题文字，默认为“9月积分演变”。
 - `fontSize`：标题字号，单位为 CSS 像素。
+- `heroImageHeight`、`nameImageHeight`：左右图片的显示高度，单位为 CSS 像素，必须为大于 `0` 的有限数字，默认均为 `100`。
 - `columns.icon1`、`columns.text`、`columns.icon2`：三个标题分区的宽度权重，三者之和必须为 `1`。
 
 `src/core/timeline.js` 提供页面级公共时间轴并统一驱动已注册组件，`src/components/score-chart.js` 只负责折线图本身的尺寸和绘制，`src/app.js` 负责数据加载与模块装配。新增依托比赛进度的组件时，可通过 `timeline.subscribe()` 订阅同一份时间状态。

@@ -52,6 +52,11 @@
     if (!Number.isFinite(title.fontSize) || title.fontSize <= 0) {
       throw new Error("title.fontSize 必须是大于 0 的数字");
     }
+    ["heroImageHeight", "nameImageHeight"].forEach(name => {
+      if (!Number.isFinite(title[name]) || title[name] <= 0) {
+        throw new Error(`title.${name} 必须是大于 0 的数字`);
+      }
+    });
     if (typeof title.text !== "string" || title.text.length === 0) {
       throw new Error("title.text 必须是非空字符串");
     }
@@ -76,6 +81,8 @@
         "--title-icon-2-width", fraction(title.columns.icon2, "title.columns.icon2")
     );
     dashboard.style.setProperty("--title-font-size", `${title.fontSize}px`);
+    dashboard.style.setProperty("--title-hero-image-height", `${title.heroImageHeight}px`);
+    dashboard.style.setProperty("--title-name-image-height", `${title.nameImageHeight}px`);
     document.getElementById("dashboardTitleText").textContent = title.text;
   }
 
