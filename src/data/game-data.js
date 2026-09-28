@@ -38,8 +38,12 @@
       throw new Error(`${path}.players 必须恰好包含 4 名选手`);
     }
     assertNonEmptyString(game.info, `${path}.info`);
+    if (game.labelx !== undefined) {
+      assertNonEmptyString(game.labelx, `${path}.labelx`);
+    }
     return Object.freeze({
       info: game.info,
+      ...(game.labelx !== undefined ? { labelx: game.labelx } : {}),
       players: Object.freeze(game.players.map((player, index) =>
         validatePlayer(player, `${path}.players[${index}]`)
       ))

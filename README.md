@@ -2,9 +2,7 @@
 
 ## TODO：
 
-- x轴标签在最后阶段会突变
 - 标题部分字体和图标
-- x轴标签文字
 - 背景
 - 确认队伍代表色
 
@@ -37,7 +35,7 @@
 - `chart.lineThickness`：所有屏幕尺寸下的积分折线粗细；折线末端圆点会随该值等比例缩放。
 - `xAxis.gridLine.thickness`：与 X 轴刻度对应的竖直网格虚线粗细。
 - `xAxis.gridLine.dashLength`、`dashGap`：竖直网格虚线的线段长度和间隔长度。
-- `xAxis.overviewTargetGridLineCount`：全景展开阶段期望显示的竖直网格线数量；实际间隔会从 `1、2、4、8、16...` 中选择最接近目标数量的一档，并在整个展开阶段保持稳定。
+- `xAxis.overviewTargetGridLineCount`：全景展开阶段期望显示的竖直网格线数量；实际间隔会从 `1、2、4、8、16...` 中选择最接近目标数量的一档，并从全景展开开始一直保持到本轮结束（包含 `restart-hold`），下一轮开始时才恢复逐场竖线。此配置只控制竖线，不控制文字标签。
 - `yAxis.gridLines.zero`：零分水平线的样式。
 - `yAxis.gridLines.major`：主刻度水平虚线的样式。
 - `yAxis.gridLines.minor`：次刻度水平虚线的样式。
@@ -46,11 +44,15 @@
 
 ## 坐标轴标签
 
-X 轴的 game 编号和 Y 轴的积分刻度文字可分别配置。`xAxis.labels` 与 `yAxis.labels` 均提供：
+X 轴的日期标签和 Y 轴的积分刻度文字可分别配置。`xAxis.labels` 与 `yAxis.labels` 均提供：
 
 - `showInNormal`：一般播放阶段是否显示该轴的文字标签。
 - `showInOverview`：全景展开和全景停留阶段是否显示该轴的文字标签。
 - `fontSize`：该轴文字标签的字号，单位为 CSS 像素。
+
+普通播放时，X 轴在有 `labelx` 的 game 处显示该字符串，没有此属性的 game 不显示文字；位置仍按 game 编号计算，不按日期间隔缩放。`data/games.json` 中按 `info` 的日期为每天第一场比赛添加 `labelx`（例如 `"9/14"`），同一天的后续比赛不添加。数据解析层保留并校验这个可选的非空字符串，图表直接读取它；后续追加数据时按同样规则填写。
+
+`xAxis.labels.initialText` 设置初始积分（`game -1`）处的文字，默认 `"9/13"`，普通播放和全景阶段共用。`xAxis.labels.finalText` 设置全景阶段最后一场 game 处的文字，默认 `"9/30"`。从进入 `overview` 开始，经过全景各阶段和 `restart-hold`，只显示这两个端点文字，不显示中间日期；端点随坐标移动，处于视窗外时不绘制。下一轮开始时恢复普通日期标签。启用 `debug.finalGameId` 时，右端点为实际演示的最后一场 game，文字仍使用配置值。
 
 标签开关只控制刻度文字，不会隐藏坐标刻度线或网格线，也不会影响由 `labels.enabled` 控制的折线末端队伍简称。
 

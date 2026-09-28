@@ -3,6 +3,7 @@
     {
       "gameId": 0,
       "info": "9月14日A桌第一半庄",
+      "labelx": "9/14",
       "players": [
         {
           "name": "逢川惠梦",
@@ -55,6 +56,7 @@
     {
       "gameId": 2,
       "info": "9月15日A桌第一半庄",
+      "labelx": "9/15",
       "players": [
         {
           "name": "尻无滨航",
@@ -107,6 +109,7 @@
     {
       "gameId": 4,
       "info": "9月17日A桌第一半庄",
+      "labelx": "9/17",
       "players": [
         {
           "name": "本田朋广",
@@ -159,6 +162,7 @@
     {
       "gameId": 6,
       "info": "9月18日A桌第一半庄",
+      "labelx": "9/18",
       "players": [
         {
           "name": "黑泽咲",
@@ -211,6 +215,7 @@
     {
       "gameId": 8,
       "info": "9月21日A桌第一半庄",
+      "labelx": "9/21",
       "players": [
         {
           "name": "渡边太",
@@ -315,6 +320,7 @@
     {
       "gameId": 12,
       "info": "9月22日A桌第一半庄",
+      "labelx": "9/22",
       "players": [
         {
           "name": "冈田纱佳",
@@ -419,6 +425,7 @@
     {
       "gameId": 16,
       "info": "9月24日A桌第一半庄",
+      "labelx": "9/24",
       "players": [
         {
           "name": "东城理央",
@@ -523,6 +530,7 @@
     {
       "gameId": 20,
       "info": "9月25日A桌第一半庄",
+      "labelx": "9/25",
       "players": [
         {
           "name": "朝仓康心",

@@ -138,9 +138,13 @@ const APP_CONFIG = Object.freeze({
     labels: Object.freeze({
       showInNormal: true,
       showInOverview: true,
-      fontSize: 24
+      fontSize: 24,
+      // 初始积分（game -1）处的文字，普通播放和全景阶段共用
+      initialText: "9/13",
+      // 从全景开始到本轮结束，最后一场 game 处显示的文字
+      finalText: "9/30"
     }),
-    // 全景阶段期望显示的竖直网格线数量
+    // 全景阶段期望显示的竖直网格线数量；间隔保持到下一轮开始
     overviewTargetGridLineCount: 12,
     gridLine: Object.freeze({
       // 设置竖直网格虚线的粗细、线段长度和间隔长度

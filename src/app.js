@@ -141,7 +141,7 @@
       const finalGame = data.games.length - 1;
       const playbackTasks = ScoreTimeline.createPlaybackTasks();
       const chart = ScoreChart.createScoreChart(
-          document.getElementById("scoreChart"), data.teams, finalGame, APP_CONFIG
+          document.getElementById("scoreChart"), data.teams, data.games, APP_CONFIG
       );
       const gameTable = GameTable.createGameTable(
           document.getElementById("gameTable"),

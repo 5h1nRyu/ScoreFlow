@@ -1,9 +1,10 @@
 (function exposeScoreChart(global) {
   "use strict";
 
-function createScoreChart(canvas, teams, finalGame, config) {
+function createScoreChart(canvas, teams, games, config) {
 const ctx = canvas.getContext("2d");
 const { chart, labels, xAxis, yAxis } = config;
+const finalGame = games.length - 1;
 
 // 校验 Canvas 线条配置，避免无效数值导致图表样式异常
 function validateLineStyle(style, name, allowSolid = false) {
@@ -59,6 +60,11 @@ function validateAxisLabels(axis, name) {
   }
 }
 validateAxisLabels(xAxis, "xAxis");
+["initialText", "finalText"].forEach(name => {
+  if (typeof xAxis.labels[name] !== "string" || !xAxis.labels[name].trim()) {
+    throw new Error(`xAxis.labels.${name} 必须是非空字符串`);
+  }
+});
 if (
     !Number.isInteger(xAxis.overviewTargetGridLineCount) ||
     xAxis.overviewTargetGridLineCount <= 0
@@ -74,7 +80,7 @@ function lineDash(style) {
   return style.dashLength === 0 ? [] : [style.dashLength, style.dashGap];
 }
 
-// 全景展开期间固定使用同一档 2 的幂间隔，避免动画过程中竖线跳变
+// 从全景展开到本轮结束固定使用同一档 2 的幂间隔，避免竖线跳变
 function overviewGridStep() {
   const target = xAxis.overviewTargetGridLineCount;
   let bestStep = 1;
@@ -670,8 +676,8 @@ function render(timelineState) {
   ctx.font = `600 ${xAxis.labels.fontSize}px "Courier New", monospace`;
 
 
-  // 仅在全景展开阶段减少竖线；普通播放阶段仍逐个显示 game
-  const xGridStep = phase === "overview" ? fixedOverviewGridStep : 1;
+  // 全景及循环等待阶段共用间隔，下一轮开始时才恢复逐场竖线。
+  const xGridStep = usesOverviewLabels ? fixedOverviewGridStep : 1;
   // 所有档位都以 game -1 为起点，确保初始积分刻度始终完整显示。
   const firstGridGame = -1 + Math.ceil((viewStart + 1) / xGridStep) * xGridStep;
 
@@ -704,20 +710,23 @@ function render(timelineState) {
     );
 
     ctx.stroke();
+  }
 
-
-    // 绘制 game 编号
-    if (showXAxisLabels) {
-      ctx.fillStyle =
-          "rgba(28,30,25,.78)";
-
-      ctx.fillText(
-          String(game),
-          x,
-          height -
-          margin.bottom +
-          14
-      );
+  // 日期标签独立于网格间隔；全景及循环等待只显示两个端点。
+  if (showXAxisLabels) {
+    ctx.fillStyle = "rgba(28,30,25,.78)";
+    const drawXLabel = (game, text) => {
+      if (!text || game < viewStart || game > viewEnd) return;
+      ctx.fillText(text, xAt(game), height - margin.bottom + 14);
+    };
+    drawXLabel(-1, xAxis.labels.initialText);
+    if (usesOverviewLabels) {
+      drawXLabel(finalGame, xAxis.labels.finalText);
+    } else {
+      for (let game = Math.max(0, Math.ceil(viewStart));
+          game <= Math.min(finalGame, Math.floor(viewEnd)); game++) {
+        drawXLabel(game, games[game].labelx);
+      }
     }
   }
 
