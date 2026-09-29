@@ -211,7 +211,7 @@
       const pairCount = games.length / 2;
       const nextIndex = Math.min(pairCount - 1, Math.max(0, index));
       if (nextIndex === activeIndex) {
-        // 重播要求立即展示时，也要结束同一目标上尚未完成的动画。
+        // 要求立即展示时，也要结束同一目标上尚未完成的动画。
         if (!animate && pendingPanel) finishTransition(pendingPanel);
         return;
       }
@@ -224,13 +224,18 @@
       // 必须在动画开始时记录目标，防止每帧重复创建同一个面板。
       activeIndex = nextIndex;
 
-      if (!activePanel || !animate || reduceMotion || transitionLength === 0) {
+      if (!animate || reduceMotion || transitionLength === 0) {
         finishTransition(nextPanel);
         return;
       }
 
-      activePanel.classList.add("game-table__panel--outgoing");
       pendingPanel = nextPanel;
+      // 首次播放和每轮重播的首组表格直接复用右侧入场，不等待旧面板退场。
+      if (!activePanel) {
+        startIncomingTransition(nextPanel);
+        return;
+      }
+      activePanel.classList.add("game-table__panel--outgoing");
       // 旧面板完全退场并移除后才挂载新面板，避免两套文字同时存在。
       transitionTimer = playbackTasks.setTimeout(() => startIncomingTransition(nextPanel), transitionLength);
     }
@@ -245,8 +250,28 @@
       if (isOverview && pendingPanel) finishTransition(pendingPanel);
     }
 
+    function resetForOpening() {
+      playbackTasks.clearTimeout(transitionTimer);
+      playbackTasks.cancelAnimationFrame(transitionFrame);
+      transitionTimer = 0;
+      transitionFrame = 0;
+      activeIndex = -1;
+      activePanel = null;
+      pendingPanel = null;
+      root.replaceChildren();
+    }
+
     return Object.freeze({
       render(state) {
+        const isOpening = state.phase === "background-hold" || state.phase === "entrance";
+        if (state.didRestart || (isOpening && activeIndex !== -1)) resetForOpening();
+        if (isOpening) {
+          setOverviewVisibility(true);
+          root.style.opacity = "0";
+          root.style.transform = "translateX(0)";
+          teamTableSlot.hidden = true;
+          return;
+        }
         const isOverview = state.phase === "overview" || state.phase === "restart-hold";
         const isExiting = state.phase === "game-table-exit";
         setOverviewVisibility(isExiting || isOverview);
@@ -259,7 +284,7 @@
         if (isExiting || isOverview) return;
         showGamePair(
             Math.floor(state.tableCompletedGame / 2),
-            activeIndex >= 0 && !state.didRestart
+            true
         );
       }
     });

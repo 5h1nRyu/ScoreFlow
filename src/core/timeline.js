@@ -4,6 +4,8 @@
   // 创建可被多个可视化组件订阅的公共时间轴
   function createTimeline(options) {
     const {
+      backgroundHoldDuration,
+      entranceDuration,
       gameDuration,
       maximumFrameDelta,
       gameTableExitDuration,
@@ -12,6 +14,11 @@
       restartDelay
     } = options.animation;
     const finalGame = options.finalGame;
+    ["backgroundHoldDuration", "entranceDuration"].forEach(name => {
+      if (!Number.isFinite(options.animation[name]) || options.animation[name] < 0) {
+        throw new Error(`animation.${name} 必须是大于或等于 0 的数字`);
+      }
+    });
     if (!Number.isFinite(gameTableExitDuration) || gameTableExitDuration < 0) {
       throw new Error("animation.gameTableExitDuration 必须是大于或等于 0 的数字");
     }
@@ -19,21 +26,26 @@
     let animationFrame = 0;
     let startTime = 0;
     let lastFrameTime = 0;
-    let previousCycleElapsed = 0;
+    let previousCycleIndex = 0;
     let pausedAt = null;
 
     // 计算当前播放状态并通知所有订阅者
     function frame(now) {
-      // 每轮从 game -1（初始积分）开始，用一个完整时长过渡到 game0。
-      const animationDuration = (finalGame + 1) * gameDuration;
+      // 开场结束后才从初始积分推进到 game0，后续各阶段整体顺延。
+      const introDuration = backgroundHoldDuration + entranceDuration;
+      const animationDuration = introDuration + (finalGame + 1) * gameDuration;
       const lastGameHoldEnd = animationDuration + gameDuration;
       const overviewStart = lastGameHoldEnd + gameTableExitDuration;
       const overviewEnd = overviewStart + overviewDuration;
       const cycleDuration = overviewEnd + restartDelay;
       const elapsed = Math.max(0, now - startTime);
       const cycleElapsed = cycleDuration > 0 ? elapsed % cycleDuration : 0;
-      const playhead = Math.min(finalGame, cycleElapsed / gameDuration - 1);
-      const didRestart = elapsed >= cycleDuration && cycleElapsed < previousCycleElapsed;
+      const cycleIndex = cycleDuration > 0 ? Math.floor(elapsed / cycleDuration) : 0;
+      const playhead = Math.min(finalGame, Math.max(0, cycleElapsed - introDuration) / gameDuration - 1);
+      const didRestart = cycleIndex !== previousCycleIndex;
+      const entranceProgress = entranceDuration > 0
+          ? Math.min(1, Math.max(0, (cycleElapsed - backgroundHoldDuration) / entranceDuration))
+          : Number(cycleElapsed >= backgroundHoldDuration);
       // 折线图在队伍表进场阶段完成全景展开，之后保持最终视图不动。
       const overviewProgress = overview.teamTableEnterDuration > 0
           ? Math.min(1, Math.max(0,
@@ -66,20 +78,25 @@
           stageStart += duration;
         }
       }
-      const phase = cycleElapsed < animationDuration
-          ? "playing"
-          : cycleElapsed < lastGameHoldEnd
-              ? "last-game-hold"
-              : cycleElapsed < overviewStart
-                  ? "game-table-exit"
-                  : cycleElapsed < overviewEnd
-                      ? "overview"
-                      : "restart-hold";
+      const phase = cycleElapsed < backgroundHoldDuration
+          ? "background-hold"
+          : cycleElapsed < introDuration
+              ? "entrance"
+              : cycleElapsed < animationDuration
+                  ? "playing"
+                  : cycleElapsed < lastGameHoldEnd
+                      ? "last-game-hold"
+                      : cycleElapsed < overviewStart
+                          ? "game-table-exit"
+                          : cycleElapsed < overviewEnd
+                              ? "overview"
+                              : "restart-hold";
       const state = Object.freeze({
         completedGame: Math.floor(playhead),
         deltaSeconds: Math.min(maximumFrameDelta, Math.max(0, now - lastFrameTime) / 1000),
         didRestart,
         elapsed,
+        entranceProgress,
         isHolding: phase !== "playing" && phase !== "overview",
         overviewProgress,
         overviewStage,
@@ -88,12 +105,13 @@
         playhead,
         tableLayoutProgress,
         // 比赛详情维持原有节奏，不随新增的 -1 → game0 时段整体后移。
-        tableCompletedGame: Math.min(finalGame, Math.floor(playhead + 1))
+        tableCompletedGame: cycleElapsed < introDuration
+            ? -1 : Math.min(finalGame, Math.floor(playhead + 1))
       });
 
       subscribers.forEach(subscriber => subscriber(state));
       lastFrameTime = now;
-      previousCycleElapsed = cycleElapsed;
+      previousCycleIndex = cycleIndex;
       animationFrame = requestAnimationFrame(frame);
     }
 
@@ -107,7 +125,7 @@
         if (animationFrame || pausedAt !== null) return;
         startTime = performance.now();
         lastFrameTime = startTime;
-        previousCycleElapsed = 0;
+        previousCycleIndex = 0;
         animationFrame = requestAnimationFrame(frame);
       },
       pause() {
@@ -194,4 +212,3 @@
 
   global.ScoreTimeline = Object.freeze({ createTimeline, createPlaybackTasks });
 }(globalThis));
-

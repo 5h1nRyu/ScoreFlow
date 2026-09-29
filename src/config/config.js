@@ -26,18 +26,14 @@ const APP_CONFIG = Object.freeze({
 
   title: Object.freeze({
     text: "M.LEAGUE 2026-2027赛季 9月积分演变",
-    fontSize: 80,
-    // 分别控制左右图片是否显示；隐藏后仍保留各自槽位宽度
-    showHeroImage: false,
-    showNameImage: false,
-    // 左右图片的显示高度，单位为 CSS 像素；保持原始比例，允许超出各自槽位
-    heroImageHeight: 100,
-    nameImageHeight: 100,
-    // 左侧图片、中间标题、右侧图片的三列宽度之和必须为 1
-    columns: Object.freeze({ icon1: 0.1, text: 0.8, icon2: 0.1 })
+    fontSize: 80
   }),
 
   animation: Object.freeze({
+    // 每轮开始时只显示背景的时长，单位为毫秒；0 表示跳过
+    backgroundHoldDuration: 5000,
+    // 标题逐字淡入与折线图整体淡入共用的时长；0 表示立即显示
+    entranceDuration: 2000,
     // 设置每个 game 对应的动画毫秒数
     gameDuration: 2000,
     // 限制单帧参与缩放计算的最大秒数
