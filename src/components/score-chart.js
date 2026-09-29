@@ -3,8 +3,6 @@
 
 function createScoreChart(canvas, teams, games, config) {
 const ctx = canvas.getContext("2d");
-// Canvas 与页面文字共用同一字体，加载由 app 在创建图表前完成。
-const fontFamily = getComputedStyle(canvas).fontFamily;
 const { chart, labels, xAxis, yAxis } = config;
 const finalGame = games.length - 1;
 
@@ -546,7 +544,7 @@ function render(timelineState) {
       : xAxis.labels.showInNormal;
 
   // 设置 Y 轴文字样式
-  ctx.font = `600 ${yAxis.labels.fontSize}px ${fontFamily}`;
+  ctx.font = `600 ${yAxis.labels.fontSize}px "Courier New", monospace`;
 
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
@@ -675,7 +673,7 @@ function render(timelineState) {
   // 设置 X 轴文字样式
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
-  ctx.font = `600 ${xAxis.labels.fontSize}px ${fontFamily}`;
+  ctx.font = `600 ${xAxis.labels.fontSize}px "Courier New", monospace`;
 
 
   // 全景及循环等待阶段共用间隔，下一轮开始时才恢复逐场竖线。
@@ -911,7 +909,7 @@ function render(timelineState) {
 
     labelCtx.clearRect(0, 0, width, height);
     labelCtx.save();
-    labelCtx.font = `${labels.fontWeight} ${labels.fontSize}px ${fontFamily}`;
+    labelCtx.font = `${labels.fontWeight} ${labels.fontSize}px "Courier New", monospace`;
     labelCtx.textAlign = "left";
     labelCtx.textBaseline = "middle";
 

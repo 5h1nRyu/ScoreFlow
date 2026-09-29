@@ -8,7 +8,7 @@
 
 :root {
   color-scheme: light;
-  --app-font-family: "Alimama DongFangDaKai", serif;
+  --heading-font-family: "Alimama DongFangDaKai", serif;
   --background-color: #ffffff;
 }
 
@@ -26,8 +26,6 @@ body {
 }
 
 body {
-  font-family: var(--app-font-family);
-  font-synthesis: none;
   background-color: var(--background-color);
 }
 
@@ -89,7 +87,7 @@ body.page--image-background {
 .dashboard__title-text {
   margin: 0;
   color: #18232d;
-  font-family: var(--app-font-family);
+  font-family: var(--heading-font-family);
   font-size: var(--title-font-size);
   font-weight: 400;
   font-synthesis: none;
@@ -222,10 +220,12 @@ body.page--image-background {
 .game-table__header {
   min-height: 28px;
   color: #52606b;
-  font: 700 clamp(14px, 1.092vw, 21px)/1.2 var(--app-font-family);
+  font: 700 clamp(14px, 1.092vw, 21px)/1.2 system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 .game-table__title {
+  font-family: var(--heading-font-family);
+  font-synthesis: none;
   margin: 0;
   color: #18232d;
   font-size: var(--game-table-header-font-size);
@@ -250,7 +250,7 @@ body.page--image-background {
   min-height: 0;
   overflow: visible;
   color: #18232d;
-  font-family: var(--app-font-family);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(44, 65, 78, 0.12);
   border-left: clamp(5px, 0.45vw, 9px) solid var(--team-color);
@@ -386,7 +386,7 @@ body.page--image-background {
   --team-table-logo-height: 42px;
   padding: clamp(10px, 1.2vw, 22px);
   overflow: hidden;
-  font-family: var(--app-font-family);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   display: flex;
   flex-direction: column;
   gap: clamp(8px, 0.8vw, 14px);
@@ -397,6 +397,8 @@ body.page--image-background {
 }
 
 .team-table__title {
+  font-family: var(--heading-font-family);
+  font-synthesis: none;
   flex: 0 0 auto;
   margin: 0;
   color: #18232d;
@@ -556,7 +558,7 @@ body.page--image-background {
   margin: 0;
   padding: 1rem 1.25rem;
   color: #8b1e13;
-  font: 600 16px/1.6 var(--app-font-family);
+  font: 600 16px/1.6 "Courier New", monospace;
   text-align: center;
   background: #fff3f0;
   border: 2px solid #cf3f27;

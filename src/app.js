@@ -138,7 +138,7 @@
       const [teamsResponse, gamesResponse] = await Promise.all([
         fetch(TEAMS_DATA_URL, { cache: "no-store" }),
         fetch(GAMES_DATA_URL, { cache: "no-store" }),
-        // Canvas 首次测量文字前加载本地字体，避免后续字体替换造成宽度跳变。
+        // 开场前加载主标题和两类表头使用的本地字体，避免入场时字体跳变。
         document.fonts.load('400 16px "Alimama DongFangDaKai"')
       ]);
       if (!teamsResponse.ok) {
