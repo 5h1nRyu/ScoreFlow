@@ -11,7 +11,7 @@ const OVERVIEW_DURATION = Object.values(OVERVIEW_PHASES)
 // 集中管理项目公共配置
 const APP_CONFIG = Object.freeze({
   // 是否使用纸张图片背景；false 时仅使用 backgroundColor
-  useBackgroundImage: true,
+  useBackgroundImage: false,
   backgroundColor: "#ffffff",
 
   layout: Object.freeze({
@@ -85,7 +85,7 @@ const APP_CONFIG = Object.freeze({
   teamTable: Object.freeze({
     // 分别设置重排前后的排行榜标题
     initialTitle: "初始队伍排名",
-    finalTitle: "月末队伍排名",
+    finalTitle: "最终队伍排名",
     // 设置标题字号与单次淡出或淡入动画时长
     titleFontSize: 40,
     titleTransitionDuration: 180,
