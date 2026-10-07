@@ -3,7 +3,7 @@
     {
       "name": "EX风林火山",
       "shortName": "火山",
-      "color": "#000000",
+      "color": "#890c12",
       "initialScore": 0,
       "players": [
         "二阶堂亚树",
@@ -15,7 +15,7 @@
     {
       "name": "科乐美麻将格斗俱乐部",
       "shortName": "格斗",
-      "color": "#920101",
+      "color": "#df3116",
       "initialScore": 0,
       "players": [
         "佐佐木寿人",
@@ -27,7 +27,7 @@
     {
       "name": "雷电",
       "shortName": "雷电",
-      "color": "#dbb400",
+      "color": "#d6870d",
       "initialScore": 0,
       "players": [
         "萩原圣人",
@@ -39,7 +39,7 @@
     {
       "name": "野兽X",
       "shortName": "野兽",
-      "color": "#002953",
+      "color": "#0c494d",
       "initialScore": 0,
       "players": [
         "铃木大介",
@@ -51,7 +51,7 @@
     {
       "name": "世嘉飒美凤凰",
       "shortName": "凤凰",
-      "color": "#b74801",
+      "color": "#d76209",
       "initialScore": 0,
       "players": [
         "茅森早香",
@@ -63,7 +63,7 @@
     {
       "name": "赤坂驱动力",
       "shortName": "赤坂",
-      "color": "#9cb832",
+      "color": "#7b9818",
       "initialScore": 0,
       "players": [
         "园田贤",
@@ -75,7 +75,7 @@
     {
       "name": "涩谷ABEMAS",
       "shortName": "AB",
-      "color": "#c6ae6f",
+      "color": "#9f6f1a",
       "initialScore": 0,
       "players": [
         "多井隆晴",
@@ -87,7 +87,7 @@
     {
       "name": "U-NEXT海盗",
       "shortName": "海盗",
-      "color": "#0582c8",
+      "color": "#3754a8",
       "initialScore": 0,
       "players": [
         "仲林圭",
@@ -99,7 +99,7 @@
     {
       "name": "角川樱花骑士",
       "shortName": "樱花",
-      "color": "#f895b5",
+      "color": "#db5b96",
       "initialScore": 0,
       "players": [
         "堀慎吾",
@@ -111,7 +111,7 @@
     {
       "name": "地球喷射机",
       "shortName": "地球",
-      "color": "#006934",
+      "color": "#085029",
       "initialScore": 0,
       "players": [
         "石井一马",

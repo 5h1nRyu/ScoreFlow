@@ -11,7 +11,7 @@ const OVERVIEW_DURATION = Object.values(OVERVIEW_PHASES)
 // 集中管理项目公共配置
 const APP_CONFIG = Object.freeze({
   // 是否使用纸张图片背景；false 时仅使用 backgroundColor
-  useBackgroundImage: false,
+  useBackgroundImage: true,
   backgroundColor: "#ffffff",
 
   layout: Object.freeze({
@@ -25,7 +25,7 @@ const APP_CONFIG = Object.freeze({
   }),
 
   title: Object.freeze({
-    text: "M.LEAGUE 2026-2027赛季 9月积分演变",
+    text: "M.LEAGUE 2026-2027赛季 9月 队伍积分演变",
     fontSize: 80
   }),
 
@@ -35,7 +35,7 @@ const APP_CONFIG = Object.freeze({
     // 标题逐字淡入与折线图整体淡入共用的时长；0 表示立即显示
     entranceDuration: 2000,
     // 设置每个 game 对应的动画毫秒数
-    gameDuration: 2000,
+    gameDuration: 1500,
     // 限制单帧参与缩放计算的最大秒数
     maximumFrameDelta: 0.05,
     // 比赛表退场与布局宽度变化同步完成，结束后才开始队伍表进场；0 表示立即切换
