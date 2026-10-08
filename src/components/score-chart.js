@@ -1,9 +1,10 @@
 (function exposeScoreChart(global) {
   "use strict";
 
-function createScoreChart(canvas, teams, finalGame, config) {
+function createScoreChart(canvas, teams, games, config) {
 const ctx = canvas.getContext("2d");
 const { chart, labels, xAxis, yAxis } = config;
+const finalGame = games.length - 1;
 
 // 校验 Canvas 线条配置，避免无效数值导致图表样式异常
 function validateLineStyle(style, name, allowSolid = false) {
@@ -36,11 +37,15 @@ if (
 ) {
   throw new Error("chart.playheadPosition 必须是大于 0 且小于 chart.windowSize 的整数");
 }
-if (!Number.isFinite(labels.rightSafetyMargin) || labels.rightSafetyMargin < 0) {
-  throw new Error("labels.rightSafetyMargin 必须是大于或等于 0 的数字");
+if (!Number.isFinite(labels.fadeOutDistance) || labels.fadeOutDistance <= 0) {
+  throw new Error("labels.fadeOutDistance 必须是大于 0 的数字");
 }
-if (!Number.isFinite(labels.fadeOutDuration) || labels.fadeOutDuration < 0) {
-  throw new Error("labels.fadeOutDuration 必须是大于或等于 0 的数字");
+if (
+    !Number.isFinite(labels.fadeOutEndDistance) ||
+    labels.fadeOutEndDistance <= 0 ||
+    labels.fadeOutEndDistance >= labels.fadeOutDistance
+) {
+  throw new Error("labels.fadeOutEndDistance 必须是大于 0 且小于 labels.fadeOutDistance 的数字");
 }
 validateLineStyle(xAxis.gridLine, "xAxis.gridLine");
 function validateAxisLabels(axis, name) {
@@ -55,6 +60,11 @@ function validateAxisLabels(axis, name) {
   }
 }
 validateAxisLabels(xAxis, "xAxis");
+["initialText", "finalText"].forEach(name => {
+  if (typeof xAxis.labels[name] !== "string" || !xAxis.labels[name].trim()) {
+    throw new Error(`xAxis.labels.${name} 必须是非空字符串`);
+  }
+});
 if (
     !Number.isInteger(xAxis.overviewTargetGridLineCount) ||
     xAxis.overviewTargetGridLineCount <= 0
@@ -70,7 +80,7 @@ function lineDash(style) {
   return style.dashLength === 0 ? [] : [style.dashLength, style.dashGap];
 }
 
-// 全景展开期间固定使用同一档 2 的幂间隔，避免动画过程中竖线跳变
+// 从全景展开到本轮结束固定使用同一档 2 的幂间隔，避免竖线跳变
 function overviewGridStep() {
   const target = xAxis.overviewTargetGridLineCount;
   let bestStep = 1;
@@ -95,9 +105,12 @@ const initialDisplayedRange = rangeForPeak(
     Math.max(...teams.map(team => Math.abs(team.initialScore)))
 );
 let displayedRange = initialDisplayedRange;
-let labelOpacity = 1;
+// 标签使用独立画布，空间渐变遮罩只影响文字，不影响折线、圆点和网格。
+const labelCanvas = document.createElement("canvas");
+const labelCtx = labelCanvas.getContext("2d");
 let width = 0;
 let height = 0;
+let lastTimelineState = null;
 
 
 // 为全景展开提供起止平滑的缓动进度
@@ -114,11 +127,19 @@ function resizeCanvas() {
       2
   );
 
-  width = canvas.clientWidth;
-  height = canvas.clientHeight;
+  const nextWidth = canvas.clientWidth;
+  const nextHeight = canvas.clientHeight;
+  if (width === nextWidth && height === nextHeight
+      && canvas.width === Math.round(nextWidth * dpr)
+      && canvas.height === Math.round(nextHeight * dpr)) return false;
+  width = nextWidth;
+  height = nextHeight;
 
   canvas.width = Math.round(width * dpr);
   canvas.height = Math.round(height * dpr);
+  labelCanvas.width = canvas.width;
+  labelCanvas.height = canvas.height;
+  labelCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   // 后续继续使用 CSS 像素坐标
   ctx.setTransform(
@@ -129,6 +150,7 @@ function resizeCanvas() {
       0,
       0
   );
+  return true;
 }
 
 
@@ -344,11 +366,16 @@ function layoutLabels(items, top, bottom) {
 
 // 绘制当前动画帧
 function render(timelineState) {
+  lastTimelineState = timelineState;
+  // 布局在同一帧先更新，立即匹配真实尺寸，避免先拉伸上一帧的画面。
+  resizeCanvas();
   const {
     completedGame,
     deltaSeconds,
     didRestart,
     overviewProgress,
+    overviewStage,
+    overviewStageProgress,
     phase,
     playhead
   } = timelineState;
@@ -386,7 +413,6 @@ function render(timelineState) {
 
   if (didRestart) {
     displayedRange = initialDisplayedRange;
-    labelOpacity = 1;
   }
 
   // 播放点到达配置位置后开始滚动，并在最后一个窗口处停止
@@ -650,8 +676,8 @@ function render(timelineState) {
   ctx.font = `600 ${xAxis.labels.fontSize}px "Courier New", monospace`;
 
 
-  // 仅在全景展开阶段减少竖线；普通播放阶段仍逐个显示 game
-  const xGridStep = phase === "overview" ? fixedOverviewGridStep : 1;
+  // 全景及循环等待阶段共用间隔，下一轮开始时才恢复逐场竖线。
+  const xGridStep = usesOverviewLabels ? fixedOverviewGridStep : 1;
   // 所有档位都以 game -1 为起点，确保初始积分刻度始终完整显示。
   const firstGridGame = -1 + Math.ceil((viewStart + 1) / xGridStep) * xGridStep;
 
@@ -684,20 +710,24 @@ function render(timelineState) {
     );
 
     ctx.stroke();
+  }
 
-
-    // 绘制 game 编号
-    if (showXAxisLabels) {
-      ctx.fillStyle =
-          "rgba(28,30,25,.78)";
-
-      ctx.fillText(
-          String(game),
-          x,
-          height -
-          margin.bottom +
-          14
-      );
+  // 日期标签独立于网格间隔；全景及循环等待只显示两个端点。
+  if (showXAxisLabels) {
+    ctx.fillStyle = "rgba(28,30,25,.78)";
+    const drawXLabel = (game, text) => {
+      if (!text || game < viewStart || game > viewEnd) return;
+      ctx.fillText(text, xAt(game), height - margin.bottom + 14);
+    };
+    if (usesOverviewLabels) {
+      drawXLabel(-1, xAxis.labels.initialText);
+      drawXLabel(finalGame, xAxis.labels.finalText);
+    } else {
+      // 每场日期标在该场分数变化的起点，窗口筛选同步前移一格。
+      for (let game = Math.max(0, Math.ceil(viewStart + 1));
+          game <= Math.min(finalGame, Math.floor(viewEnd + 1)); game++) {
+        drawXLabel(game - 1, games[game].labelx);
+      }
     }
   }
 
@@ -729,6 +759,13 @@ function render(timelineState) {
 
 
   const labelItems = [];
+
+  // 全景初始停留时仅让圆点巡线，保留完整折线及真实比赛进度。
+  // 共用时间轴的阶段进度，使所有圆点同步缓入缓出并支持暂停恢复。
+  const dotPlayhead = chart.initialHoldTraversalEnabled
+      && phase === "overview" && overviewStage === "initial-hold"
+      ? -1 + (finalGame + 1) * easeInOut(overviewStageProgress)
+      : playhead;
 
   // 绘制每支队伍的分数曲线
   teams.forEach((team, index) => {
@@ -820,17 +857,23 @@ function render(timelineState) {
     labelItems.push({
       color: team.color,
       index,
-      name: team.shortName,
+      shortName: team.shortName,
+      // 固定一位小数，并避免过零时显示 -0.0。
+      scoreText: Number(tipValue.toFixed(1)).toFixed(1),
       tipX,
       tipY,
       value: tipValue
     });
 
 
-    // 绘制曲线末端圆点
+    // 巡线时沿同一条固定 Bezier 曲线定位，其余阶段跟随真实端点。
+    const dotX = xAt(dotPlayhead);
+    const dotY = yAt(valueOnFixedCurve(team, dotPlayhead));
+
+    // 绘制圆点
     if (
-        tipX >= margin.left &&
-        tipX <=
+        dotX >= margin.left &&
+        dotX <=
         width -
         margin.right
     ) {
@@ -840,8 +883,8 @@ function render(timelineState) {
       ctx.beginPath();
 
       ctx.arc(
-          tipX,
-          tipY,
+          dotX,
+          dotY,
           chart.lineThickness * (
               width < 520
                   ? 8 / 9
@@ -864,45 +907,50 @@ function render(timelineState) {
         height - margin.bottom - halfLabelHeight
     );
 
-    ctx.save();
-    ctx.font = `${labels.fontWeight} ${labels.fontSize}px "Courier New", monospace`;
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
+    labelCtx.clearRect(0, 0, width, height);
+    labelCtx.save();
+    labelCtx.font = `${labels.fontWeight} ${labels.fontSize}px "Courier New", monospace`;
+    labelCtx.textAlign = "left";
+    labelCtx.textBaseline = "middle";
 
-    // 最长标签放不进绘图区时，所有标签同步隐藏
-    const longestLabelWidth = arrangedLabels.reduce(
-        (maximum, label) => Math.max(maximum, ctx.measureText(label.name).width),
+    // 按实际字体测量所有简称，统一分数起点；保留原来一个空格的间距。
+    const nameColumnWidth = arrangedLabels.reduce(
+        (maximum, label) => Math.max(maximum, labelCtx.measureText(label.shortName).width),
         0
     );
-    const labelsFit = arrangedLabels.every(label =>
-      label.tipX + labels.horizontalGap + longestLabelWidth + labels.rightSafetyMargin <=
-      width - margin.right
+    const scoreOffset = nameColumnWidth + labelCtx.measureText(" ").width;
+    arrangedLabels.forEach((label) => {
+      const labelX = label.tipX + labels.horizontalGap;
+      labelCtx.fillStyle = label.color;
+      labelCtx.fillText(label.shortName, labelX, label.labelY);
+      labelCtx.fillText(label.scoreText, labelX + scoreOffset, label.labelY);
+    });
+
+    // 同一标签内部按水平位置连续变透明；渐变区以外保持原样。
+    // 在配置的结束距离处完全透明，更靠近边框的文字保持透明。
+    const plotRight = width - margin.right;
+    const fadeMask = labelCtx.createLinearGradient(
+        plotRight - labels.fadeOutDistance, 0,
+        plotRight - labels.fadeOutEndDistance, 0
     );
+    fadeMask.addColorStop(0, "rgba(0,0,0,1)");
+    fadeMask.addColorStop(1, "rgba(0,0,0,0)");
+    labelCtx.globalCompositeOperation = "destination-in";
+    labelCtx.fillStyle = fadeMask;
+    labelCtx.fillRect(0, 0, width, height);
+    labelCtx.restore();
 
-    if (!labelsFit) {
-      labelOpacity = labels.fadeOutDuration > 0
-          ? Math.max(0, labelOpacity - deltaSeconds * 1000 / labels.fadeOutDuration)
-          : 0;
-    }
-
-    if (labelOpacity > 0) {
-      ctx.globalAlpha = labelOpacity;
-      arrangedLabels.forEach((label) => {
-        ctx.fillStyle = label.color;
-        ctx.fillText(
-            label.name,
-            label.tipX + labels.horizontalGap,
-            label.labelY
-        );
-      });
-    }
-
-    ctx.restore();
+    ctx.drawImage(labelCanvas, 0, 0, width, height);
   }
 
 }
 
-const resizeObserver = new ResizeObserver(resizeCanvas);
+const resizeObserver = new ResizeObserver(() => {
+  if (resizeCanvas() && lastTimelineState) {
+    // 暂停时调整窗口也要重绘，但不推进动画或重复执行循环重置。
+    render({ ...lastTimelineState, deltaSeconds: 0, didRestart: false });
+  }
+});
 resizeObserver.observe(canvas);
 resizeCanvas();
 
@@ -914,3 +962,4 @@ return Object.freeze({
 
 global.ScoreChart = Object.freeze({ createScoreChart });
 }(globalThis));
+

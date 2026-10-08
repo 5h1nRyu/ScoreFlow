@@ -1,7 +1,10 @@
 (function startApplication() {
   "use strict";
 
-  const { animation, backgroundColor, debug, teamsDataUrl, layout, gamesDataUrl, title } = APP_CONFIG;
+  const { animation, backgroundColor, useBackgroundImage, debug, layout, title } = APP_CONFIG;
+  // 数据文件位置固定，不作为外观配置提供。
+  const TEAMS_DATA_URL = "data/teams.json";
+  const GAMES_DATA_URL = "data/games.json";
 
   // 将布局比例转换为 CSS 百分比
   function percentage(value, name) {
@@ -11,18 +14,22 @@
     return `${value * 100}%`;
   }
 
-  // 将相对于整个页面的宽度比例作为网格权重
-  function fraction(value, name) {
-    percentage(value, name);
-    return `${value}fr`;
-  }
-
   // 校验并将页面外观配置写入样式表
   function applyAppearance() {
+    if (typeof useBackgroundImage !== "boolean") {
+      throw new Error("useBackgroundImage 必须是布尔值");
+    }
     if (!CSS.supports("color", backgroundColor)) {
       throw new Error(`背景颜色“${backgroundColor}”无效`);
     }
     document.documentElement.style.setProperty("--background-color", backgroundColor);
+    document.body.classList.toggle("page--image-background", useBackgroundImage);
+    if (typeof debug.showLayoutBorders !== "boolean") {
+      throw new Error("debug.showLayoutBorders 必须是布尔值");
+    }
+    document.getElementById("dashboard").classList.toggle(
+        "dashboard--debug-layout", debug.showLayoutBorders
+    );
   }
 
   // 校验配置并把布局参数写入页面
@@ -30,18 +37,15 @@
     const dashboard = document.getElementById("dashboard");
     const { pageMargin, rows, chartColumns } = layout;
     const verticalTotal = pageMargin.top + rows.title + rows.chart + pageMargin.bottom;
-    const horizontalTotal = pageMargin.horizontal * 2
-        + chartColumns.scoreChart + chartColumns.dataTable;
-    const titleColumnsTotal = title.columns.icon1 + title.columns.text + title.columns.icon2;
     if (Math.abs(verticalTotal - 1) > Number.EPSILON * 10) {
       throw new Error("layout 的纵向比例之和必须为 1");
     }
-    if (Math.abs(horizontalTotal - 1) > Number.EPSILON * 10) {
-      throw new Error("layout 的水平比例之和必须为 1");
-    }
-    if (Math.abs(titleColumnsTotal - 1) > Number.EPSILON * 10) {
-      throw new Error("title.columns 的比例之和必须为 1");
-    }
+    // 两个表格不会同时占列，分别校验各自的布局，边距仅扣除一次。
+    ["gameTable", "teamTable"].forEach(name => {
+      percentage(chartColumns[name], `layout.chartColumns.${name}`);
+      const scoreChart = 1 - pageMargin.horizontal * 2 - chartColumns[name];
+      percentage(scoreChart, `layout.chartColumns.${name} 对应的剩余折线图比例`);
+    });
     if (!Number.isFinite(title.fontSize) || title.fontSize <= 0) {
       throw new Error("title.fontSize 必须是大于 0 的数字");
     }
@@ -58,23 +62,54 @@
     Object.entries(variables).forEach(([property, [value, name]]) => {
       dashboard.style.setProperty(property, percentage(value, name));
     });
-    dashboard.style.setProperty(
-        "--score-chart-width", fraction(chartColumns.scoreChart, "layout.chartColumns.scoreChart")
-    );
-    dashboard.style.setProperty(
-        "--data-table-width", fraction(chartColumns.dataTable, "layout.chartColumns.dataTable")
-    );
-    dashboard.style.setProperty(
-        "--title-icon-1-width", fraction(title.columns.icon1, "title.columns.icon1")
-    );
-    dashboard.style.setProperty(
-        "--title-text-width", fraction(title.columns.text, "title.columns.text")
-    );
-    dashboard.style.setProperty(
-        "--title-icon-2-width", fraction(title.columns.icon2, "title.columns.icon2")
-    );
+    renderTableLayout({ tableLayoutProgress: 0 });
     dashboard.style.setProperty("--title-font-size", `${title.fontSize}px`);
-    document.getElementById("dashboardTitleText").textContent = title.text;
+    const titleElement = document.getElementById("dashboardTitleText");
+    titleElement.setAttribute("aria-label", title.text);
+    // 预先排好完整标题，只改变透明度，避免逐字入场时文字位置跳动。
+    const characters = typeof Intl.Segmenter === "function"
+        ? Array.from(new Intl.Segmenter("zh-CN", { granularity: "grapheme" }).segment(title.text), item => item.segment)
+        : Array.from(title.text);
+    titleCharacters = characters.map(character => {
+      const span = document.createElement("span");
+      span.className = "dashboard__title-character";
+      span.textContent = character;
+      span.setAttribute("aria-hidden", "true");
+      return span;
+    });
+    titleElement.replaceChildren(...titleCharacters);
+  }
+
+  let titleCharacters = [];
+  let previousEntranceProgress = null;
+  function renderEntrance({ phase, entranceProgress }) {
+    document.getElementById("dashboard").dataset.phase = phase;
+    if (entranceProgress === previousEntranceProgress) return;
+    previousEntranceProgress = entranceProgress;
+    const easedProgress = entranceProgress * entranceProgress * (3 - 2 * entranceProgress);
+    document.getElementById("scoreChart").style.opacity = String(easedProgress);
+    // 固定比例分配逐字错峰：最后一个字与 chart 一起在入场结束时完全显示。
+    const characterDuration = titleCharacters.length > 1 ? 0.35 : 1;
+    titleCharacters.forEach((span, index) => {
+      const start = titleCharacters.length > 1
+          ? index / (titleCharacters.length - 1) * (1 - characterDuration) : 0;
+      const progress = Math.min(1, Math.max(0, (entranceProgress - start) / characterDuration));
+      span.style.opacity = String(progress * progress * (3 - 2 * progress));
+    });
+  }
+
+  // 与表格退场共用时间轴，暂停冻结进度，循环首帧立即恢复比赛表布局。
+  let previousTableWidth = null;
+  function renderTableLayout({ tableLayoutProgress }) {
+    const { pageMargin, chartColumns } = layout;
+    const progress = tableLayoutProgress * tableLayoutProgress * (3 - 2 * tableLayoutProgress);
+    const tableWidth = chartColumns.gameTable
+        + (chartColumns.teamTable - chartColumns.gameTable) * progress;
+    if (tableWidth === previousTableWidth) return;
+    previousTableWidth = tableWidth;
+    const dashboard = document.getElementById("dashboard");
+    dashboard.style.setProperty("--data-table-width", `${tableWidth * 100}%`);
+    dashboard.style.setProperty("--score-chart-width", `${(1 - pageMargin.horizontal * 2 - tableWidth) * 100}%`);
   }
 
   // 调试时保留从 game0 到指定 gameId 的数据，并同步截断各队积分序列。
@@ -101,14 +136,16 @@
       applyAppearance();
       applyLayout();
       const [teamsResponse, gamesResponse] = await Promise.all([
-        fetch(teamsDataUrl, { cache: "no-store" }),
-        fetch(gamesDataUrl, { cache: "no-store" })
+        fetch(TEAMS_DATA_URL, { cache: "no-store" }),
+        fetch(GAMES_DATA_URL, { cache: "no-store" }),
+        // 开场前加载主标题和两类表头使用的本地字体，避免入场时字体跳变。
+        document.fonts.load('400 16px "Alimama DongFangDaKai"')
       ]);
       if (!teamsResponse.ok) {
-        throw new Error(`读取 ${teamsDataUrl} 失败（HTTP ${teamsResponse.status}）`);
+        throw new Error(`读取 ${TEAMS_DATA_URL} 失败（HTTP ${teamsResponse.status}）`);
       }
       if (!gamesResponse.ok) {
-        throw new Error(`读取 ${gamesDataUrl} 失败（HTTP ${gamesResponse.status}）`);
+        throw new Error(`读取 ${GAMES_DATA_URL} 失败（HTTP ${gamesResponse.status}）`);
       }
 
       const teamData = TeamData.parseTeamsJson(await teamsResponse.text());
@@ -123,23 +160,56 @@
       });
 
       const finalGame = data.games.length - 1;
+      const playbackTasks = ScoreTimeline.createPlaybackTasks();
       const chart = ScoreChart.createScoreChart(
-          document.getElementById("scoreChart"), data.teams, finalGame, APP_CONFIG
+          document.getElementById("scoreChart"), data.teams, data.games, APP_CONFIG
       );
       const gameTable = GameTable.createGameTable(
           document.getElementById("gameTable"),
           document.getElementById("teamTableSlot"),
           data.games,
-          APP_CONFIG.gameTable
+          APP_CONFIG.gameTable,
+          playbackTasks
       );
       const teamTable = TeamTable.createTeamTable(
-          document.getElementById("teamTableSlot"), data.teams, APP_CONFIG.teamTable
+          document.getElementById("teamTableSlot"), data.teams, APP_CONFIG.teamTable, playbackTasks
       );
       const timeline = ScoreTimeline.createTimeline({ animation, finalGame });
       // 使用同一时间状态驱动折线图和比赛详情
+      // 先更新布局，再按新尺寸绘图，避免宽度变化落后一帧。
+      timeline.subscribe(renderEntrance);
+      timeline.subscribe(renderTableLayout);
       timeline.subscribe(chart.render);
       timeline.subscribe(gameTable.render);
       timeline.subscribe(teamTable.render);
+      const dashboard = document.getElementById("dashboard");
+      let paused = false;
+      let pausedAnimations = [];
+      document.addEventListener("keydown", event => {
+        if (event.code !== "Space" || event.altKey || event.ctrlKey || event.metaKey) return;
+        // 编辑控件中的空格保留原有输入行为。
+        const target = event.target;
+        if (target instanceof HTMLElement
+            && (target.isContentEditable || target.closest("input, textarea, select, button"))) return;
+        event.preventDefault();
+        if (event.repeat) return;
+
+        paused = !paused;
+        if (paused) {
+          timeline.pause();
+          playbackTasks.pause();
+          // getAnimations 同时包含 CSS animation 和 transition，保留各自的当前进度。
+          pausedAnimations = dashboard.getAnimations({ subtree: true }).filter(animation =>
+            animation.playState === "running" || animation.pending
+          );
+          pausedAnimations.forEach(animation => animation.pause());
+        } else {
+          pausedAnimations.forEach(animation => animation.play());
+          pausedAnimations = [];
+          playbackTasks.resume();
+          timeline.resume();
+        }
+      });
       timeline.start();
     } catch (error) {
       // 将初始化错误同时展示给用户和开发者
@@ -153,3 +223,5 @@
 
   start();
 }());
+
+

@@ -1,6 +1,9 @@
 (function exposeTeamTable(global) {
   "use strict";
 
+  // 队伍排行榜的队标使用固定资源目录。
+  const TEAM_IMAGE_BASE_URL = "assets/images/icons";
+
   function createElement(tagName, className, text) {
     const element = document.createElement(tagName);
     if (className) element.className = className;
@@ -37,7 +40,7 @@
         : 1 - Math.pow(-2 * value + 2, 3) / 2;
   }
 
-  function createTeamTable(root, teams, config) {
+  function createTeamTable(root, teams, config, playbackTasks) {
     if (!(root instanceof HTMLElement)) throw new Error("team-table 需要有效的挂载元素");
     if (!Array.isArray(teams) || teams.length !== 10) {
       throw new Error("team-table 必须恰好接收 10 支队伍");
@@ -100,7 +103,7 @@
       row.style.setProperty("--team-color", entry.team.color);
       const rank = createElement("span", "team-table__rank", String(entry.rank));
       const logo = createElement("img", "team-table__logo");
-      logo.src = imageUrl(config.teamImageBaseUrl, entry.team.name);
+      logo.src = imageUrl(TEAM_IMAGE_BASE_URL, entry.team.name);
       logo.alt = `${entry.team.name}队标`;
       logo.addEventListener("error", () => logo.classList.add("team-table__logo--missing"), { once: true });
       const name = createElement("strong", "team-table__name", entry.team.name);
@@ -145,7 +148,7 @@
     function updateTitle(nextTitle) {
       if (nextTitle === desiredTitle) return;
       desiredTitle = nextTitle;
-      window.clearTimeout(titleTimer);
+      playbackTasks.clearTimeout(titleTimer);
       title.classList.remove("team-table__title--incoming");
 
       if (config.titleTransitionDuration === 0) {
@@ -155,11 +158,11 @@
       }
 
       title.classList.add("team-table__title--outgoing");
-      titleTimer = window.setTimeout(() => {
+      titleTimer = playbackTasks.setTimeout(() => {
         title.textContent = desiredTitle;
         title.classList.remove("team-table__title--outgoing");
         title.classList.add("team-table__title--incoming");
-        titleTimer = window.setTimeout(() => {
+        titleTimer = playbackTasks.setTimeout(() => {
           title.classList.remove("team-table__title--incoming");
           titleTimer = 0;
         }, config.titleTransitionDuration);
@@ -172,7 +175,7 @@
       if (config.titleTransitionDuration === 0) return;
 
       title.classList.add("team-table__title--incoming");
-      titleTimer = window.setTimeout(() => {
+      titleTimer = playbackTasks.setTimeout(() => {
         title.classList.remove("team-table__title--incoming");
         titleTimer = 0;
       }, config.titleTransitionDuration);
@@ -181,7 +184,7 @@
     function render(state) {
       if (state.phase !== "overview" && state.phase !== "restart-hold") {
         if (titleIsVisible) {
-          window.clearTimeout(titleTimer);
+          playbackTasks.clearTimeout(titleTimer);
           titleTimer = 0;
           desiredTitle = config.initialTitle;
           title.textContent = desiredTitle;

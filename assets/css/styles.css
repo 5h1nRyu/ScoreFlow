@@ -1,7 +1,14 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@700&display=swap");
+@font-face {
+  font-family: "Alimama DongFangDaKai";
+  src: url("../font/阿里妈妈东方大楷.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   color-scheme: light;
+  --heading-font-family: "Alimama DongFangDaKai", serif;
   --background-color: #ffffff;
 }
 
@@ -22,6 +29,14 @@ body {
   background-color: var(--background-color);
 }
 
+/* 整页共用一张纸张背景，保持比例居中铺满，允许裁切。 */
+body.page--image-background {
+  background-image: url("../images/background/paper.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 /* 使用可配置比例构建页面的纵向主布局 */
 .dashboard {
   --page-horizontal-margin: 2.5%;
@@ -29,11 +44,8 @@ body {
   --page-bottom-margin: 5%;
   --title-height: 12.5%;
   --chart-height: 80%;
-  --score-chart-width: 0.7fr;
-  --data-table-width: 0.25fr;
-  --title-icon-1-width: 0.3fr;
-  --title-text-width: 0.5fr;
-  --title-icon-2-width: 0.2fr;
+  --score-chart-width: 70%;
+  --data-table-width: 25%;
   --title-font-size: 48px;
   display: grid;
   grid-template-columns: var(--page-horizontal-margin) minmax(0, 1fr) var(--page-horizontal-margin);
@@ -45,7 +57,7 @@ body {
   gap: 0;
   width: 100%;
   height: 100%;
-  background-color: var(--background-color);
+  background-color: transparent;
 }
 
 .dashboard__title,
@@ -58,36 +70,53 @@ body {
 .dashboard__title {
   display: grid;
   grid-row: 2;
-  grid-template-columns:
-    var(--title-icon-1-width)
-    var(--title-text-width)
-    var(--title-icon-2-width);
+  grid-template-rows: 100%;
+  overflow: visible;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .dashboard__title-section {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  align-items: flex-end;
+  justify-content: center;
   min-width: 0;
   min-height: 0;
+  overflow: visible;
 }
 
 .dashboard__title-text {
   margin: 0;
   color: #18232d;
-  font-family: "Noto Sans SC", "Source Han Sans SC", system-ui, sans-serif;
+  font-family: var(--heading-font-family);
   font-size: var(--title-font-size);
-  font-weight: 700;
+  font-weight: 400;
+  font-synthesis: none;
   line-height: 1.2;
+  text-align: center;
+  width: 100%;
 }
 
 .dashboard__chart-area {
   display: grid;
   grid-row: 3;
+  /* 跨越整页，四列都以整页宽度为基准，左右边距只计算一次。 */
+  grid-column: 1 / -1;
   grid-template-columns:
+    var(--page-horizontal-margin)
     var(--score-chart-width)
-    var(--data-table-width);
-  column-gap: clamp(10px, 1.2vw, 22px);
+    var(--data-table-width)
+    var(--page-horizontal-margin);
+  column-gap: 0;
+}
+
+.dashboard__chart-area > .dashboard__region:first-child {
+  grid-column: 2;
+  /* 原列间距放在折线图区内部，不额外占用页面宽度。 */
+  padding-right: clamp(10px, 1.2vw, 22px);
+}
+
+.dashboard__chart-area > .dashboard__region:last-child {
+  grid-column: 3;
 }
 
 .dashboard__region {
@@ -97,7 +126,21 @@ body {
   overflow: hidden;
 }
 
+/* 首帧及每轮开场均只显示页面背景，调试边框也不提前露出。 */
+.dashboard[data-phase="background-hold"] {
+  visibility: hidden;
+}
+
+.dashboard[data-phase="entrance"] .table-stage {
+  visibility: hidden;
+}
+
+.dashboard__title-character {
+  opacity: 0;
+}
+
 #scoreChart {
+  opacity: 0;
   display: block;
   width: 100%;
   height: 100%;
@@ -114,7 +157,7 @@ body {
 .table-stage {
   position: relative;
   padding: clamp(10px, 1.2vw, 22px) 0 clamp(10px, 1.2vw, 22px) clamp(10px, 1.2vw, 22px);
-  background-color: var(--background-color);
+  background-color: transparent;
 }
 
 .game-table {
@@ -129,13 +172,11 @@ body {
   position: relative;
   overflow: hidden;
   opacity: 1;
-  transition: opacity 240ms ease, transform 240ms ease;
+  /* 整体退场由公共时间轴驱动，与布局宽度变化同步暂停、恢复。 */
 }
 
 .game-table--hidden {
   pointer-events: none;
-  opacity: 0;
-  transform: translateX(-5%);
 }
 
 .game-table__panel {
@@ -183,6 +224,8 @@ body {
 }
 
 .game-table__title {
+  font-family: var(--heading-font-family);
+  font-synthesis: none;
   margin: 0;
   color: #18232d;
   font-size: var(--game-table-header-font-size);
@@ -354,6 +397,8 @@ body {
 }
 
 .team-table__title {
+  font-family: var(--heading-font-family);
+  font-synthesis: none;
   flex: 0 0 auto;
   margin: 0;
   color: #18232d;
@@ -519,3 +564,42 @@ body {
   border: 2px solid #cf3f27;
   transform: translate(-50%, -50%);
 }
+
+/* 布局调试：轮廓向内绘制，避免被 overflow 裁掉，且不参与尺寸计算。 */
+.dashboard--debug-layout,
+.dashboard--debug-layout :is(.dashboard__title, .dashboard__chart-area, .dashboard__region) {
+  outline: 2px solid #e63946;
+  outline-offset: -2px;
+}
+
+.dashboard--debug-layout :is(.dashboard__title-section, #scoreChart, .table-stage,
+    .game-table, .team-table-slot) {
+  outline: 1px dashed #2563eb;
+  outline-offset: -4px;
+}
+
+.dashboard--debug-layout :is(.game-table__panel, .game-table__section, .game-table__header,
+    .game-table__list, .team-table__title, .team-table__list) {
+  outline: 1px dashed #08916c;
+  outline-offset: -1px;
+}
+
+.dashboard--debug-layout :is(.game-table__row, .team-table__row) {
+  outline: 1px solid #d97706;
+  outline-offset: -2px;
+}
+
+.dashboard--debug-layout :is(.game-table__identity, .game-table__score,
+    .team-table__rank, .team-table__logo, .team-table__name,
+    .team-table__score, .team-table__change) {
+  outline: 1px dotted #9333ea;
+  outline-offset: -1px;
+}
+
+/* 隐藏的排名变化列仍占空间：调试时只显示其轮廓，文字继续隐藏。 */
+.dashboard--debug-layout .team-table__change:not(.team-table__change--visible) {
+  opacity: 1;
+  color: transparent;
+}
+
+

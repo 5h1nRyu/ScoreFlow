@@ -10,6 +10,8 @@ const OVERVIEW_DURATION = Object.values(OVERVIEW_PHASES)
 
 // 集中管理项目公共配置
 const APP_CONFIG = Object.freeze({
+  // 是否使用纸张图片背景；false 时仅使用 backgroundColor
+  useBackgroundImage: true,
   backgroundColor: "#ffffff",
 
   layout: Object.freeze({
@@ -17,22 +19,27 @@ const APP_CONFIG = Object.freeze({
     pageMargin: Object.freeze({ horizontal: 0.025, top: 0.025, bottom: 0.05 }),
     // 页面主体按标题和图表区从上到下紧凑排列
     rows: Object.freeze({ title: 0.125, chart: 0.8 }),
-    // 图表区按折线图和数据表从左到右排列，二者之间的间距由 CSS 控制
-    chartColumns: Object.freeze({ scoreChart: 0.7, dataTable: 0.25 })
+    // 两个表格分别占整页的比例；折线图自动使用扣除左右边距和当前表格后的空间
+    // 列间距包含在折线图区内，不额外占用页面宽度
+    chartColumns: Object.freeze({ gameTable: 0.25, teamTable: 0.3 })
   }),
 
   title: Object.freeze({
-    text: "9月积分演变",
-    fontSize: 60,
-    // 图标槽位暂不放置实际资源；三列宽度之和必须为 1
-    columns: Object.freeze({ icon1: 0.3, text: 0.5, icon2: 0.2 })
+    text: "M.LEAGUE 2026-2027赛季 9月 队伍积分演变",
+    fontSize: 80
   }),
 
   animation: Object.freeze({
+    // 每轮开始时只显示背景的时长，单位为毫秒；0 表示跳过
+    backgroundHoldDuration: 5000,
+    // 标题逐字淡入与折线图整体淡入共用的时长；0 表示立即显示
+    entranceDuration: 2000,
     // 设置每个 game 对应的动画毫秒数
-    gameDuration: 2000,
+    gameDuration: 1500,
     // 限制单帧参与缩放计算的最大秒数
     maximumFrameDelta: 0.05,
+    // 比赛表退场与布局宽度变化同步完成，结束后才开始队伍表进场；0 表示立即切换
+    gameTableExitDuration: 400,
     // 四段时长之和作为完整的队伍表总览阶段时间
     overview: OVERVIEW_PHASES,
     overviewDuration: OVERVIEW_DURATION,
@@ -40,12 +47,9 @@ const APP_CONFIG = Object.freeze({
     restartDelay: 3000
   }),
 
-  // 指定队伍、队员归属和初始分数的数据文件
-  teamsDataUrl: "data/teams.json",
-  // 指定每个 game 的选手数据文件
-  gamesDataUrl: "data/games.json",
-
   debug: Object.freeze({
+    // 显示布局区域与表格内容列的调试边框，不影响实际布局尺寸
+    showLayoutBorders: false,
     // -1 使用完整数据；正整数 x 只演示到 gameId 为 x 的 game（包含该 game）
     finalGameId: -1
   }),
@@ -71,25 +75,23 @@ const APP_CONFIG = Object.freeze({
       totalScore: 36,
       convertedTeamScore: 20,
       stat: 28
-    }),
-    playerImageBaseUrl: "assets/images/players",
-    teamImageBaseUrl: "assets/images/teams"
+    })
   }),
 
   teamTable: Object.freeze({
     // 分别设置重排前后的排行榜标题
-    initialTitle: "9月13日队伍排名",
-    finalTitle: "9月30日队伍排名",
+    initialTitle: "初始队伍排名",
+    finalTitle: "最终队伍排名",
     // 设置标题字号与单次淡出或淡入动画时长
-    titleFontSize: 32,
+    titleFontSize: 40,
     titleTransitionDuration: 180,
     // 条目高度和间距均相对于 team-table 区域高度计算
     itemHeightRatio: 0.075,
     itemGapRatio: 0.018,
-    // 队标高度与各类文字字号均使用 CSS 像素
-    teamImageHeight: 120,
+    // 队标高使用 CSS 像素
+    teamImageHeight: 80,
     // 控制重排后是否显示排名变化图标，并始终保留其布局空间
-    showRankChange: true,
+    showRankChange: false,
     // 设置重排过程中条目放大或缩小的最大比例
     reorderScaleAmplitude: 0.012,
     itemFontSizes: Object.freeze({
@@ -97,8 +99,7 @@ const APP_CONFIG = Object.freeze({
       teamName: 24,
       score: 30,
       rankChange: 20
-    }),
-    teamImageBaseUrl: "assets/images/icons"
+    })
   }),
 
   chart: Object.freeze({
@@ -106,6 +107,8 @@ const APP_CONFIG = Object.freeze({
     windowSize: 6,
     // 设置滚动期间当前 game 位于从左侧起第几个 X 轴间隔
     playheadPosition: 4,
+    // 控制 initialHoldDuration 阶段的小球巡线动画；false 时停留在右侧端点
+    initialHoldTraversalEnabled: false,
     // 设置所有屏幕尺寸下的积分折线粗细
     lineThickness: 6
   }),
@@ -119,10 +122,10 @@ const APP_CONFIG = Object.freeze({
     fontWeight: 700,
     // 设置标签与折线末端圆点的水平间距
     horizontalGap: 10,
-    // 在最长标签宽度之外额外保留的 CSS 像素
-    rightSafetyMargin: 50,
-    // 设置右侧空间不足后标签渐隐的毫秒数；设为 0 时立即隐藏
-    fadeOutDuration: 100,
+    // 右边界渐变区域的宽度，单位为 CSS 像素，必须大于 0；文字越靠右越透明
+    fadeOutDistance: 120,
+    // 距右边界达到此距离时文字已完全透明；必须大于 0 且小于 fadeOutDistance
+    fadeOutEndDistance: 40,
     // 设置标签之间的额外垂直间距
     verticalGap: 4
   }),
@@ -131,9 +134,13 @@ const APP_CONFIG = Object.freeze({
     labels: Object.freeze({
       showInNormal: true,
       showInOverview: true,
-      fontSize: 24
+      fontSize: 24,
+      // 初始积分（game -1）处的文字，仅从全景开始显示到本轮结束
+      initialText: "9/14",
+      // 从全景开始到本轮结束，最后一场 game 处显示的文字
+      finalText: "9/30"
     }),
-    // 全景阶段期望显示的竖直网格线数量
+    // 全景阶段期望显示的竖直网格线数量；间隔保持到下一轮开始
     overviewTargetGridLineCount: 12,
     gridLine: Object.freeze({
       // 设置竖直网格虚线的粗细、线段长度和间隔长度
@@ -150,7 +157,7 @@ const APP_CONFIG = Object.freeze({
       fontSize: 24
     }),
     // 限制动态 Y 轴范围的下限
-    minimumRange: 60,
+    minimumRange: 50,
     // 设置最高分数之外的显示空间倍率
     paddingFactor: 1.12,
     // 设置 Y 轴期望显示的主刻度数量

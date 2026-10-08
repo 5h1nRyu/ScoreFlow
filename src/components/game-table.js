@@ -1,6 +1,10 @@
 (function exposeGameTable(global) {
   "use strict";
 
+  // 选手头像和比赛条目背景队标使用固定资源目录。
+  const PLAYER_IMAGE_BASE_URL = "assets/images/players";
+  const TEAM_IMAGE_BASE_URL = "assets/images/teams";
+
   function createElement(tagName, className, text) {
     const element = document.createElement(tagName);
     if (className) element.className = className;
@@ -43,14 +47,14 @@
     row.append(
         createImage(
             "game-table__team-mark",
-            imageUrl(config.teamImageBaseUrl, player.team),
+            imageUrl(TEAM_IMAGE_BASE_URL, player.team),
             ""
         ),
         identity,
         score,
         createImage(
             "game-table__portrait",
-            imageUrl(config.playerImageBaseUrl, player.name),
+            imageUrl(PLAYER_IMAGE_BASE_URL, player.name),
             `${player.name}的头像`
         )
     );
@@ -82,7 +86,7 @@
     return panel;
   }
 
-  function createGameTable(root, teamTableSlot, games, config) {
+  function createGameTable(root, teamTableSlot, games, config, playbackTasks) {
     if (!(root instanceof HTMLElement) || !(teamTableSlot instanceof HTMLElement)) {
       throw new Error("game-table 需要有效的挂载元素");
     }
@@ -167,8 +171,8 @@
     resizeObserver.observe(root);
 
     function finishTransition(nextPanel) {
-      clearTimeout(transitionTimer);
-      cancelAnimationFrame(transitionFrame);
+      playbackTasks.clearTimeout(transitionTimer);
+      playbackTasks.cancelAnimationFrame(transitionFrame);
       transitionTimer = 0;
       transitionFrame = 0;
 
@@ -190,13 +194,13 @@
       activePanel = null;
 
       // 分两帧应用入场状态，让浏览器先处理面板的初始样式。
-      transitionFrame = requestAnimationFrame(() => {
-        transitionFrame = requestAnimationFrame(() => {
+      transitionFrame = playbackTasks.requestAnimationFrame(() => {
+        transitionFrame = playbackTasks.requestAnimationFrame(() => {
           transitionFrame = 0;
           if (pendingPanel !== nextPanel) return;
 
           nextPanel.classList.add("game-table__panel--entering");
-          transitionTimer = window.setTimeout(() => {
+          transitionTimer = playbackTasks.setTimeout(() => {
             if (pendingPanel === nextPanel) finishTransition(nextPanel);
           }, transitionLength);
         });
@@ -207,7 +211,7 @@
       const pairCount = games.length / 2;
       const nextIndex = Math.min(pairCount - 1, Math.max(0, index));
       if (nextIndex === activeIndex) {
-        // 重播要求立即展示时，也要结束同一目标上尚未完成的动画。
+        // 要求立即展示时，也要结束同一目标上尚未完成的动画。
         if (!animate && pendingPanel) finishTransition(pendingPanel);
         return;
       }
@@ -220,15 +224,20 @@
       // 必须在动画开始时记录目标，防止每帧重复创建同一个面板。
       activeIndex = nextIndex;
 
-      if (!activePanel || !animate || reduceMotion || transitionLength === 0) {
+      if (!animate || reduceMotion || transitionLength === 0) {
         finishTransition(nextPanel);
         return;
       }
 
-      activePanel.classList.add("game-table__panel--outgoing");
       pendingPanel = nextPanel;
+      // 首次播放和每轮重播的首组表格直接复用右侧入场，不等待旧面板退场。
+      if (!activePanel) {
+        startIncomingTransition(nextPanel);
+        return;
+      }
+      activePanel.classList.add("game-table__panel--outgoing");
       // 旧面板完全退场并移除后才挂载新面板，避免两套文字同时存在。
-      transitionTimer = window.setTimeout(() => startIncomingTransition(nextPanel), transitionLength);
+      transitionTimer = playbackTasks.setTimeout(() => startIncomingTransition(nextPanel), transitionLength);
     }
 
     function setOverviewVisibility(isOverview) {
@@ -236,20 +245,46 @@
       hiddenForOverview = isOverview;
       root.classList.toggle("game-table--hidden", isOverview);
       root.setAttribute("aria-hidden", String(isOverview));
-      teamTableSlot.hidden = !isOverview;
 
       // 隐藏前完成切换，避免动画回调跨越总览和重播阶段。
       if (isOverview && pendingPanel) finishTransition(pendingPanel);
     }
 
+    function resetForOpening() {
+      playbackTasks.clearTimeout(transitionTimer);
+      playbackTasks.cancelAnimationFrame(transitionFrame);
+      transitionTimer = 0;
+      transitionFrame = 0;
+      activeIndex = -1;
+      activePanel = null;
+      pendingPanel = null;
+      root.replaceChildren();
+    }
+
     return Object.freeze({
       render(state) {
+        const isOpening = state.phase === "background-hold" || state.phase === "entrance";
+        if (state.didRestart || (isOpening && activeIndex !== -1)) resetForOpening();
+        if (isOpening) {
+          setOverviewVisibility(true);
+          root.style.opacity = "0";
+          root.style.transform = "translateX(0)";
+          teamTableSlot.hidden = true;
+          return;
+        }
         const isOverview = state.phase === "overview" || state.phase === "restart-hold";
-        setOverviewVisibility(isOverview);
-        if (isOverview) return;
+        const isExiting = state.phase === "game-table-exit";
+        setOverviewVisibility(isExiting || isOverview);
+        // 队伍表在退场和宽度变化完成后才显示，避免进场时挤占空间。
+        teamTableSlot.hidden = !isOverview;
+        const progress = state.tableLayoutProgress;
+        const easedProgress = progress * progress * (3 - 2 * progress);
+        root.style.opacity = String(1 - easedProgress);
+        root.style.transform = `translateX(${-5 * easedProgress}%)`;
+        if (isExiting || isOverview) return;
         showGamePair(
             Math.floor(state.tableCompletedGame / 2),
-            activeIndex >= 0 && !state.didRestart
+            true
         );
       }
     });
@@ -257,3 +292,4 @@
 
   global.GameTable = Object.freeze({ createGameTable });
 }(globalThis));
+

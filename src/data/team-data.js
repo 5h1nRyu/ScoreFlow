@@ -66,7 +66,6 @@
         teamData.teams.map(team => [team.name, team.initialScore])
     );
     const values = new Map(teamData.teams.map(team => [team.name, []]));
-    const seenPlayers = new Set();
 
     const games = gameData.games.map((game, gameIndex) => {
       const gameTeams = new Set();
@@ -79,7 +78,6 @@
           throw new Error(`games[${gameIndex}] 中不能有两名选手来自“${teamName}”`);
         }
         gameTeams.add(teamName);
-        seenPlayers.add(player.name);
         const team = teamsByName.get(teamName);
         currentScores.set(teamName, currentScores.get(teamName) + player.teamPoint);
         return Object.freeze({ ...player, team: teamName, teamColor: team.color });
@@ -88,11 +86,6 @@
       teamData.teams.forEach(team => values.get(team.name).push(currentScores.get(team.name)));
       return Object.freeze({ ...game, players: Object.freeze(players) });
     });
-
-    const missingPlayers = [...teamData.playerTeams.keys()].filter(player => !seenPlayers.has(player));
-    if (missingPlayers.length) {
-      throw new Error(`以下选手没有出现在任何 game 中：${missingPlayers.join("、")}`);
-    }
 
     const teams = teamData.teams.map(team => Object.freeze({
       ...team,
