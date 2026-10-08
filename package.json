@@ -1,0 +1,10 @@
+{
+  "name": "scoreflow",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/protocol.test.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

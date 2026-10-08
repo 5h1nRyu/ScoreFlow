@@ -5,6 +5,13 @@
   // 数据文件位置固定，不作为外观配置提供。
   const TEAMS_DATA_URL = "data/teams.json";
   const GAMES_DATA_URL = "data/games.json";
+  // 导出器在脚本运行前注入；从启动阶段就禁止自动播放。
+  let exportMode = Boolean(globalThis.__VIDEO_EXPORT_REQUEST__);
+  let disposed = false;
+  let dataPromise = null;
+  let application = null;
+  let initializing = null;
+  const dataController = new AbortController();
 
   // 将布局比例转换为 CSS 百分比
   function percentage(value, name) {
@@ -130,98 +137,180 @@
     });
   }
 
-  // 加载数据并装配图表与公共时间轴
-  async function start() {
-    try {
-      applyAppearance();
-      applyLayout();
-      const [teamsResponse, gamesResponse] = await Promise.all([
-        fetch(TEAMS_DATA_URL, { cache: "no-store" }),
-        fetch(GAMES_DATA_URL, { cache: "no-store" }),
-        // 开场前加载主标题和两类表头使用的本地字体，避免入场时字体跳变。
-        document.fonts.load('400 16px "Alimama DongFangDaKai"')
-      ]);
-      if (!teamsResponse.ok) {
-        throw new Error(`读取 ${TEAMS_DATA_URL} 失败（HTTP ${teamsResponse.status}）`);
-      }
-      if (!gamesResponse.ok) {
-        throw new Error(`读取 ${GAMES_DATA_URL} 失败（HTTP ${gamesResponse.status}）`);
-      }
+  function assertOpen() {
+    if (disposed) throw new Error("ScoreFlow 已释放，请重新打开页面");
+  }
 
+  function loadData() {
+    assertOpen();
+    if (!dataPromise) dataPromise = (async () => {
+      const [teamsResponse, gamesResponse] = await Promise.all([
+        fetch(TEAMS_DATA_URL, { cache: "no-store", signal: dataController.signal }),
+        fetch(GAMES_DATA_URL, { cache: "no-store", signal: dataController.signal })
+      ]);
+      if (!teamsResponse.ok) throw new Error(`读取 ${TEAMS_DATA_URL} 失败（HTTP ${teamsResponse.status}）`);
+      if (!gamesResponse.ok) throw new Error(`读取 ${GAMES_DATA_URL} 失败（HTTP ${gamesResponse.status}）`);
       const teamData = TeamData.parseTeamsJson(await teamsResponse.text());
       const gameData = GameData.parseGamesJson(await gamesResponse.text());
-      const completeData = TeamData.combineWithGames(teamData, gameData);
-      const data = limitDataForDebug(completeData);
-      // 在绘图前验证所有队伍颜色
+      const data = limitDataForDebug(TeamData.combineWithGames(teamData, gameData));
       data.teams.forEach((team, index) => {
-        if (!CSS.supports("color", team.color)) {
-          throw new Error(`第 ${index + 1} 支队伍的 color“${team.color}”无效`);
-        }
+        if (!CSS.supports("color", team.color)) throw new Error(`第 ${index + 1} 支队伍的 color“${team.color}”无效`);
       });
+      ScoreTimeline.getCycleDuration(animation, data.games.length - 1);
+      assertOpen();
+      return data;
+    })();
+    return dataPromise;
+  }
 
-      const finalGame = data.games.length - 1;
-      const playbackTasks = ScoreTimeline.createPlaybackTasks();
+  function destroyApplication() {
+    if (!application) return;
+    const previous = application;
+    application = null;
+    previous.timeline.destroy();
+    previous.resizeObserver?.disconnect();
+    document.removeEventListener("keydown", previous.onKeydown);
+    previous.chart.destroy();
+    previous.gameTable.destroy();
+    previous.teamTable.destroy();
+  }
+
+  async function initialize(options) {
+    assertOpen();
+    applyAppearance();
+    previousEntranceProgress = null;
+    previousTableWidth = null;
+    applyLayout();
+    const data = await loadData();
+    await Promise.all([
+      ScoreResources.prepareFont(title.text + data.games.map(game => game.info).join("")
+          + APP_CONFIG.teamTable.initialTitle + APP_CONFIG.teamTable.finalTitle),
+      ScoreResources.prepareBackground(Boolean(options))
+    ]);
+    assertOpen();
+    const manual = Boolean(options);
+    const components = [];
+    try {
       const chart = ScoreChart.createScoreChart(
-          document.getElementById("scoreChart"), data.teams, data.games, APP_CONFIG
+          document.getElementById("scoreChart"), data.teams, data.games, APP_CONFIG,
+          // 应用级尺寸观察统一重绘所有组件；导出不注册任何尺寸观察回调。
+          { manual: true, deviceScaleFactor: options?.deviceScaleFactor }
       );
+      components.push(chart);
       const gameTable = GameTable.createGameTable(
-          document.getElementById("gameTable"),
-          document.getElementById("teamTableSlot"),
-          data.games,
-          APP_CONFIG.gameTable,
-          playbackTasks
+          document.getElementById("gameTable"), document.getElementById("teamTableSlot"),
+          data.games, APP_CONFIG.gameTable
       );
+      components.push(gameTable);
       const teamTable = TeamTable.createTeamTable(
-          document.getElementById("teamTableSlot"), data.teams, APP_CONFIG.teamTable, playbackTasks
+          document.getElementById("teamTableSlot"), data.teams, APP_CONFIG.teamTable
       );
-      const timeline = ScoreTimeline.createTimeline({ animation, finalGame });
-      // 使用同一时间状态驱动折线图和比赛详情
-      // 先更新布局，再按新尺寸绘图，避免宽度变化落后一帧。
-      timeline.subscribe(renderEntrance);
-      timeline.subscribe(renderTableLayout);
-      timeline.subscribe(chart.render);
-      timeline.subscribe(gameTable.render);
-      timeline.subscribe(teamTable.render);
-      const dashboard = document.getElementById("dashboard");
+      components.push(teamTable);
+      const timeline = ScoreTimeline.createTimeline({ animation, finalGame: data.games.length - 1, manual });
+      components.push(timeline);
+      let lastState = null;
       let paused = false;
-      let pausedAnimations = [];
-      document.addEventListener("keydown", event => {
-        if (event.code !== "Space" || event.altKey || event.ctrlKey || event.metaKey) return;
-        // 编辑控件中的空格保留原有输入行为。
+      const onKeydown = event => {
+        if (exportMode || event.code !== "Space" || event.altKey || event.ctrlKey || event.metaKey) return;
         const target = event.target;
         if (target instanceof HTMLElement
             && (target.isContentEditable || target.closest("input, textarea, select, button"))) return;
         event.preventDefault();
         if (event.repeat) return;
-
         paused = !paused;
-        if (paused) {
-          timeline.pause();
-          playbackTasks.pause();
-          // getAnimations 同时包含 CSS animation 和 transition，保留各自的当前进度。
-          pausedAnimations = dashboard.getAnimations({ subtree: true }).filter(animation =>
-            animation.playState === "running" || animation.pending
-          );
-          pausedAnimations.forEach(animation => animation.pause());
-        } else {
-          pausedAnimations.forEach(animation => animation.play());
-          pausedAnimations = [];
-          playbackTasks.resume();
-          timeline.resume();
-        }
+        if (paused) timeline.pause();
+        else timeline.resume();
+      };
+      timeline.subscribe(renderEntrance);
+      timeline.subscribe(renderTableLayout);
+      // 先设置表格可见性和新布局，再测量尺寸、绘制当前帧。
+      timeline.subscribe(gameTable.render);
+      timeline.subscribe(teamTable.render);
+      timeline.subscribe(chart.render);
+      timeline.subscribe(state => { lastState = state; });
+      const resizeObserver = manual ? null : new ResizeObserver(() => {
+        if (lastState) timeline.renderAt(lastState.elapsed, 0);
       });
-      timeline.start();
+      resizeObserver?.observe(document.getElementById("dashboard"));
+      if (!manual) document.addEventListener("keydown", onKeydown);
+      application = { timeline, chart, gameTable, teamTable, resizeObserver, onKeydown };
+      await Promise.all([gameTable.ready, teamTable.ready]);
+      assertOpen();
+      timeline.renderAt(0, 0);
+      chart.finishFrame();
+      document.getElementById("dataError").hidden = true;
+      return application;
     } catch (error) {
-      // 将初始化错误同时展示给用户和开发者
+      if (application) destroyApplication();
+      else components.reverse().forEach(component => component.destroy());
+      throw error;
+    }
+  }
+
+  async function getManifest() {
+    const data = await loadData();
+    const durationMs = ScoreTimeline.getCycleDuration(animation, data.games.length - 1);
+    if (!(durationMs > 0 && durationMs <= 24 * 60 * 60 * 1000)) throw new Error("导出时长必须在 0 到 24 小时之间");
+    if (typeof title.text !== "string" || !title.text.trim()) throw new Error("导出名称不能为空");
+    // 元数据只加载数据，不创建组件、不依赖 prepare，更不启动播放。
+    return { name: title.text, durationMs, recommendedViewport: { width: 1920, height: 1080 }, supportsSeeking: false };
+  }
+
+  async function prepare(options) {
+    assertOpen();
+    exportMode = true;
+    // 若在普通页面上手动调用接口，也先停下播放，再等初始化完成并重建。
+    application?.timeline.stop();
+    if (initializing) await initializing.catch(() => {});
+    assertOpen();
+    destroyApplication();
+    document.documentElement.style.width = `${options.viewport.width}px`;
+    document.documentElement.style.height = `${options.viewport.height}px`;
+    initializing = initialize(options);
+    await initializing;
+  }
+
+  function reset() {
+    assertOpen();
+    const { timeline, chart, gameTable, teamTable } = application;
+    timeline.reset();
+    chart.reset();
+    gameTable.reset();
+    teamTable.reset();
+    previousEntranceProgress = null;
+    previousTableWidth = null;
+    timeline.renderAt(0, 0);
+    chart.finishFrame();
+    document.documentElement.getBoundingClientRect();
+  }
+
+  function renderFrame(frame) {
+    assertOpen();
+    application.timeline.renderAt(frame.timeMs, frame.deltaMs);
+    application.chart.finishFrame();
+    // DOM 样式与布局同步提交，Canvas 2D 已同步绘制，不需要计时器或实时循环推进。
+    document.documentElement.getBoundingClientRect();
+  }
+
+  function dispose() {
+    if (disposed) return;
+    disposed = true;
+    dataController.abort();
+    destroyApplication();
+  }
+
+  globalThis.ScoreApplication = Object.freeze({ getManifest, prepare, reset, renderFrame, dispose });
+  if (!exportMode) {
+    initializing = initialize(null);
+    initializing.then(result => {
+      if (!disposed && !exportMode) result.timeline.start();
+    }).catch(error => {
+      if (disposed) return;
       const message = error instanceof Error ? error.message : String(error);
       const errorElement = document.getElementById("dataError");
       errorElement.textContent = `无法加载页面数据：${message}`;
       errorElement.hidden = false;
       console.error(error);
-    }
+    });
   }
-
-  start();
 }());
-
-

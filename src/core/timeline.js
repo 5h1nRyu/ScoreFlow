@@ -1,7 +1,48 @@
 (function exposeTimeline(global) {
   "use strict";
 
-  // 创建可被多个可视化组件订阅的公共时间轴
+  function getCycleDuration(animation, finalGame) {
+    ["backgroundHoldDuration", "entranceDuration", "gameTableExitDuration", "restartDelay"]
+        .forEach(name => {
+          if (!Number.isFinite(animation[name]) || animation[name] < 0) {
+            throw new Error(`animation.${name} 必须是有限非负数`);
+          }
+        });
+    ["gameDuration", "maximumFrameDelta"].forEach(name => {
+      if (!Number.isFinite(animation[name]) || animation[name] <= 0) {
+        throw new Error(`animation.${name} 必须是有限正数`);
+      }
+    });
+    const overviewDuration = ["teamTableEnterDuration", "initialHoldDuration", "reorderDuration", "finalHoldDuration"]
+        .reduce((total, name) => {
+          const duration = animation.overview?.[name];
+          if (!Number.isFinite(duration) || duration < 0) throw new Error(`animation.overview.${name} 必须是有限非负数`);
+          return total + duration;
+        }, 0);
+    if (overviewDuration !== animation.overviewDuration) throw new Error("总览阶段总时长不一致");
+    if (!Number.isInteger(finalGame) || finalGame < 0) throw new Error("时间轴缺少比赛数据");
+    return animation.backgroundHoldDuration + animation.entranceDuration
+        + (finalGame + 2) * animation.gameDuration + animation.gameTableExitDuration
+        + overviewDuration + animation.restartDelay;
+  }
+
+  // 与原 CSS cubic-bezier 相同的缓动，直接从时间计算，不创建实时动画。
+  function ease(progress, x1 = 0.25, y1 = 0.1, x2 = 0.25, y2 = 1) {
+    if (progress <= 0) return 0;
+    if (progress >= 1) return 1;
+    const at = (t, p1, p2) => 3 * (1 - t) ** 2 * t * p1
+        + 3 * (1 - t) * t * t * p2 + t ** 3;
+    let low = 0;
+    let high = 1;
+    for (let index = 0; index < 24; index += 1) {
+      const t = (low + high) / 2;
+      if (at(t, x1, x2) < progress) low = t;
+      else high = t;
+    }
+    return at((low + high) / 2, y1, y2);
+  }
+
+  // 时间计算与浏览器播放驱动分离；导出只调用 renderAt。
   function createTimeline(options) {
     const {
       backgroundHoldDuration,
@@ -10,35 +51,25 @@
       maximumFrameDelta,
       gameTableExitDuration,
       overview,
-      overviewDuration,
-      restartDelay
+      overviewDuration
     } = options.animation;
     const finalGame = options.finalGame;
-    ["backgroundHoldDuration", "entranceDuration"].forEach(name => {
-      if (!Number.isFinite(options.animation[name]) || options.animation[name] < 0) {
-        throw new Error(`animation.${name} 必须是大于或等于 0 的数字`);
-      }
-    });
-    if (!Number.isFinite(gameTableExitDuration) || gameTableExitDuration < 0) {
-      throw new Error("animation.gameTableExitDuration 必须是大于或等于 0 的数字");
-    }
+    const cycleDuration = getCycleDuration(options.animation, finalGame);
     const subscribers = new Set();
     let animationFrame = 0;
     let startTime = 0;
-    let lastFrameTime = 0;
+    let lastElapsed = 0;
     let previousCycleIndex = 0;
     let pausedAt = null;
 
     // 计算当前播放状态并通知所有订阅者
-    function frame(now) {
+    function renderAt(elapsed, deltaMs = 0) {
       // 开场结束后才从初始积分推进到 game0，后续各阶段整体顺延。
       const introDuration = backgroundHoldDuration + entranceDuration;
       const animationDuration = introDuration + (finalGame + 1) * gameDuration;
       const lastGameHoldEnd = animationDuration + gameDuration;
       const overviewStart = lastGameHoldEnd + gameTableExitDuration;
       const overviewEnd = overviewStart + overviewDuration;
-      const cycleDuration = overviewEnd + restartDelay;
-      const elapsed = Math.max(0, now - startTime);
       const cycleElapsed = cycleDuration > 0 ? elapsed % cycleDuration : 0;
       const cycleIndex = cycleDuration > 0 ? Math.floor(elapsed / cycleDuration) : 0;
       const playhead = Math.min(finalGame, Math.max(0, cycleElapsed - introDuration) / gameDuration - 1);
@@ -93,12 +124,17 @@
                               : "restart-hold";
       const state = Object.freeze({
         completedGame: Math.floor(playhead),
-        deltaSeconds: Math.min(maximumFrameDelta, Math.max(0, now - lastFrameTime) / 1000),
+        deltaSeconds: Math.max(0, deltaMs) / 1000,
         didRestart,
         elapsed,
+        cycleElapsed,
+        gameDuration,
+        introDuration,
         entranceProgress,
         isHolding: phase !== "playing" && phase !== "overview",
         overviewProgress,
+        overviewElapsed,
+        reorderElapsed: overviewElapsed - overview.teamTableEnterDuration - overview.initialHoldDuration,
         overviewStage,
         overviewStageProgress,
         phase,
@@ -110,21 +146,35 @@
       });
 
       subscribers.forEach(subscriber => subscriber(state));
-      lastFrameTime = now;
+      lastElapsed = elapsed;
       previousCycleIndex = cycleIndex;
+      return state;
+    }
+
+    function frame(now) {
+      const elapsed = Math.max(0, now - startTime);
+      renderAt(elapsed, Math.min(maximumFrameDelta * 1000, Math.max(0, elapsed - lastElapsed)));
       animationFrame = requestAnimationFrame(frame);
     }
 
     // 仅暴露订阅和播放控制能力
     return Object.freeze({
+      durationMs: cycleDuration,
+      renderAt,
+      reset() {
+        this.stop();
+        lastElapsed = 0;
+        previousCycleIndex = 0;
+      },
       subscribe(subscriber) {
         subscribers.add(subscriber);
         return () => subscribers.delete(subscriber);
       },
       start() {
+        if (options.manual) throw new Error("导出时间轴不能自动播放");
         if (animationFrame || pausedAt !== null) return;
         startTime = performance.now();
-        lastFrameTime = startTime;
+        lastElapsed = 0;
         previousCycleIndex = 0;
         animationFrame = requestAnimationFrame(frame);
       },
@@ -137,9 +187,8 @@
       resume() {
         if (pausedAt === null) return;
         const pauseDuration = performance.now() - pausedAt;
-        // 同时移动起点和上一帧时间，避免恢复时进度跳跃或产生超大帧间隔。
+        // 移动起点，暂停期间不计入页面时间。
         startTime += pauseDuration;
-        lastFrameTime += pauseDuration;
         pausedAt = null;
         animationFrame = requestAnimationFrame(frame);
       },
@@ -147,68 +196,13 @@
         cancelAnimationFrame(animationFrame);
         animationFrame = 0;
         pausedAt = null;
-      }
-    });
-  }
-
-  // 表格的延迟切换和两帧入场准备也使用可暂停的任务队列。
-  function createPlaybackTasks() {
-    const tasks = new Map();
-    let nextId = 1;
-    let paused = false;
-
-    function arm(id, task) {
-      task.startedAt = performance.now();
-      const run = () => {
-        tasks.delete(id);
-        task.callback();
-      };
-      task.handle = task.isFrame
-          ? requestAnimationFrame(run)
-          : window.setTimeout(run, task.remaining);
-    }
-
-    function cancel(task) {
-      if (task.isFrame) cancelAnimationFrame(task.handle);
-      else window.clearTimeout(task.handle);
-    }
-
-    function schedule(callback, delay, isFrame) {
-      const id = nextId++;
-      const task = { callback, remaining: delay, isFrame, handle: 0, startedAt: 0 };
-      tasks.set(id, task);
-      if (!paused) arm(id, task);
-      return id;
-    }
-
-    function clear(id) {
-      const task = tasks.get(id);
-      if (!task) return;
-      cancel(task);
-      tasks.delete(id);
-    }
-
-    return Object.freeze({
-      setTimeout: (callback, delay) => schedule(callback, delay, false),
-      requestAnimationFrame: callback => schedule(callback, 0, true),
-      clearTimeout: clear,
-      cancelAnimationFrame: clear,
-      pause() {
-        if (paused) return;
-        paused = true;
-        const now = performance.now();
-        tasks.forEach(task => {
-          cancel(task);
-          if (!task.isFrame) task.remaining = Math.max(0, task.remaining - (now - task.startedAt));
-        });
       },
-      resume() {
-        if (!paused) return;
-        paused = false;
-        tasks.forEach((task, id) => arm(id, task));
+      destroy() {
+        this.stop();
+        subscribers.clear();
       }
     });
   }
 
-  global.ScoreTimeline = Object.freeze({ createTimeline, createPlaybackTasks });
+  global.ScoreTimeline = Object.freeze({ createTimeline, getCycleDuration, ease });
 }(globalThis));

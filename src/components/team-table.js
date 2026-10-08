@@ -40,7 +40,7 @@
         : 1 - Math.pow(-2 * value + 2, 3) / 2;
   }
 
-  function createTeamTable(root, teams, config, playbackTasks) {
+  function createTeamTable(root, teams, config) {
     if (!(root instanceof HTMLElement)) throw new Error("team-table 需要有效的挂载元素");
     if (!Array.isArray(teams) || teams.length !== 10) {
       throw new Error("team-table 必须恰好接收 10 支队伍");
@@ -75,16 +75,12 @@
 
     const initialOrder = rankTeams(teams, team => team.initialScore);
     const finalOrder = rankTeams(teams, team => team.values.at(-1));
-    const initialByName = new Map(initialOrder.map(entry => [entry.team.name, entry]));
     const finalByName = new Map(finalOrder.map(entry => [entry.team.name, entry]));
     const title = createElement("h2", "team-table__title", config.initialTitle);
     const list = createElement("ol", "team-table__list");
     const rows = new Map();
     let itemHeight = 0;
     let itemGap = 0;
-    let desiredTitle = config.initialTitle;
-    let titleTimer = 0;
-    let titleIsVisible = false;
 
     root.classList.add("team-table");
     root.style.setProperty("--team-table-rank-font-size", `${config.itemFontSizes.rank}px`);
@@ -93,10 +89,6 @@
     root.style.setProperty("--team-table-change-font-size", `${config.itemFontSizes.rankChange}px`);
     root.style.setProperty("--team-table-logo-height", `${config.teamImageHeight}px`);
     root.style.setProperty("--team-table-title-font-size", `${config.titleFontSize}px`);
-    root.style.setProperty(
-        "--team-table-title-transition-duration",
-        `${config.titleTransitionDuration}ms`
-    );
 
     initialOrder.forEach(entry => {
       const row = createElement("li", "team-table__row");
@@ -141,66 +133,54 @@
       itemGap = height * config.itemGapRatio;
       root.style.setProperty("--team-table-item-height", `${itemHeight}px`);
     }
-    updateDimensions();
-    const resizeObserver = new ResizeObserver(updateDimensions);
-    resizeObserver.observe(root);
+    const ready = Promise.all(Array.from(root.querySelectorAll("img"), image =>
+      ScoreResources.prepareImage(image)
+    ));
 
-    function updateTitle(nextTitle) {
-      if (nextTitle === desiredTitle) return;
-      desiredTitle = nextTitle;
-      playbackTasks.clearTimeout(titleTimer);
-      title.classList.remove("team-table__title--incoming");
-
-      if (config.titleTransitionDuration === 0) {
-        title.classList.remove("team-table__title--outgoing");
-        title.textContent = desiredTitle;
-        return;
+    function renderTitle(state) {
+      const duration = config.titleTransitionDuration;
+      const elapsed = state.reorderElapsed;
+      if (elapsed < 0) {
+        title.textContent = config.initialTitle;
+        title.style.opacity = String(duration > 0 ? ScoreTimeline.ease(state.overviewElapsed / duration) : 1);
+      } else if (duration > 0 && elapsed < duration) {
+        title.textContent = config.initialTitle;
+        title.style.opacity = String(1 - ScoreTimeline.ease(elapsed / duration));
+      } else {
+        title.textContent = config.finalTitle;
+        title.style.opacity = String(duration > 0 ? ScoreTimeline.ease((elapsed - duration) / duration) : 1);
       }
-
-      title.classList.add("team-table__title--outgoing");
-      titleTimer = playbackTasks.setTimeout(() => {
-        title.textContent = desiredTitle;
-        title.classList.remove("team-table__title--outgoing");
-        title.classList.add("team-table__title--incoming");
-        titleTimer = playbackTasks.setTimeout(() => {
-          title.classList.remove("team-table__title--incoming");
-          titleTimer = 0;
-        }, config.titleTransitionDuration);
-      }, config.titleTransitionDuration);
     }
 
-    function showTitle() {
-      if (titleIsVisible) return;
-      titleIsVisible = true;
-      if (config.titleTransitionDuration === 0) return;
-
-      title.classList.add("team-table__title--incoming");
-      titleTimer = playbackTasks.setTimeout(() => {
-        title.classList.remove("team-table__title--incoming");
-        titleTimer = 0;
-      }, config.titleTransitionDuration);
+    function reset() {
+      itemHeight = 0;
+      itemGap = 0;
+      root.style.setProperty("--team-table-item-height", "0px");
+      title.textContent = config.initialTitle;
+      title.style.opacity = "0";
+      initialOrder.forEach(entry => {
+        const elements = rows.get(entry.team.name);
+        elements.row.style.opacity = "0";
+        elements.row.style.transform = "none";
+        elements.row.style.zIndex = String(100 - finalByName.get(entry.team.name).position);
+        elements.rank.textContent = rankText(initialOrder, entry);
+        elements.score.textContent = scoreFormatter(entry.score);
+        elements.change.classList.remove("team-table__change--visible");
+        elements.change.style.opacity = "0";
+      });
     }
 
     function render(state) {
       if (state.phase !== "overview" && state.phase !== "restart-hold") {
-        if (titleIsVisible) {
-          playbackTasks.clearTimeout(titleTimer);
-          titleTimer = 0;
-          desiredTitle = config.initialTitle;
-          title.textContent = desiredTitle;
-          title.classList.remove(
-              "team-table__title--incoming",
-              "team-table__title--outgoing"
-          );
-        }
-        titleIsVisible = false;
+        reset();
         return;
       }
-      showTitle();
+      // 比赛表先显示容器，在同一帧读取新布局，避免 ResizeObserver 晚一帧更新。
+      renderTitle(state);
+      updateDimensions();
       const isReordered = state.overviewStage === "reorder"
           || state.overviewStage === "final-hold"
           || state.phase === "restart-hold";
-      updateTitle(isReordered ? config.finalTitle : config.initialTitle);
       const rawProgress = state.overviewStage === "reorder"
           ? state.overviewStageProgress
           : Number(isReordered);
@@ -228,6 +208,10 @@
             : rankText(initialOrder, initialEntry);
         const shownScore = initialEntry.score + (finalEntry.score - initialEntry.score) * progress;
         elements.score.textContent = scoreFormatter(shownScore);
+        const showChange = config.showRankChange && isReordered;
+        const showDebugOutline = APP_CONFIG.debug.showLayoutBorders && !showChange;
+        elements.change.style.opacity = String(showDebugOutline ? 1
+            : showChange ? ScoreTimeline.ease(state.reorderElapsed / 160) : 0);
         elements.change.classList.toggle(
             "team-table__change--visible",
             config.showRankChange && isReordered
@@ -235,7 +219,16 @@
       });
     }
 
-    return Object.freeze({ render });
+    return Object.freeze({
+      ready,
+      render,
+      reset,
+      destroy() {
+        reset();
+        rows.clear();
+        root.replaceChildren();
+      }
+    });
   }
 
   global.TeamTable = Object.freeze({ createTeamTable });

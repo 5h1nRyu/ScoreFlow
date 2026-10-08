@@ -5,6 +5,51 @@
 - 确认队伍代表色
 - 背景
 
+## VideoMaker 逐帧导出
+
+`dev_v4` 实现 [VideoMaker 网页逐帧协议 v1](https://github.com/5h1nRyu/VideoMaker/blob/main/docs/protocol-v1.md)。使用 HTTP 服务打开本项目后，将页面地址交给 VideoMaker 即可。普通访问仍自动循环播放，并支持空格暂停；导出器在网页脚本运行前注入 `window.__VIDEO_EXPORT_REQUEST__` 时，页面从启动阶段就禁用自动播放，也不注册会自行重绘的尺寸观察器。
+
+`window.__VIDEO_EXPORT__` 暴露以下接口，`version` 固定为 `1`：
+
+| 方法 | 行为 |
+| --- | --- |
+| `getManifest()` | 异步读取并校验数据，返回名称、时长、推荐视口和寻址能力；不依赖 `prepare()`，不创建动画或启动播放 |
+| `prepare(options)` | 校验 60 fps、视口、输出尺寸、像素比和 uint32 seed，固定布局尺寸，等待字体、背景及全部比赛图片完成加载与解码 |
+| `reset()` | 恢复时间轴起点、表格、标题、布局缓存及 Y 轴平滑范围，绘制时间 0 的初始状态 |
+| `renderFrame(frame)` | 同步完成该帧的时间计算、DOM、布局和两层 Canvas 绘制；返回后画面保持不变，直到下一帧 |
+| `dispose()` | 停止播放、取消数据请求、断开观察器并清理组件和键盘监听；未 prepare 时及重复调用均安全，释放后需重新打开页面 |
+
+推荐视口为 `1920 × 1080` CSS 像素。输出 `3840 × 2160` 时使用 `deviceScaleFactor: 2`，主 Canvas 和标签 Canvas 的内部像素都按实际组件尺寸乘以该像素比，导出不受普通播放 DPR 上限 2 的限制。整个页面填满固定视口，截图使用 `animations: 'allow'`，无需 `fullPage` 或固定睡眠。
+
+导出时长是一轮完整循环，包含纯背景、入场、比赛动画、最后一场停留、比赛表退场、队伍排名四阶段及结尾 `restartDelay`。时长根据实际使用的数据和配置计算，不硬编码：
+
+```text
+durationMs = backgroundHoldDuration + entranceDuration
+           + (比赛场数 + 1) × gameDuration
+           + gameTableExitDuration + overviewDuration + restartDelay
+```
+
+当前 32 场比赛及默认配置对应 **66900 ms（66.9 秒，4014 帧）**。`debug.finalGameId` 截断数据后，元数据时长同步缩短，最后一组也支持只有一场比赛。
+
+`supportsSeeking` 固定为 `false`，因为 Y 轴缩放需要按固定帧间隔逐步平滑。每次 reset 后必须从全局帧 `0` 开始连续提交，`timeMs = index * 1000 / 60`；第 0 帧的 `deltaMs` 为 `0`，后续为 `1000 / 60`。导出中途片段时，由 VideoMaker 先顺序推进全部前置帧，不能把片段首帧重新编号为 0。重复帧、跳帧及不符合协议的帧时间会报错。当前效果不使用随机数，seed 被校验和保存，画面不依赖系统时钟或 `Math.random()`。
+
+所有可见动画由同一时间轴驱动，包括比赛表逐行错峰切换、标题淡入淡出、排名变化标记、图表缩放与布局变化；组件不再通过实时计时器、CSS animation 或 transition 改变画面。比赛面板提前创建，后续比赛的头像及队标也在准备阶段完成解码，逐帧切换不会再发起资源请求。
+
+资源失败规则：
+
+- 数据、配置启用的背景图及指定本地字体必须加载成功，否则 `prepare()` 拒绝并终止导出。
+- 头像、比赛条目背景队标及排行榜队标允许缺失；在准备阶段确定失败并隐藏图片，保留布局空间，后续帧不再重试。普通播放的背景图仍保留纯色回退。
+
+浏览器集成测试覆盖完整循环每一帧的 Canvas PNG 与 DOM 重现、1080p 截图静止、片段预推进、4K 和 DPR 3、资源失败、接口参数、重复 prepare 和普通播放暂停/重启。测试需要 Node.js 20 或以上；依赖仅供开发使用，网页仍无需构建：
+
+```bash
+npm ci
+npx playwright install chromium
+npm test
+```
+
+使用已有 Chromium 时可设置 `CHROMIUM_PATH=/path/to/chromium npm test`。测试自动启动临时本地 HTTP 服务，不需要另开服务器。
+
 ## 页面布局
 
 在 `src/config/config.js` 中通过 `useBackgroundImage` 切换整页背景，默认 `true`：开启时使用固定图片 `assets/images/background/paper.jpg`，等比例居中铺满、不重复，允许裁切；关闭时仅使用 `backgroundColor` 指定的纯色。主容器与表格舞台透明，整页共用连续背景，表格条目保留自身底色；图片加载失败时也会露出该纯色底色。
@@ -94,12 +139,16 @@ ScoreFlow/
 │   ├── config/
 │   │   └── config.js               # 页面、动画和图表配置
 │   ├── core/
-│   │   └── timeline.js             # 公共动画时间轴
+│   │   ├── timeline.js             # 公共时间计算、缓动及播放驱动
+│   │   ├── resources.js            # 字体及图片准备、缺图处理
+│   │   └── video-export.js         # VideoMaker v1 接口及生命周期校验
 │   ├── data/
 │   │   ├── game-data.js            # game JSON 校验与转换
 │   │   └── team-data.js            # 队伍 JSON 校验、归属关联和积分累计
 │   └── app.js                      # 应用入口与模块装配
 ├── index.html                      # 页面结构和资源入口
+├── tests/protocol.test.cjs          # Chromium 逐帧导出与普通播放验证
+├── package.json                    # 仅测试用开发依赖，无网页构建步骤
 └── README.md                       # 使用与架构说明
 ```
 

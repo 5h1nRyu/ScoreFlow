@@ -1,8 +1,8 @@
 (function exposeScoreChart(global) {
   "use strict";
 
-function createScoreChart(canvas, teams, games, config) {
-const ctx = canvas.getContext("2d");
+function createScoreChart(canvas, teams, games, config, renderOptions = {}) {
+const ctx = canvas.getContext("2d", { willReadFrequently: renderOptions.deviceScaleFactor !== undefined });
 const { chart, labels, xAxis, yAxis } = config;
 const finalGame = games.length - 1;
 
@@ -121,8 +121,8 @@ function easeInOut(progress) {
 
 // 根据窗口大小调整 Canvas 分辨率
 function resizeCanvas() {
-  // 限制最高设备像素比
-  const dpr = Math.min(
+  // 普通播放保留性能限制；导出使用协议的像素比，主画布和标签画布只缩放一次。
+  const dpr = renderOptions.deviceScaleFactor ?? Math.min(
       window.devicePixelRatio || 1,
       2
   );
@@ -945,17 +945,32 @@ function render(timelineState) {
 
 }
 
-const resizeObserver = new ResizeObserver(() => {
+const resizeObserver = renderOptions.manual ? null : new ResizeObserver(() => {
   if (resizeCanvas() && lastTimelineState) {
     // 暂停时调整窗口也要重绘，但不推进动画或重复执行循环重置。
     render({ ...lastTimelineState, deltaSeconds: 0, didRestart: false });
   }
 });
-resizeObserver.observe(canvas);
+resizeObserver?.observe(canvas);
 resizeCanvas();
 
 return Object.freeze({
-  destroy() { resizeObserver.disconnect(); },
+  finishFrame() {
+    // 一像素同步读回会完成 Canvas 2D 的待绘制指令；预推进也真正绘制，避免指令积压。
+    ctx.getImageData(0, 0, 1, 1);
+  },
+  reset() {
+    displayedRange = initialDisplayedRange;
+    lastTimelineState = null;
+    ctx.clearRect(0, 0, width, height);
+    labelCtx.clearRect(0, 0, width, height);
+  },
+  destroy() {
+    resizeObserver?.disconnect();
+    lastTimelineState = null;
+    labelCanvas.width = 0;
+    labelCanvas.height = 0;
+  },
   render
 });
 }

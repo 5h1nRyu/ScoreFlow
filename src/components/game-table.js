@@ -86,12 +86,11 @@
     return panel;
   }
 
-  function createGameTable(root, teamTableSlot, games, config, playbackTasks) {
+  function createGameTable(root, teamTableSlot, games, config) {
     if (!(root instanceof HTMLElement) || !(teamTableSlot instanceof HTMLElement)) {
       throw new Error("game-table 需要有效的挂载元素");
     }
     if (!Array.isArray(games) || !games.length) throw new Error("game-table 缺少比赛数据");
-    if (games.length % 2 !== 0) throw new Error("game-table 的 game 数量必须是偶数");
     if (!Number.isFinite(config.rowTransitionDuration) || config.rowTransitionDuration < 0
         || !Number.isFinite(config.rowTransitionDelay) || config.rowTransitionDelay < 0) {
       throw new Error("game-table 动画时长必须是大于或等于 0 的数字");
@@ -118,19 +117,21 @@
       throw new Error("gameTable.headerFontSize 必须是大于 0 的数字");
     }
 
-    // const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const reduceMotion = false;
-    const transitionLength = config.rowTransitionDuration
-      + config.rowTransitionDelay * 7;
-    let activeIndex = -1;
+    const transitionLength = config.rowTransitionDuration + config.rowTransitionDelay * 7;
+    // 所有面板提前创建和解码，切换到后续比赛时不再触发图片请求。
+    const panels = Array.from({ length: Math.ceil(games.length / 2) }, (_, index) => {
+      const element = createPanel(games, index, config);
+      return {
+        element,
+        rows: Array.from(element.querySelectorAll(".game-table__row")),
+        headers: Array.from(element.querySelectorAll(".game-table__header"))
+      };
+    });
+    const ready = Promise.all(panels.flatMap(panel =>
+      Array.from(panel.element.querySelectorAll("img"), image => ScoreResources.prepareImage(image))
+    ));
     let activePanel = null;
-    let pendingPanel = null;
-    let transitionTimer = 0;
-    let transitionFrame = 0;
-    let hiddenForOverview = null;
 
-    root.style.setProperty("--row-transition-duration", `${config.rowTransitionDuration}ms`);
-    root.style.setProperty("--row-transition-delay", `${config.rowTransitionDelay}ms`);
     root.style.setProperty(
         "--game-table-player-name-font-size",
         `${config.itemFontSizes.playerName}px`
@@ -166,130 +167,74 @@
       );
     }
 
-    updateItemDimensions();
-    const resizeObserver = new ResizeObserver(updateItemDimensions);
-    resizeObserver.observe(root);
-
-    function finishTransition(nextPanel) {
-      playbackTasks.clearTimeout(transitionTimer);
-      playbackTasks.cancelAnimationFrame(transitionFrame);
-      transitionTimer = 0;
-      transitionFrame = 0;
-
-      root.replaceChildren(nextPanel);
-      nextPanel.classList.remove(
-          "game-table__panel--incoming",
-          "game-table__panel--entering",
-          "game-table__panel--outgoing"
-      );
-      activePanel = nextPanel;
-      pendingPanel = null;
+    function showPanel(panel) {
+      if (activePanel === panel) return;
+      root.replaceChildren(panel.element);
+      activePanel = panel;
     }
 
-    function startIncomingTransition(nextPanel) {
-      if (pendingPanel !== nextPanel) return;
-
-      root.replaceChildren(nextPanel);
-      nextPanel.classList.add("game-table__panel--incoming");
-      activePanel = null;
-
-      // 分两帧应用入场状态，让浏览器先处理面板的初始样式。
-      transitionFrame = playbackTasks.requestAnimationFrame(() => {
-        transitionFrame = playbackTasks.requestAnimationFrame(() => {
-          transitionFrame = 0;
-          if (pendingPanel !== nextPanel) return;
-
-          nextPanel.classList.add("game-table__panel--entering");
-          transitionTimer = playbackTasks.setTimeout(() => {
-            if (pendingPanel === nextPanel) finishTransition(nextPanel);
-          }, transitionLength);
-        });
+    function renderPanel(panel, elapsed, outgoing) {
+      panel.rows.forEach((row, index) => {
+        const time = elapsed - index * config.rowTransitionDelay;
+        const raw = config.rowTransitionDuration > 0
+            ? time / config.rowTransitionDuration : Number(time >= 0);
+        const progress = outgoing
+            ? ScoreTimeline.ease(raw, 0.55, 0, 0.8, 0.4)
+            : ScoreTimeline.ease(raw, 0.2, 0.75, 0.25, 1);
+        row.style.opacity = String(outgoing ? 1 - progress : progress);
+        row.style.transform = `translateX(${outgoing ? -110 * progress : 110 * (1 - progress)}%)`;
+      });
+      const progress = transitionLength > 0 ? ScoreTimeline.ease(elapsed / 180) : 1;
+      panel.headers.forEach(header => {
+        header.style.opacity = String(outgoing ? 1 - progress : progress);
       });
     }
 
-    function showGamePair(index, animate) {
-      const pairCount = games.length / 2;
-      const nextIndex = Math.min(pairCount - 1, Math.max(0, index));
-      if (nextIndex === activeIndex) {
-        // 要求立即展示时，也要结束同一目标上尚未完成的动画。
-        if (!animate && pendingPanel) finishTransition(pendingPanel);
-        return;
-      }
-
-      const nextPanel = createPanel(games, nextIndex, config);
-
-      // 中途切换到其他比赛时，先收尾上一轮动画，清除残留面板和回调。
-      if (pendingPanel) finishTransition(pendingPanel);
-
-      // 必须在动画开始时记录目标，防止每帧重复创建同一个面板。
-      activeIndex = nextIndex;
-
-      if (!animate || reduceMotion || transitionLength === 0) {
-        finishTransition(nextPanel);
-        return;
-      }
-
-      pendingPanel = nextPanel;
-      // 首次播放和每轮重播的首组表格直接复用右侧入场，不等待旧面板退场。
-      if (!activePanel) {
-        startIncomingTransition(nextPanel);
-        return;
-      }
-      activePanel.classList.add("game-table__panel--outgoing");
-      // 旧面板完全退场并移除后才挂载新面板，避免两套文字同时存在。
-      transitionTimer = playbackTasks.setTimeout(() => startIncomingTransition(nextPanel), transitionLength);
-    }
-
-    function setOverviewVisibility(isOverview) {
-      if (isOverview === hiddenForOverview) return;
-      hiddenForOverview = isOverview;
-      root.classList.toggle("game-table--hidden", isOverview);
-      root.setAttribute("aria-hidden", String(isOverview));
-
-      // 隐藏前完成切换，避免动画回调跨越总览和重播阶段。
-      if (isOverview && pendingPanel) finishTransition(pendingPanel);
-    }
-
-    function resetForOpening() {
-      playbackTasks.clearTimeout(transitionTimer);
-      playbackTasks.cancelAnimationFrame(transitionFrame);
-      transitionTimer = 0;
-      transitionFrame = 0;
-      activeIndex = -1;
+    function reset() {
       activePanel = null;
-      pendingPanel = null;
       root.replaceChildren();
+      root.style.opacity = "0";
+      root.style.transform = "translateX(0)";
+      root.classList.add("game-table--hidden");
+      root.setAttribute("aria-hidden", "true");
+      teamTableSlot.hidden = true;
     }
 
     return Object.freeze({
+      ready,
+      reset,
+      destroy() {
+        reset();
+        panels.length = 0;
+      },
       render(state) {
+        updateItemDimensions();
         const isOpening = state.phase === "background-hold" || state.phase === "entrance";
-        if (state.didRestart || (isOpening && activeIndex !== -1)) resetForOpening();
         if (isOpening) {
-          setOverviewVisibility(true);
-          root.style.opacity = "0";
-          root.style.transform = "translateX(0)";
-          teamTableSlot.hidden = true;
+          reset();
           return;
         }
         const isOverview = state.phase === "overview" || state.phase === "restart-hold";
         const isExiting = state.phase === "game-table-exit";
-        setOverviewVisibility(isExiting || isOverview);
-        // 队伍表在退场和宽度变化完成后才显示，避免进场时挤占空间。
+        root.classList.toggle("game-table--hidden", isExiting || isOverview);
+        root.setAttribute("aria-hidden", String(isExiting || isOverview));
         teamTableSlot.hidden = !isOverview;
         const progress = state.tableLayoutProgress;
         const easedProgress = progress * progress * (3 - 2 * progress);
         root.style.opacity = String(1 - easedProgress);
         root.style.transform = `translateX(${-5 * easedProgress}%)`;
-        if (isExiting || isOverview) return;
-        showGamePair(
-            Math.floor(state.tableCompletedGame / 2),
-            true
-        );
+        if (isOverview) return;
+
+        const playTime = Math.max(0, state.cycleElapsed - state.introDuration);
+        const index = Math.min(panels.length - 1, Math.floor(playTime / (2 * state.gameDuration)));
+        const localTime = playTime - index * 2 * state.gameDuration;
+        const outgoing = index > 0 && localTime < transitionLength;
+        const panel = panels[outgoing ? index - 1 : index];
+        showPanel(panel);
+        renderPanel(panel, outgoing ? localTime : localTime - (index > 0 ? transitionLength : 0), outgoing);
       }
     });
   }
 
   global.GameTable = Object.freeze({ createGameTable });
 }(globalThis));
-
