@@ -150,7 +150,10 @@
       ]);
       if (!teamsResponse.ok) throw new Error(`读取 ${TEAMS_DATA_URL} 失败（HTTP ${teamsResponse.status}）`);
       if (!gamesResponse.ok) throw new Error(`读取 ${GAMES_DATA_URL} 失败（HTTP ${gamesResponse.status}）`);
-      const teamData = TeamData.parseTeamsJson(await teamsResponse.text());
+      const parsedTeams = TeamData.parseTeamsJson(await teamsResponse.text());
+      const teamData = Object.freeze({ ...parsedTeams, teams: Object.freeze(parsedTeams.teams.map((team, index) => Object.freeze({
+        ...team, color: APP_CONFIG.theme.teamColors[index % APP_CONFIG.theme.teamColors.length]
+      }))) });
       const gameData = GameData.parseGamesJson(await gamesResponse.text());
       const data = limitDataForDebug(TeamData.combineWithGames(teamData, gameData));
       data.teams.forEach((team, index) => {
@@ -170,6 +173,7 @@
     previous.timeline.destroy();
     previous.resizeObserver?.disconnect();
     document.removeEventListener("keydown", previous.onKeydown);
+    document.getElementById("playbackToggle").removeEventListener("click", previous.togglePlayback);
     previous.chart.destroy();
     previous.gameTable.destroy();
     previous.teamTable.destroy();
@@ -182,6 +186,26 @@
     previousTableWidth = null;
     applyLayout();
     const data = await loadData();
+    const legend = document.getElementById("teamLegend");
+    legend.replaceChildren(...data.teams.map((team, index) => {
+      const item = document.createElement("li");
+      item.title = team.name;
+      const swatch = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      swatch.setAttribute("viewBox", "0 0 30 6");
+      swatch.setAttribute("aria-hidden", "true");
+      const line = document.createElementNS(swatch.namespaceURI, "line");
+      Object.entries({ x1: 0, y1: 3, x2: 30, y2: 3, stroke: team.color, "stroke-width": 2.6,
+        "stroke-dasharray": APP_CONFIG.theme.teamDashes[index].join(" ") || "none" })
+        .forEach(([key, value]) => line.setAttribute(key, value));
+      swatch.append(line);
+      const number = document.createElement("span");
+      number.className = "channel-id";
+      number.textContent = String(index + 1).padStart(2, "0");
+      const name = document.createElement("span");
+      name.textContent = team.shortName;
+      item.append(number, swatch, name);
+      return item;
+    }));
     await Promise.all([
       ScoreResources.prepareFont(title.text + data.games.map(game => game.info).join("")
           + APP_CONFIG.teamTable.initialTitle + APP_CONFIG.teamTable.finalTitle),
@@ -210,6 +234,20 @@
       components.push(timeline);
       let lastState = null;
       let paused = false;
+      const playbackButton = document.getElementById("playbackToggle");
+      playbackButton.disabled = manual;
+      playbackButton.setAttribute("aria-pressed", "false");
+      playbackButton.querySelector(".transport-icon").textContent = "Ⅱ";
+      document.getElementById("playbackLabel").textContent = manual ? "逐帧导出" : "暂停回放";
+      function togglePlayback() {
+        if (manual) return;
+        paused = !paused;
+        if (paused) timeline.pause();
+        else timeline.resume();
+        playbackButton.setAttribute("aria-pressed", String(paused));
+        document.getElementById("playbackLabel").textContent = paused ? "继续回放" : "暂停回放";
+        playbackButton.querySelector(".transport-icon").textContent = paused ? "▶" : "Ⅱ";
+      }
       const onKeydown = event => {
         if (exportMode || event.code !== "Space" || event.altKey || event.ctrlKey || event.metaKey) return;
         const target = event.target;
@@ -217,9 +255,7 @@
             && (target.isContentEditable || target.closest("input, textarea, select, button"))) return;
         event.preventDefault();
         if (event.repeat) return;
-        paused = !paused;
-        if (paused) timeline.pause();
-        else timeline.resume();
+        togglePlayback();
       };
       timeline.subscribe(renderEntrance);
       timeline.subscribe(renderTableLayout);
@@ -227,13 +263,31 @@
       timeline.subscribe(gameTable.render);
       timeline.subscribe(teamTable.render);
       timeline.subscribe(chart.render);
+      const phaseNames = { "background-hold": "STANDBY", entrance: "INITIALIZING", playing: "TRACKING",
+        "last-game-hold": "ACQUIRED", "game-table-exit": "PROCESSING", overview: "OVERVIEW", "restart-hold": "REPLAY READY" };
+      timeline.subscribe(state => {
+        const seconds = Math.floor(state.cycleElapsed / 1000);
+        document.getElementById("missionClock").textContent = 'T+ ' + String(Math.floor(seconds / 60)).padStart(2, "0") + ':' + String(seconds % 60).padStart(2, "0");
+        document.getElementById("missionGame").textContent = 'GAME ' + String(Math.max(0, state.tableCompletedGame + 1)).padStart(2, "0") + ' / ' + String(data.games.length).padStart(2, "0");
+        document.getElementById("missionPhase").textContent = phaseNames[state.phase];
+        const progress = state.cycleElapsed / timeline.durationMs * 100;
+        const progressElement = document.getElementById("missionProgress");
+        progressElement.setAttribute("aria-valuenow", String(Math.round(progress)));
+        progressElement.firstElementChild.style.width = progress + '%';
+        const isOverview = state.phase === "overview" || state.phase === "restart-hold";
+        document.getElementById("dataPanelTitle").textContent = isOverview ? "队伍总览" : "对局记录";
+        document.getElementById("dataPanelEnglish").textContent = isOverview ? "CREW STANDINGS" : "MATCH LOG";
+      });
       timeline.subscribe(state => { lastState = state; });
       const resizeObserver = manual ? null : new ResizeObserver(() => {
         if (lastState) timeline.renderAt(lastState.elapsed, 0);
       });
       resizeObserver?.observe(document.getElementById("dashboard"));
-      if (!manual) document.addEventListener("keydown", onKeydown);
-      application = { timeline, chart, gameTable, teamTable, resizeObserver, onKeydown };
+      if (!manual) {
+        document.addEventListener("keydown", onKeydown);
+        playbackButton.addEventListener("click", togglePlayback);
+      }
+      application = { timeline, chart, gameTable, teamTable, resizeObserver, onKeydown, togglePlayback };
       await Promise.all([gameTable.ready, teamTable.ready]);
       assertOpen();
       timeline.renderAt(0, 0);

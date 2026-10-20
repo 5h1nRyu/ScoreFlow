@@ -112,6 +112,11 @@ let width = 0;
 let height = 0;
 let lastTimelineState = null;
 
+// Keep labels legible inside the smaller mobile instrument without crowding its ten channels.
+function responsiveFontSize(size) {
+  return Math.min(size, Math.max(11, width * 0.026));
+}
+
 
 // 为全景展开提供起止平滑的缓动进度
 function easeInOut(progress) {
@@ -318,7 +323,7 @@ function layoutLabels(items, top, bottom) {
     return [];
   }
 
-  const minimumGap = labels.fontSize + labels.verticalGap;
+  const minimumGap = responsiveFontSize(labels.fontSize) + labels.verticalGap;
   const availableHeight = bottom - top;
   const effectiveGap = items.length > 1
       ? Math.min(minimumGap, availableHeight / (items.length - 1))
@@ -544,7 +549,7 @@ function render(timelineState) {
       : xAxis.labels.showInNormal;
 
   // 设置 Y 轴文字样式
-  ctx.font = `600 ${yAxis.labels.fontSize}px "Courier New", monospace`;
+  ctx.font = `600 ${responsiveFontSize(yAxis.labels.fontSize)}px "Courier New", monospace`;
 
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
@@ -673,7 +678,7 @@ function render(timelineState) {
   // 设置 X 轴文字样式
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
-  ctx.font = `600 ${xAxis.labels.fontSize}px "Courier New", monospace`;
+  ctx.font = `600 ${responsiveFontSize(xAxis.labels.fontSize)}px "Courier New", monospace`;
 
 
   // 全景及循环等待阶段共用间隔，下一轮开始时才恢复逐场竖线。
@@ -835,6 +840,7 @@ function render(timelineState) {
         team.color;
 
     ctx.lineWidth = chart.lineThickness;
+    ctx.setLineDash(config.theme.teamDashes[index % config.theme.teamDashes.length]);
 
     ctx.stroke();
 
@@ -857,7 +863,7 @@ function render(timelineState) {
     labelItems.push({
       color: team.color,
       index,
-      shortName: team.shortName,
+      shortName: `${String(index + 1).padStart(2, "0")} ${team.shortName}`,
       // 固定一位小数，并避免过零时显示 -0.0。
       scoreText: Number(tipValue.toFixed(1)).toFixed(1),
       tipX,
@@ -900,7 +906,7 @@ function render(timelineState) {
 
 
   if (labels.enabled && phase !== "overview" && phase !== "restart-hold") {
-    const halfLabelHeight = labels.fontSize / 2;
+    const halfLabelHeight = responsiveFontSize(labels.fontSize) / 2;
     const arrangedLabels = layoutLabels(
         labelItems,
         margin.top + halfLabelHeight,
@@ -909,7 +915,7 @@ function render(timelineState) {
 
     labelCtx.clearRect(0, 0, width, height);
     labelCtx.save();
-    labelCtx.font = `${labels.fontWeight} ${labels.fontSize}px "Courier New", monospace`;
+    labelCtx.font = `${labels.fontWeight} ${responsiveFontSize(labels.fontSize)}px "Courier New", monospace`;
     labelCtx.textAlign = "left";
     labelCtx.textBaseline = "middle";
 

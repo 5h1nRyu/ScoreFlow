@@ -3,7 +3,6 @@
 
   // 选手头像和比赛条目背景队标使用固定资源目录。
   const PLAYER_IMAGE_BASE_URL = "assets/images/players";
-  const TEAM_IMAGE_BASE_URL = "assets/images/teams";
 
   function createElement(tagName, className, text) {
     const element = document.createElement(tagName);
@@ -45,11 +44,6 @@
         createElement("span", "game-table__team-point", formatTeamPoint(player.teamPoint))
     );
     row.append(
-        createImage(
-            "game-table__team-mark",
-            imageUrl(TEAM_IMAGE_BASE_URL, player.team),
-            ""
-        ),
         identity,
         score,
         createImage(
@@ -66,7 +60,8 @@
     section.setAttribute("aria-label", `${game.info} 比赛`);
     const header = createElement("header", "game-table__header");
     header.append(
-        createElement("h2", "game-table__title", game.info)
+        createElement("h2", "game-table__title", game.info),
+        createElement("span", "game-table__record-id", 'LOG / ' + String(game.gameId + 1).padStart(2, "0"))
     );
     const list = createElement("ol", "game-table__list");
     const orderedPlayers = game.players.map((player, sourceIndex) => ({ player, sourceIndex }))

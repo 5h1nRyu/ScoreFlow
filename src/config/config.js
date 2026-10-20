@@ -10,23 +10,28 @@ const OVERVIEW_DURATION = Object.values(OVERVIEW_PHASES)
 
 // 集中管理项目公共配置
 const APP_CONFIG = Object.freeze({
-  // 是否使用纸张图片背景；false 时仅使用 backgroundColor
-  useBackgroundImage: true,
-  backgroundColor: "#ffffff",
+  // NASA-punk 机身底色；旧纸张背景仍可通过开关启用。
+  useBackgroundImage: false,
+  backgroundColor: "#ECE5D6",
+  // 仅影响呈现，不改写原始队伍数据。编号和线型共同区分低饱和通道。
+  theme: Object.freeze({
+    teamColors: Object.freeze(["#86483D", "#596674", "#96743E", "#4E6864", "#746549", "#72784B", "#73616B", "#3E5366", "#9A6252", "#555A47"]),
+    teamDashes: Object.freeze([[], [9, 4], [3, 3], [12, 4, 3, 4], [], [9, 4], [3, 3], [12, 4, 3, 4], [7, 3], [2, 4]])
+  }),
 
   layout: Object.freeze({
     // 页面外围留白分别相对于视口宽度和高度计算
-    pageMargin: Object.freeze({ horizontal: 0.025, top: 0.025, bottom: 0.05 }),
+    pageMargin: Object.freeze({ horizontal: 0.025, top: 0.025, bottom: 0.09 }),
     // 页面主体按标题和图表区从上到下紧凑排列
-    rows: Object.freeze({ title: 0.125, chart: 0.8 }),
+    rows: Object.freeze({ title: 0.185, chart: 0.7 }),
     // 两个表格分别占整页的比例；折线图自动使用扣除左右边距和当前表格后的空间
     // 列间距包含在折线图区内，不额外占用页面宽度
-    chartColumns: Object.freeze({ gameTable: 0.25, teamTable: 0.3 })
+    chartColumns: Object.freeze({ gameTable: 0.29, teamTable: 0.32 })
   }),
 
   title: Object.freeze({
-    text: "M.LEAGUE 2026-2027赛季 9月 队伍积分演变",
-    fontSize: 80
+    text: "9月 · 队伍积分演变",
+    fontSize: 44
   }),
 
   animation: Object.freeze({
@@ -67,14 +72,14 @@ const APP_CONFIG = Object.freeze({
     // 设置总分区域与条目右端的距离，单位为 CSS 像素
     totalScoreRightGap: 12,
     // 设置 info 表头字号及其与下方选手条目的距离，单位为 CSS 像素
-    headerFontSize: 36,
+    headerFontSize: 24,
     headerItemGap: 10,
     // 设置选手条目内各类文字的字号，单位为 CSS 像素
     itemFontSizes: Object.freeze({
-      playerName: 36,
-      totalScore: 36,
-      convertedTeamScore: 20,
-      stat: 28
+      playerName: 24,
+      totalScore: 28,
+      convertedTeamScore: 16,
+      stat: 22
     })
   }),
 
@@ -83,22 +88,22 @@ const APP_CONFIG = Object.freeze({
     initialTitle: "初始队伍排名",
     finalTitle: "最终队伍排名",
     // 设置标题字号与单次淡出或淡入动画时长
-    titleFontSize: 40,
+    titleFontSize: 26,
     titleTransitionDuration: 180,
     // 条目高度和间距均相对于 team-table 区域高度计算
     itemHeightRatio: 0.075,
     itemGapRatio: 0.018,
     // 队标高使用 CSS 像素
-    teamImageHeight: 80,
+    teamImageHeight: 38,
     // 控制重排后是否显示排名变化图标，并始终保留其布局空间
     showRankChange: false,
     // 设置重排过程中条目放大或缩小的最大比例
     reorderScaleAmplitude: 0.012,
     itemFontSizes: Object.freeze({
-      rank: 28,
-      teamName: 24,
-      score: 30,
-      rankChange: 20
+      rank: 20,
+      teamName: 21,
+      score: 24,
+      rankChange: 16
     })
   }),
 
@@ -110,14 +115,14 @@ const APP_CONFIG = Object.freeze({
     // 控制 initialHoldDuration 阶段的小球巡线动画；false 时停留在右侧端点
     initialHoldTraversalEnabled: false,
     // 设置所有屏幕尺寸下的积分折线粗细
-    lineThickness: 6
+    lineThickness: 2.6
   }),
 
   labels: Object.freeze({
     // 控制折线末端的队伍名称显示
     enabled: true,
     // 设置标签字号的 CSS 像素值
-    fontSize: 24,
+    fontSize: 18,
     // 设置 Canvas 支持的标签字重
     fontWeight: 700,
     // 设置标签与折线末端圆点的水平间距
@@ -134,7 +139,7 @@ const APP_CONFIG = Object.freeze({
     labels: Object.freeze({
       showInNormal: true,
       showInOverview: true,
-      fontSize: 24,
+      fontSize: 18,
       // 初始积分（game -1）处的文字，仅从全景开始显示到本轮结束
       initialText: "9/14",
       // 从全景开始到本轮结束，最后一场 game 处显示的文字
@@ -154,7 +159,7 @@ const APP_CONFIG = Object.freeze({
     labels: Object.freeze({
       showInNormal: true,
       showInOverview: true,
-      fontSize: 24
+      fontSize: 18
     }),
     // 限制动态 Y 轴范围的下限
     minimumRange: 50,

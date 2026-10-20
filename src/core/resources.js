@@ -14,12 +14,13 @@
   }
 
   async function prepareFont(text) {
-    const font = '400 16px "Alimama DongFangDaKai"';
-    const faces = await document.fonts.load(font, text);
+    const family = getComputedStyle(document.documentElement).getPropertyValue("--heading-font-family").trim();
+    const font = '600 16px ' + family;
+    await document.fonts.load(font, text);
     await document.fonts.ready;
-    if (!faces.length || faces.some(face => face.status !== "loaded") || !document.fonts.check(font, text)) {
-      throw new Error("指定字体 Alimama DongFangDaKai 未成功加载");
-    }
+    if (!document.fonts.check(font, text)) throw new Error("界面字体未准备完成");
+    // 徽章在 prepare 前解码，导出期间不产生迟到的资源变化。
+    await Promise.all(Array.from(document.querySelectorAll(".mission-patch"), image => prepareImage(image, true)));
   }
 
   async function prepareBackground(required) {

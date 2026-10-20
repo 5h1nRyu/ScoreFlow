@@ -1,9 +1,16 @@
 # ScoreFlow
 
-## TODO：
+## dev_v5 · NASA-punk 赛事遥测终端
 
-- 确认队伍代表色
-- 背景
+从 dev_v4 延续比赛回放和 VideoMaker 协议，将整个界面重做为 70 年代航天设备面板。
+
+- 暖灰机身（#ECE5D6）、浅色面板、细线接缝与槽口铆钉，搭配轻微矢量划痕和手写校准签注。
+- 原创圆形任务徽章和四色复古彩条（#4C5A68 / #7A7F4E / #D2A85E / #A8432F）。素材随仓库保存，无外部字体或图片依赖。
+- 红色（#D63A2C）用于回放主按钮和关键状态标记。头像和队标采用灰度处理，十支队伍使用低饱和通道色、编号与线型共同识别，原始 teams.json 保留不变。
+- 底部按钮与空格键均可暂停、继续整页回放。阶段、场次、计时、进度条共用比赛时间轴，导出模式锁定操作。
+- 桌面使用双面板；760px 及以下切换为纵向面板并允许滚动。推荐视频导出视口仍为 1920 × 1080。
+
+主配色、线型在 src/config/config.js 的 theme 中；材质、字体、响应式布局在 assets/css/styles.css；徽章在 assets/images/mission-patch.svg。无需构建，通过任意静态 HTTP 服务打开 index.html 即可。
 
 ## VideoMaker 逐帧导出
 
@@ -37,8 +44,8 @@ durationMs = backgroundHoldDuration + entranceDuration
 
 资源失败规则：
 
-- 数据、配置启用的背景图及指定本地字体必须加载成功，否则 `prepare()` 拒绝并终止导出。
-- 头像、比赛条目背景队标及排行榜队标允许缺失；在准备阶段确定失败并隐藏图片，保留布局空间，后续帧不再重试。普通播放的背景图仍保留纯色回退。
+- 数据、配置启用的背景图及任务徽章必须加载成功，系统界面字体等待就绪后开始绘制，否则 `prepare()` 拒绝并终止导出。
+- 头像及排行榜队标允许缺失；在准备阶段确定失败并隐藏图片，保留布局空间，后续帧不再重试。普通播放的背景图仍保留纯色回退。
 
 浏览器集成测试覆盖完整循环每一帧的 Canvas PNG 与 DOM 重现、1080p 截图静止、片段预推进、4K 和 DPR 3、资源失败、接口参数、重复 prepare 和普通播放暂停/重启。测试需要 Node.js 20 或以上；依赖仅供开发使用，网页仍无需构建：
 
@@ -52,21 +59,21 @@ npm test
 
 ## 页面布局
 
-在 `src/config/config.js` 中通过 `useBackgroundImage` 切换整页背景，默认 `true`：开启时使用固定图片 `assets/images/background/paper.jpg`，等比例居中铺满、不重复，允许裁切；关闭时仅使用 `backgroundColor` 指定的纯色。主容器与表格舞台透明，整页共用连续背景，表格条目保留自身底色；图片加载失败时也会露出该纯色底色。
+在 `src/config/config.js` 中通过 `useBackgroundImage` 切换整页背景，默认 `false`：开启时使用固定图片 `assets/images/background/paper.jpg`，等比例居中铺满、不重复，允许裁切；关闭时使用 `backgroundColor` 指定的暖灰机身底色（默认 `#ECE5D6`），两个仪表面板使用独立浅色底板。轻微磨损由固定矢量图案绘制，不依赖随机数；图片加载失败时也会露出该纯色底色。
 
 页面使用统一背景的纵向布局，顶部留白、主标题区、图表区和底部留白从上到下紧凑排列；图表区内的折线图和数据表从左到右排列，两者之间保留由 CSS 控制的间距，该间距包含在折线图区分配的宽度内。可在 `src/config/config.js` 的 `layout` 中调整：
 
 - `pageMargin.horizontal`：页面左右两侧的外围留白。
 - `pageMargin.top`、`pageMargin.bottom`：页面顶部和底部的独立留白。
 - `rows`：主标题区和图表区的高度比例。
-- `chartColumns.gameTable`：比赛详情表相对于整页的宽度比例，默认 `0.25`。
-- `chartColumns.teamTable`：队伍排名表相对于整页的宽度比例，默认 `0.3`。
+- `chartColumns.gameTable`：比赛详情表相对于整页的宽度比例，默认 `0.29`。
+- `chartColumns.teamTable`：队伍排名表相对于整页的宽度比例，默认 `0.32`。
 
-折线图区比例自动计算为 `1 - 2 * pageMargin.horizontal - 当前表格比例`，不再配置 `scoreChart` 或 `dataTable`。默认左右边距各为 2.5%，比赛表阶段为折线图 70% + 比赛表 25%，队伍表阶段为折线图 65% + 队伍表 30%。所有列均以整页宽度为基准，边距只计算一次。两个表格比例分别校验，必须为有限正数且给折线图留下正的宽度；纵向各组比例之和仍必须为 `1`。
+折线图区比例自动计算为 `1 - 2 * pageMargin.horizontal - 当前表格比例`，不再配置 `scoreChart` 或 `dataTable`。默认左右边距各为 2.5%，比赛表阶段为折线图 66% + 比赛表 29%，队伍表阶段为折线图 63% + 队伍表 32%。所有列均以整页宽度为基准，边距只计算一次。两个表格比例分别校验，必须为有限正数且给折线图留下正的宽度；纵向各组比例之和仍必须为 `1`。
 
 比赛表开始退场时，折线图区同步平滑调整宽度；退场结束且宽度调整完成后，队伍表才开始进场。每轮重播时直接恢复比赛表对应的布局，不播放反向宽度动画。两个表格宽度相同时保持布局不动，队伍表更窄时折线图平滑变宽。
 
-主标题只保留文字，占满标题区域宽度，水平居中、竖直底部对齐。仅主标题、比赛详情表的 `info` 表头和队伍排名表的表头使用本地字体 `assets/font/阿里妈妈东方大楷.ttf`，字体加载完成后开始播放。表格内容恢复系统字体；Canvas 坐标轴、队伍简称与分数标签恢复 `Courier New, monospace`。可在 `title` 中调整：
+标题区由任务徽章、左对齐主标题、观测日期和复古彩条组成，上方为设备铭牌。标题和表格使用 Arial / Helvetica Neue / Microsoft YaHei 无衬线字体，设备标签使用 Cascadia Mono / Consolas 等宽字体；Canvas 使用 Courier New 等宽字体。不再加载原来的书法字体。可在 `title` 中调整（窄屏字号由 CSS 自适应限制）：
 
 - `text`：标题文字。
 - `fontSize`：标题字号，单位为 CSS 像素。
@@ -87,7 +94,7 @@ npm test
 | 队伍数据 | `data/teams.json` |
 | 比赛数据 | `data/games.json` |
 | 选手头像 | `assets/images/players` |
-| 比赛条目背景队标 | `assets/images/teams` |
+| 任务徽章 | `assets/images/mission-patch.svg` |
 | 队伍排行榜队标 | `assets/images/icons` |
 
 ## 图表线条样式

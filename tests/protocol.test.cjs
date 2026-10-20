@@ -6,7 +6,7 @@ const path = require("node:path");
 const { chromium } = require("playwright");
 
 const root = path.resolve(__dirname, "..");
-const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg", ".ttf": "font/ttf" };
+const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg", ".ttf": "font/ttf", ".svg": "image/svg+xml" };
 let server;
 let browser;
 let baseURL;
@@ -220,8 +220,8 @@ test("prepare settles missing optional images, including later games; no resourc
   } finally { await page.close(); }
 });
 
-test("required data, background and font failures reject preparation", async () => {
-  for (const pattern of ["**/data/games.json", "**/assets/images/background/paper.jpg", "**/assets/font/*"]) {
+test("required data and mission badge failures reject preparation", async () => {
+  for (const pattern of ["**/data/games.json", "**/assets/images/mission-patch.svg"]) {
     const page = await openExport(options(), page => page.route(pattern, route => route.fulfill({ status: 404, body: "Missing" })));
     try {
       await assert.rejects(() => prepare(page));
@@ -323,4 +323,49 @@ test("normal playback still pauses the whole page, resumes, reaches overview and
     await page.waitForFunction(() => document.querySelector("#dashboard").dataset.phase === "background-hold");
     assert.deepEqual(errors, []);
   } finally { await page.close(); }
+});
+
+
+test("NASA-punk channels, responsive panels and playback button share the original timeline", { timeout: 30000 }, async () => {
+  for (const viewport of [{ width: 1366, height: 768 }, { width: 390, height: 844 }]) {
+    const page = await browser.newPage({ viewport });
+    await page.route("**/src/config/config.js", async route => {
+      const response = await route.fetch();
+      const body = (await response.text()).replace(/backgroundHoldDuration: 5000/, "backgroundHoldDuration: 0")
+          .replace(/entranceDuration: 2000/, "entranceDuration: 0");
+      await route.fulfill({ response, body });
+    });
+    try {
+      await page.goto(baseURL);
+      await page.waitForFunction(() => !document.querySelector("#playbackToggle").disabled);
+      assert.equal(await page.locator("#teamLegend li").count(), 10);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), viewport.width);
+      assert.equal(await page.locator("body").evaluate(body => getComputedStyle(body).backgroundColor), "rgb(236, 229, 214)");
+      const rects = await page.locator(".dashboard__region").evaluateAll(nodes => nodes.map(node => {
+        const { x, y, width, height } = node.getBoundingClientRect();
+        return { x, y, width, height };
+      }));
+      if (viewport.width < 761) assert(rects[1].y >= rects[0].y + rects[0].height);
+      else assert(rects[1].x >= rects[0].x + rects[0].width);
+      await page.locator("#playbackToggle").click();
+      assert.equal(await page.locator("#playbackToggle").getAttribute("aria-pressed"), "true");
+      const paused = await page.screenshot({ animations: "allow" });
+      await page.waitForTimeout(150);
+      assert.deepEqual(await page.screenshot({ animations: "allow" }), paused);
+      await page.locator("#playbackToggle").click();
+      assert.equal(await page.locator("#playbackToggle").getAttribute("aria-pressed"), "false");
+    } finally { await page.close(); }
+  }
+});
+
+test("the optional legacy background is still required when enabled", async () => {
+  const page = await openExport(options(), async page => {
+    await page.route("**/src/config/config.js", async route => {
+      const response = await route.fetch();
+      await route.fulfill({ response, body: (await response.text()).replace("useBackgroundImage: false", "useBackgroundImage: true") });
+    });
+    await page.route("**/assets/images/background/paper.jpg", route => route.fulfill({ status: 404, body: "Missing" }));
+  });
+  try { await assert.rejects(() => prepare(page)); }
+  finally { await page.close(); }
 });
