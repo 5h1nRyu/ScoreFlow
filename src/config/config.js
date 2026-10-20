@@ -13,24 +13,23 @@ const APP_CONFIG = Object.freeze({
   // NASA-punk 机身底色；旧纸张背景仍可通过开关启用。
   useBackgroundImage: false,
   backgroundColor: "#ECE5D6",
-  // 仅影响呈现，不改写原始队伍数据。编号和线型共同区分低饱和通道。
+  // 仅影响呈现，不改写原始队伍数据。所有队伍曲线保持实线。
   theme: Object.freeze({
-    teamColors: Object.freeze(["#86483D", "#596674", "#96743E", "#4E6864", "#746549", "#72784B", "#73616B", "#3E5366", "#9A6252", "#555A47"]),
-    teamDashes: Object.freeze([[], [9, 4], [3, 3], [12, 4, 3, 4], [], [9, 4], [3, 3], [12, 4, 3, 4], [7, 3], [2, 4]])
+    teamColors: Object.freeze(["#86483D", "#596674", "#96743E", "#4E6864", "#746549", "#72784B", "#73616B", "#3E5366", "#9A6252", "#555A47"])
   }),
 
   layout: Object.freeze({
     // 页面外围留白分别相对于视口宽度和高度计算
-    pageMargin: Object.freeze({ horizontal: 0.025, top: 0.025, bottom: 0.09 }),
+    pageMargin: Object.freeze({ horizontal: 0.025, top: 0.025, bottom: 0.055 }),
     // 页面主体按标题和图表区从上到下紧凑排列
-    rows: Object.freeze({ title: 0.185, chart: 0.7 }),
+    rows: Object.freeze({ title: 0.145, chart: 0.775 }),
     // 两个表格分别占整页的比例；折线图自动使用扣除左右边距和当前表格后的空间
     // 列间距包含在折线图区内，不额外占用页面宽度
     chartColumns: Object.freeze({ gameTable: 0.29, teamTable: 0.32 })
   }),
 
   title: Object.freeze({
-    text: "9月 · 队伍积分演变",
+    text: "M.LEAGUE 2026-2027赛季 9月 队伍积分演变",
     fontSize: 44
   }),
 

@@ -220,8 +220,8 @@ test("prepare settles missing optional images, including later games; no resourc
   } finally { await page.close(); }
 });
 
-test("required data and mission badge failures reject preparation", async () => {
-  for (const pattern of ["**/data/games.json", "**/assets/images/mission-patch.svg"]) {
+test("required data failures reject preparation", async () => {
+  for (const pattern of ["**/data/games.json"]) {
     const page = await openExport(options(), page => page.route(pattern, route => route.fulfill({ status: 404, body: "Missing" })));
     try {
       await assert.rejects(() => prepare(page));
@@ -326,7 +326,7 @@ test("normal playback still pauses the whole page, resumes, reaches overview and
 });
 
 
-test("NASA-punk channels, responsive panels and playback button share the original timeline", { timeout: 30000 }, async () => {
+test("simplified NASA-punk panels retain the original title, color portraits and keyboard playback", { timeout: 30000 }, async () => {
   for (const viewport of [{ width: 1366, height: 768 }, { width: 390, height: 844 }]) {
     const page = await browser.newPage({ viewport });
     await page.route("**/src/config/config.js", async route => {
@@ -337,8 +337,11 @@ test("NASA-punk channels, responsive panels and playback button share the origin
     });
     try {
       await page.goto(baseURL);
-      await page.waitForFunction(() => !document.querySelector("#playbackToggle").disabled);
-      assert.equal(await page.locator("#teamLegend li").count(), 10);
+      await page.waitForFunction(() => document.querySelector("#dashboard").dataset.phase === "playing");
+      assert.equal(await page.locator("#teamLegend, #playbackToggle, .mission-patch, .panel-code, .equipment-label").count(), 0);
+      assert.equal(await page.locator("#dashboardTitleText").textContent(), "M.LEAGUE 2026-2027赛季 9月 队伍积分演变");
+      assert.equal(await page.locator(".mission-spec strong").textContent(), "09.14 — 09.30");
+      assert.equal(await page.locator(".game-table__portrait").first().evaluate(node => getComputedStyle(node).filter), "saturate(0.8)");
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), viewport.width);
       assert.equal(await page.locator("body").evaluate(body => getComputedStyle(body).backgroundColor), "rgb(236, 229, 214)");
       const rects = await page.locator(".dashboard__region").evaluateAll(nodes => nodes.map(node => {
@@ -347,13 +350,13 @@ test("NASA-punk channels, responsive panels and playback button share the origin
       }));
       if (viewport.width < 761) assert(rects[1].y >= rects[0].y + rects[0].height);
       else assert(rects[1].x >= rects[0].x + rects[0].width);
-      await page.locator("#playbackToggle").click();
-      assert.equal(await page.locator("#playbackToggle").getAttribute("aria-pressed"), "true");
+      await page.keyboard.press("Space");
+      assert.equal(await page.locator("#missionPhase").textContent(), "已暂停");
       const paused = await page.screenshot({ animations: "allow" });
       await page.waitForTimeout(150);
       assert.deepEqual(await page.screenshot({ animations: "allow" }), paused);
-      await page.locator("#playbackToggle").click();
-      assert.equal(await page.locator("#playbackToggle").getAttribute("aria-pressed"), "false");
+      await page.keyboard.press("Space");
+      assert.equal(await page.locator("#missionPhase").textContent(), "比赛回放");
     } finally { await page.close(); }
   }
 });

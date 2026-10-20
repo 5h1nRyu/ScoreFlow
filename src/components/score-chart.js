@@ -840,7 +840,7 @@ function render(timelineState) {
         team.color;
 
     ctx.lineWidth = chart.lineThickness;
-    ctx.setLineDash(config.theme.teamDashes[index % config.theme.teamDashes.length]);
+    ctx.setLineDash([]);
 
     ctx.stroke();
 
@@ -863,7 +863,7 @@ function render(timelineState) {
     labelItems.push({
       color: team.color,
       index,
-      shortName: `${String(index + 1).padStart(2, "0")} ${team.shortName}`,
+      shortName: team.shortName,
       // 固定一位小数，并避免过零时显示 -0.0。
       scoreText: Number(tipValue.toFixed(1)).toFixed(1),
       tipX,

@@ -8,44 +8,32 @@
     <title>ScoreFlow / 赛事遥测终端</title>
     <script src="src/config/config.js"></script>
     <link rel="stylesheet" href="assets/css/styles.css" />
-    <link rel="icon" href="assets/images/mission-patch.svg" type="image/svg+xml" />
   </head>
   <body>
     <main id="dashboard" class="dashboard" data-phase="background-hold">
       <header class="dashboard__title" aria-label="任务与赛事信息">
-        <div class="mission-masthead">
-          <a class="mission-brand" href="./" aria-label="ScoreFlow 首页">SCOREFLOW<span>FLIGHT DYNAMICS DIVISION</span></a>
-          <div class="mission-masthead__right"><span class="status-lamp" aria-hidden="true"></span>赛事遥测终端 <span class="masthead-serial">/ SF–026 · REV 05</span></div>
-        </div>
         <div class="mission-heading">
-          <img class="mission-patch" src="assets/images/mission-patch.svg" alt="ScoreFlow 2026 赛季任务徽章" width="92" height="92" />
           <div class="dashboard__title-section">
-            <p class="eyebrow">MISSION CONTROL / M.LEAGUE 2026–2027</p>
             <h1 id="dashboardTitleText" class="dashboard__title-text"></h1>
-            <p class="mission-subtitle">每一场对局，都是一段新的轨迹。<span>SEASON TELEMETRY · SEPTEMBER</span></p>
           </div>
-          <div class="mission-spec"><span>OBSERVATION WINDOW</span><strong>09.14 — 09.30</strong><span>2026 / REGULAR SEASON</span><div class="retro-stripe" aria-hidden="true"><i></i><i></i><i></i><i></i></div></div>
+          <div class="mission-spec"><strong>09.14 — 09.30</strong><div class="retro-stripe" aria-hidden="true"><i></i><i></i><i></i><i></i></div></div>
         </div>
       </header>
       <section class="dashboard__chart-area" aria-label="赛事遥测面板">
         <section class="dashboard__region chart-instrument" aria-labelledby="trajectoryHeading">
-          <header class="panel-header"><h2 id="trajectoryHeading"><span class="panel-number">01</span>积分轨迹 <span class="panel-english">SCORE TRAJECTORY</span></h2><span class="panel-code">Y / PT &nbsp; X / GAME</span></header>
-          <div class="chart-viewport"><canvas id="scoreChart" role="img" aria-label="各队伍随比赛进度连续变化的积分折线图；队伍编号与线型见下方图例"></canvas><span class="chart-axis-note">CUMULATIVE POINTS / 累计积分</span></div>
-          <div class="channel-register"><div class="channel-register__label">CHANNEL REGISTER <span>队伍识别 / 10 CHANNELS</span></div><ul id="teamLegend" class="team-legend" aria-label="积分线队伍图例"></ul></div>
+          <header class="panel-header"><h2 id="trajectoryHeading">积分轨迹</h2></header>
+          <div class="chart-viewport"><canvas id="scoreChart" role="img" aria-label="各队伍随比赛进度连续变化的积分折线图"></canvas></div>
         </section>
         <section class="dashboard__region table-instrument" aria-labelledby="dataPanelHeading">
-          <header class="panel-header"><h2 id="dataPanelHeading"><span class="panel-number">02</span><span id="dataPanelTitle">对局记录</span> <span class="panel-english" id="dataPanelEnglish">MATCH LOG</span></h2><span class="panel-code">SF / B</span></header>
+          <header class="panel-header"><h2 id="dataPanelHeading"><span id="dataPanelTitle">对局记录</span></h2></header>
           <div id="tableStage" class="table-stage">
             <section id="gameTable" class="game-table" aria-label="当前两场比赛详情"></section>
             <section id="teamTableSlot" class="team-table-slot" aria-label="队伍总览" hidden></section>
           </div>
-          <div class="panel-footnote"><span class="hazard-stripe" aria-hidden="true"></span><span>POINTS VERIFIED / 数据已校验</span><span aria-hidden="true">↑ UP</span></div>
         </section>
       </section>
       <footer class="mission-footer">
-        <div class="transport"><span class="transport__label">PLAYBACK CONTROL</span><button id="playbackToggle" class="playback-toggle" type="button" aria-pressed="false" disabled><span class="transport-icon" aria-hidden="true">Ⅱ</span><span id="playbackLabel">暂停回放</span></button><kbd>SPACE</kbd></div>
-        <div class="telemetry"><span id="missionPhase" class="telemetry__phase">STANDBY</span><span id="missionClock">T+ 00:00</span><span id="missionGame">GAME — / —</span><div class="mission-progress" role="progressbar" aria-label="本轮回放进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="missionProgress"><span></span></div></div>
-        <div class="equipment-label"><span>STOW 84S · THIS SIDE UP ↑</span><span class="inspection-note">已校准 / checked ✓</span><span class="barcode" aria-hidden="true"></span></div>
+        <div class="telemetry"><span id="missionPhase" class="telemetry__phase">等待回放</span><span id="missionClock">回放 00:00</span><span id="missionGame">比赛 — / —</span><div class="mission-progress" role="progressbar" aria-label="本轮回放进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="missionProgress"><span></span></div></div>
       </footer>
     </main>
     <p id="dataError" role="alert" hidden></p>
