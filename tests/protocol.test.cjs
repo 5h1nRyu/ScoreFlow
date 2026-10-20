@@ -7,6 +7,8 @@ const { chromium } = require("playwright");
 
 const root = path.resolve(__dirname, "..");
 const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg", ".ttf": "font/ttf", ".svg": "image/svg+xml" };
+const gameCount = JSON.parse(require("node:fs").readFileSync(path.join(root, "data/games.json"), "utf8")).games.length;
+const cycleDuration = 5000 + 2000 + (gameCount + 1) * 1500 + 400 + 7000 + 3000;
 let server;
 let browser;
 let baseURL;
@@ -90,7 +92,7 @@ test("metadata works before prepare; export startup schedules no playback; metad
   const page = await openExport();
   try {
     const manifest = await page.evaluate(() => __VIDEO_EXPORT__.getManifest());
-    assert.equal(manifest.durationMs, 66900);
+    assert.equal(manifest.durationMs, cycleDuration);
     assert.equal(manifest.supportsSeeking, false);
     assert.deepEqual(manifest.recommendedViewport, { width: 1920, height: 1080 });
     assert(manifest.name.length);
@@ -104,7 +106,7 @@ test("metadata works before prepare; export startup schedules no playback; metad
   } finally { await page.close(); }
 });
 
-test("every frame in a complete 4014-frame cycle reproduces its Canvas PNG and DOM after reset", { timeout: 180000 }, async () => {
+test("every frame in a complete cycle reproduces its Canvas PNG and DOM after reset", { timeout: Math.max(180000, cycleDuration * 4) }, async () => {
   const page = await openExport();
   try {
     await prepare(page);
@@ -132,7 +134,7 @@ test("every frame in a complete 4014-frame cycle reproduces its Canvas PNG and D
       return { count, phases: [...phases], work: scheduledWork, animations: document.getAnimations().length };
     });
     assert.equal(result.mismatch, undefined, `frame mismatch: ${result.mismatch}`);
-    assert.equal(result.count, 4014);
+    assert.equal(result.count, Math.ceil(cycleDuration * 60 / 1000));
     assert.deepEqual(result.phases, ["background-hold", "entrance", "playing", "last-game-hold", "game-table-exit", "overview", "restart-hold"]);
     assert.deepEqual(result.work, { frames: 0, timers: 0, observers: 0 });
     assert.equal(result.animations, 0);
@@ -164,7 +166,7 @@ test("1080p screenshots stay fixed across real waits, keyboard input, reset and 
     assert.deepEqual(await page.screenshot({ animations: "allow" }), shots.get(0));
     await advance(page, 1, 630); // VideoMaker pre-roll for a segment starting inside a table entrance.
     assert.deepEqual(await page.screenshot({ animations: "allow" }), shots.get(630));
-    await advance(page, 631, 3605); // Continue pre-roll to a segment inside the leaderboard title transition.
+    await advance(page, 631, 3605); // Continue pre-roll to a segment inside the leaderboard reorder.
     assert.deepEqual(await page.screenshot({ animations: "allow" }), shots.get(3605));
     assert.deepEqual(page.pageErrors, []);
   } finally { await page.close(); }
@@ -257,7 +259,6 @@ test("zero-duration phases and odd debug game counts retain correct layout and i
         .replace(/gameTableExitDuration: 400/, "gameTableExitDuration: 0")
         .replace(/rowTransitionDuration: 220/, "rowTransitionDuration: 0")
         .replace(/rowTransitionDelay: 35/, "rowTransitionDelay: 0")
-        .replace(/titleTransitionDuration: 180/, "titleTransitionDuration: 0")
         .replace(/finalGameId: -1/, "finalGameId: 2");
     await route.fulfill({ response, body });
   }));
@@ -274,7 +275,8 @@ test("zero-duration phases and odd debug game counts retain correct layout and i
     await advance(page, 181, 360);
     assert.equal(await page.locator("#dashboard").getAttribute("data-phase"), "overview");
     assert(await page.locator("#teamTableSlot").isVisible());
-    assert.equal(await page.locator(".team-table__title").evaluate(title => title.style.opacity), "1");
+    assert.equal(await page.locator(".team-table__title").count(), 0);
+    assert.equal(await page.locator("#dataPanelTitle").textContent(), "队伍排名");
     assert.deepEqual(page.pageErrors, []);
   } finally { await page.close(); }
 });
@@ -378,6 +380,76 @@ test("the optional legacy background is still required when enabled", async () =
     });
     await page.route("**/assets/images/background/paper.jpg", route => route.fulfill({ status: 404, body: "Missing" }));
   });
+  try { await assert.rejects(() => prepare(page)); }
+  finally { await page.close(); }
+});
+
+test("replay progress excludes every other phase, freezes at completion and resets per cycle", async () => {
+  const page = await openExport();
+  try {
+    const cases = await page.evaluate(() => {
+      return [0, 2, 47].flatMap(finalGame => [false, true].map(skipIntro => {
+        const animation = { ...APP_CONFIG.animation,
+          ...(skipIntro ? { backgroundHoldDuration: 0, entranceDuration: 0 } : {}) };
+        const timeline = ScoreTimeline.createTimeline({ animation, finalGame, manual: true });
+        const intro = animation.backgroundHoldDuration + animation.entranceDuration;
+        const end = intro + (finalGame + 1) * animation.gameDuration;
+        const progressAt = time => timeline.renderAt(time).replayProgress;
+        return { start: progressAt(0), intro: progressAt(intro), half: progressAt((intro + end) / 2),
+          end: progressAt(end), lastHold: progressAt(end + animation.gameDuration / 2),
+          exit: progressAt(end + animation.gameDuration + animation.gameTableExitDuration / 2),
+          overview: progressAt(end + animation.gameDuration + animation.gameTableExitDuration + 500),
+          tail: progressAt(timeline.durationMs - 1), restart: progressAt(timeline.durationMs) };
+      }));
+    });
+    for (const result of cases) assert.deepEqual(result, { start: 0, intro: 0, half: .5,
+      end: 1, lastHold: 1, exit: 1, overview: 1, tail: 1, restart: 0 });
+  } finally { await page.close(); }
+});
+
+test("ranking rows fill the panel and reserve a readable change column at every viewport", async () => {
+  for (const [width, height] of [[1920, 1080], [1366, 768], [960, 540], [390, 844]]) {
+    const o = options(1, width, height);
+    const page = await openExport(o, page => page.route("**/src/config/config.js", async route => {
+      const response = await route.fetch();
+      await route.fulfill({ response, body: (await response.text()).replace(/finalGameId: -1/, "finalGameId: 2") });
+    }));
+    try {
+      await prepare(page, o);
+      await advance(page, 0, 1254); // Final ranking, after a complete short replay.
+      assert.equal(await page.locator(".team-table__title").count(), 0);
+      assert.equal(await page.locator("#dataPanelTitle").textContent(), "队伍排名");
+      assert.equal(await page.locator("#missionProgress").getAttribute("aria-valuenow"), "100");
+      assert.match(await page.locator("#missionGame").textContent(), /^03 \/ 03$/);
+      const result = await page.evaluate(() => {
+        const list = document.querySelector(".team-table__list").getBoundingClientRect();
+        const rows = [...document.querySelectorAll(".team-table__row")];
+        const details = rows.map(row => {
+          const r = row.getBoundingClientRect();
+          const score = row.querySelector(".team-table__score").getBoundingClientRect();
+          const change = row.querySelector(".team-table__change");
+          const c = change.getBoundingClientRect();
+          return { top: r.top, bottom: r.bottom, height: r.height,
+            separate: score.right < c.left, centered: Math.abs((r.top + r.bottom) - (c.top + c.bottom)) < 1,
+            contained: c.right <= r.right, readable: parseFloat(getComputedStyle(change).fontSize) >= 12 };
+        });
+        return { list: { top: list.top, bottom: list.bottom }, details,
+          font: document.fonts.check('500 16px Rajdhani'),
+          noOverflow: document.documentElement.scrollWidth === innerWidth };
+      });
+      assert.equal(result.details.length, 10);
+      assert(Math.abs(Math.min(...result.details.map(r => r.top)) - result.list.top) < 1);
+      assert(Math.abs(Math.max(...result.details.map(r => r.bottom)) - result.list.bottom) < 1);
+      assert(result.details.every(r => r.separate && r.centered && r.contained && r.readable));
+      assert(result.font && result.noOverflow);
+      assert.deepEqual(page.pageErrors, []);
+    } finally { await page.close(); }
+  }
+});
+
+test("export preparation rejects a missing title font", async () => {
+  const page = await openExport(options(), page => page.route("**/assets/font/Rajdhani-Medium.ttf", route =>
+    route.fulfill({ status: 404, body: "Missing" })));
   try { await assert.rejects(() => prepare(page)); }
   finally { await page.close(); }
 });

@@ -1,3 +1,9 @@
+TODO:
+chart X轴标签会有残留
+标题太细
+队伍表表项挤到下方装饰
+
+
 # ScoreFlow
 
 ## dev_v5 · NASA-punk 赛事遥测终端
@@ -7,7 +13,7 @@
 - 暖灰机身（#ECE5D6）、浅色面板、细线接缝与槽口铆钉，搭配轻微矢量划痕。
 - 标题恢复原始赛事文字并靠左，右侧保留日期与四色复古彩条（#4C5A68 / #7A7F4E / #D2A85E / #A8432F）。移除任务徽章、设备编号、装饰文案和图例。
 - 头像饱和度降至 80%，队标保留原色；队伍代表色直接读取 data/teams.json，不再覆盖配色，所有队伍曲线均为实线，沿用队伍简称与分数标签，原始 teams.json 保留不变。
-- 移除回放按钮，空格键仍可暂停、继续整页回放。底部仅保留同排的进度条与比赛场次，进度条在场次左边，高度为 10px，采用嵌入式分段槽、下沿机械刻度和红色游标，共用比赛时间轴，导出模式锁定操作。
+- 移除回放按钮，空格键仍可暂停、继续整页回放。底部仅保留同排的进度条与比赛场次，进度条在场次左边，高度为 10px，采用嵌入式分段槽、下沿机械刻度和红色游标，仅统计比赛回顾区段：开场保持 0，最后一场积分回放完成时达到 100%，之后直到本轮结束始终保持满格，重播时归零；场次只显示数字。导出模式锁定操作。
 - 桌面使用双面板；760px 及以下切换为纵向面板并允许滚动。推荐视频导出视口仍为 1920 × 1080。
 
 队伍代表色在 data/teams.json 中；材质、字体、响应式布局在 assets/css/styles.css。无需构建，通过任意静态 HTTP 服务打开 index.html 即可。
@@ -36,7 +42,7 @@ durationMs = backgroundHoldDuration + entranceDuration
            + gameTableExitDuration + overviewDuration + restartDelay
 ```
 
-当前 32 场比赛及默认配置对应 **66900 ms（66.9 秒，4014 帧）**。`debug.finalGameId` 截断数据后，元数据时长同步缩短，最后一组也支持只有一场比赛。
+当前 48 场比赛及默认配置对应 **90900 ms（90.9 秒，5454 帧）**。`debug.finalGameId` 截断数据后，元数据时长同步缩短，最后一组也支持只有一场比赛。
 
 `supportsSeeking` 固定为 `false`，因为 Y 轴缩放需要按固定帧间隔逐步平滑。每次 reset 后必须从全局帧 `0` 开始连续提交，`timeMs = index * 1000 / 60`；第 0 帧的 `deltaMs` 为 `0`，后续为 `1000 / 60`。导出中途片段时，由 VideoMaker 先顺序推进全部前置帧，不能把片段首帧重新编号为 0。重复帧、跳帧及不符合协议的帧时间会报错。当前效果不使用随机数，seed 被校验和保存，画面不依赖系统时钟或 `Math.random()`。
 
@@ -73,7 +79,7 @@ npm test
 
 比赛表开始退场时，折线图区同步平滑调整宽度；退场结束且宽度调整完成后，队伍表才开始进场。每轮重播时直接恢复比赛表对应的布局，不播放反向宽度动画。两个表格宽度相同时保持布局不动，队伍表更窄时折线图平滑变宽。
 
-标题区由左对齐的原始赛事标题、观测日期和复古彩条组成。标题和表格使用 Arial / Helvetica Neue / Microsoft YaHei 无衬线字体，设备标签使用 Cascadia Mono / Consolas 等宽字体；Canvas 使用 Courier New 等宽字体。不再加载原来的书法字体。可在 `title` 中调整（窄屏字号由 CSS 自适应限制）：
+标题区由左对齐的原始赛事标题、观测日期和复古彩条组成。大标题使用本地 Rajdhani Medium（500 字重），搭配 Windows 等线（DengXian）显示中文，缺失时回退到 Microsoft YaHei；整行水平缩至 86%，使中西文统一呈现瘦高的航天仪表字形。字体来源：[Google Fonts](https://fonts.google.com/specimen/Rajdhani)，随项目附带 SIL OFL 许可证，运行和导出不需要联网。表格仍使用 Arial / Helvetica Neue / Microsoft YaHei，设备标签使用 Cascadia Mono / Consolas 等宽字体；Canvas 使用 Courier New 等宽字体。可在 `title` 中调整（窄屏字号由 CSS 自适应限制）：
 
 - `text`：标题文字。
 - `fontSize`：标题字号，单位为 CSS 像素。
@@ -270,10 +276,10 @@ games.json ──┘             │                          ↑
 原始先后顺序。每组并列队伍只有第一支显示数字排名，后续队伍以 `-` 表示并列。
 
 重排期间，最终排名较高的条目具有更高的层叠顺序，并通过轻微缩放增强交错效果。排名变化以
-绿色 `▲`、红色 `▼` 或灰色 `=` 显示，并附带上升或下降的名次数。队标文件约定为
+绿色 `▲`、红色 `▼` 或灰色 `=` 显示，并附带上升或下降的名次数；分数右侧使用独立的固定宽度列，竖直居中，默认字号为 20px，窄屏自适应，分数相应左移。队标文件约定为
 `assets/images/icons/<team>.png`；缺少图片时会隐藏破损图像但保留布局。
 
-排行榜在重排前使用 `teamTable.initialTitle`，重排开始后使用 `teamTable.finalTitle`，两个标题均左对齐并以淡出、淡入动画切换。可通过 `teamTable.titleFontSize` 设置标题字号，通过 `teamTable.titleTransitionDuration` 设置单次淡出或淡入的毫秒数。另可在 `teamTable` 配置中调整 `itemHeightRatio`、`itemGapRatio`、`teamImageHeight`、`reorderScaleAmplitude`（重排时条目的最大缩放比例），以及
+面板左上标题统一显示“队伍排名”，表格内部不再创建初始/最终排名标题。列表使用全部可用高度，默认 `itemHeightRatio: 0.0838` 和 `itemGapRatio: 0.018` 让 10 个条目与 9 个间距铺满列表，腾出的标题高度分配给各行。可在 `teamTable` 配置中调整 `itemHeightRatio`、`itemGapRatio`、`teamImageHeight`、`reorderScaleAmplitude`（重排时条目的最大缩放比例），以及
 `itemFontSizes.rank`、`itemFontSizes.teamName`、`itemFontSizes.score`、
 `itemFontSizes.rankChange`。`teamImageHeight` 是队标高度的 CSS 像素值，可以大于条目高度；队标始终与条目竖直居中，超出条目的上下部分会被裁切。队标、排名、队伍名称、分数和排名变化文字均与条目的竖直中心对齐。
 

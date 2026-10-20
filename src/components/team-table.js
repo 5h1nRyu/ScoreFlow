@@ -45,12 +45,7 @@
     if (!Array.isArray(teams) || teams.length !== 10) {
       throw new Error("team-table 必须恰好接收 10 支队伍");
     }
-    ["initialTitle", "finalTitle"].forEach(name => {
-      if (typeof config[name] !== "string" || !config[name].trim()) {
-        throw new Error(`teamTable.${name} 必须是非空字符串`);
-      }
-    });
-    ["itemHeightRatio", "teamImageHeight", "titleFontSize"].forEach(name => {
+    ["itemHeightRatio", "teamImageHeight"].forEach(name => {
       if (!Number.isFinite(config[name]) || config[name] <= 0) {
         throw new Error(`teamTable.${name} 必须是大于 0 的数字`);
       }
@@ -60,9 +55,6 @@
     }
     if (!Number.isFinite(config.reorderScaleAmplitude) || config.reorderScaleAmplitude < 0) {
       throw new Error("teamTable.reorderScaleAmplitude 必须是大于或等于 0 的数字");
-    }
-    if (!Number.isFinite(config.titleTransitionDuration) || config.titleTransitionDuration < 0) {
-      throw new Error("teamTable.titleTransitionDuration 必须是大于或等于 0 的数字");
     }
     if (typeof config.showRankChange !== "boolean") {
       throw new Error("teamTable.showRankChange 必须是布尔值");
@@ -76,7 +68,6 @@
     const initialOrder = rankTeams(teams, team => team.initialScore);
     const finalOrder = rankTeams(teams, team => team.values.at(-1));
     const finalByName = new Map(finalOrder.map(entry => [entry.team.name, entry]));
-    const title = createElement("h2", "team-table__title", config.initialTitle);
     const list = createElement("ol", "team-table__list");
     const rows = new Map();
     let itemHeight = 0;
@@ -88,7 +79,6 @@
     root.style.setProperty("--team-table-score-font-size", `${config.itemFontSizes.score}px`);
     root.style.setProperty("--team-table-change-font-size", `${config.itemFontSizes.rankChange}px`);
     root.style.setProperty("--team-table-logo-height", `${config.teamImageHeight}px`);
-    root.style.setProperty("--team-table-title-font-size", `${config.titleFontSize}px`);
 
     initialOrder.forEach(entry => {
       const row = createElement("li", "team-table__row");
@@ -120,7 +110,7 @@
       list.append(row);
       rows.set(entry.team.name, { change, rank, row, score });
     });
-    root.replaceChildren(title, list);
+    root.replaceChildren(list);
 
     function rankText(order, entry) {
       const previous = order[entry.position - 1];
@@ -137,27 +127,10 @@
       ScoreResources.prepareImage(image)
     ));
 
-    function renderTitle(state) {
-      const duration = config.titleTransitionDuration;
-      const elapsed = state.reorderElapsed;
-      if (elapsed < 0) {
-        title.textContent = config.initialTitle;
-        title.style.opacity = String(duration > 0 ? ScoreTimeline.ease(state.overviewElapsed / duration) : 1);
-      } else if (duration > 0 && elapsed < duration) {
-        title.textContent = config.initialTitle;
-        title.style.opacity = String(1 - ScoreTimeline.ease(elapsed / duration));
-      } else {
-        title.textContent = config.finalTitle;
-        title.style.opacity = String(duration > 0 ? ScoreTimeline.ease((elapsed - duration) / duration) : 1);
-      }
-    }
-
     function reset() {
       itemHeight = 0;
       itemGap = 0;
       root.style.setProperty("--team-table-item-height", "0px");
-      title.textContent = config.initialTitle;
-      title.style.opacity = "0";
       initialOrder.forEach(entry => {
         const elements = rows.get(entry.team.name);
         elements.row.style.opacity = "0";
@@ -176,7 +149,6 @@
         return;
       }
       // 比赛表先显示容器，在同一帧读取新布局，避免 ResizeObserver 晚一帧更新。
-      renderTitle(state);
       updateDimensions();
       const isReordered = state.overviewStage === "reorder"
           || state.overviewStage === "final-hold"

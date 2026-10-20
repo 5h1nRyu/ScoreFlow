@@ -14,11 +14,16 @@
   }
 
   async function prepareFont(text) {
-    const family = getComputedStyle(document.documentElement).getPropertyValue("--heading-font-family").trim();
-    const font = '600 16px ' + family;
-    await document.fonts.load(font, text);
+    const styles = getComputedStyle(document.documentElement);
+    const fonts = [
+      ['600 16px ' + styles.getPropertyValue("--heading-font-family").trim(), text],
+      ['500 16px ' + styles.getPropertyValue("--title-font-family").trim(), APP_CONFIG.title.text]
+    ];
+    await Promise.all(fonts.map(([font, sample]) => document.fonts.load(font, sample)));
     await document.fonts.ready;
-    if (!document.fonts.check(font, text)) throw new Error("界面字体未准备完成");
+    if (fonts.some(([font, sample]) => !document.fonts.check(font, sample))) {
+      throw new Error("界面字体未准备完成");
+    }
   }
 
   async function prepareBackground(required) {

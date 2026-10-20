@@ -130,6 +130,9 @@
         cycleElapsed,
         gameDuration,
         introDuration,
+        // 仅比赛回顾推进进度；开场为 0，最后一场完成后保持 1，重播时归零。
+        replayProgress: Math.min(1, Math.max(0,
+            (cycleElapsed - introDuration) / ((finalGame + 1) * gameDuration))),
         entranceProgress,
         isHolding: phase !== "playing" && phase !== "overview",
         overviewProgress,

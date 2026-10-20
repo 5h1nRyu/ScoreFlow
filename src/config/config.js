@@ -31,7 +31,7 @@ const APP_CONFIG = Object.freeze({
 
   animation: Object.freeze({
     // 每轮开始时只显示背景的时长，单位为毫秒；0 表示跳过
-    backgroundHoldDuration: 5000,
+    backgroundHoldDuration: 1000,
     // 标题逐字淡入与折线图整体淡入共用的时长；0 表示立即显示
     entranceDuration: 2000,
     // 设置每个 game 对应的动画毫秒数
@@ -79,26 +79,20 @@ const APP_CONFIG = Object.freeze({
   }),
 
   teamTable: Object.freeze({
-    // 分别设置重排前后的排行榜标题
-    initialTitle: "初始队伍排名",
-    finalTitle: "最终队伍排名",
-    // 设置标题字号与单次淡出或淡入动画时长
-    titleFontSize: 26,
-    titleTransitionDuration: 180,
-    // 条目高度和间距均相对于 team-table 区域高度计算
-    itemHeightRatio: 0.075,
+    // 列表占满原标题空间；10 个条目 + 9 个间距刚好铺满列表。
+    itemHeightRatio: 0.0838,
     itemGapRatio: 0.018,
     // 队标高使用 CSS 像素
     teamImageHeight: 38,
     // 控制重排后是否显示排名变化图标，并始终保留其布局空间
-    showRankChange: false,
+    showRankChange: true,
     // 设置重排过程中条目放大或缩小的最大比例
     reorderScaleAmplitude: 0.012,
     itemFontSizes: Object.freeze({
       rank: 20,
       teamName: 21,
       score: 24,
-      rankChange: 16
+      rankChange: 20
     })
   }),
 

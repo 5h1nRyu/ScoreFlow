@@ -1,5 +1,13 @@
+@font-face {
+  font-family: "Rajdhani";
+  src: url("../font/Rajdhani-Medium.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 500;
+  font-display: block;
+}
 :root {
   color-scheme: light;
+  --title-font-family: "Rajdhani", "DengXian", "Microsoft YaHei", sans-serif;
   --heading-font-family: "Arial", "Helvetica Neue", "Microsoft YaHei", sans-serif;
   --mono: "Cascadia Mono", "Consolas", "Courier New", "Microsoft YaHei", monospace;
   --background-color: #ECE5D6;
@@ -21,7 +29,7 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; opac
 .dashboard__title { grid-column: 2; grid-row: 2; display: flex; align-items: center; padding-bottom: 18px; }
 .mission-heading { display: flex; gap: 28px; align-items: center; min-height: 0; width: 100%; }
 .dashboard__title-section { min-width: 0; flex: 1; }
-.dashboard__title-text { margin: 0; color: var(--ink); font-family: var(--heading-font-family); font-size: min(var(--title-font-size), 2.3vw); font-weight: 800; line-height: 1.2; letter-spacing: -.04em; }
+.dashboard__title-text { margin: 0; width: calc(100% / .86); color: var(--ink); font-family: var(--title-font-family); font-size: min(var(--title-font-size), 2.6vw); font-weight: 500; line-height: 1.25; letter-spacing: .015em; transform: scaleX(.86); transform-origin: left center; }
 .mission-spec { flex: 0 0 auto; min-width: 225px; padding-left: 24px; border-left: 1px solid var(--seam); display: grid; gap: 6px; font: 10px/1.2 var(--mono); letter-spacing: .09em; }
 .mission-spec strong { font: 700 26px/1.1 var(--mono); letter-spacing: -.04em; }
 .retro-stripe { display: flex; height: 9px; width: 100%; margin-top: 4px; }
@@ -63,18 +71,17 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; opac
 .game-table__score-total { font-size: min(var(--game-table-total-score-font-size), 1.65vw); font-weight: 700; line-height: 1; letter-spacing: -.06em; white-space: nowrap; }
 .game-table__team-point { margin-top: 4px; color: var(--muted); font-size: min(var(--game-table-converted-score-font-size), .95vw); line-height: 1; white-space: nowrap; }
 .team-table-slot { position: absolute; inset: 18px 14px 6px; width: calc(100% - 28px); height: calc(100% - 24px); }
-.team-table { display: flex; flex-direction: column; gap: 14px; overflow: hidden; padding: 0; }
+.team-table { display: flex; flex-direction: column; overflow: hidden; padding: 0; }
 [hidden], .team-table[hidden] { display: none !important; }
-.team-table__title { flex: 0 0 auto; padding: 0 0 10px; margin: 0; border-bottom: 1px solid var(--ink); font-size: min(var(--team-table-title-font-size), 1.6vw); font-weight: 700; line-height: 1.2; }
 .team-table__list { position: relative; flex: 1 1 auto; min-height: 0; width: 100%; margin: 0; padding: 0; list-style: none; }
-.team-table__row { position: absolute; top: 0; left: 0; display: grid; grid-template-columns: 2ch var(--team-table-logo-height) minmax(0, 1fr) max-content; grid-template-rows: 100%; align-items: center; gap: 8px; width: 100%; height: var(--team-table-item-height); min-height: 0; padding: 0 10px; border: 1px solid #C5C0B2; border-left: 4px solid var(--team-color); background: #E9E4D8; border-radius: 1px; overflow: hidden; transform-origin: center; }
+.team-table__row { position: absolute; top: 0; left: 0; display: grid; grid-template-columns: 2ch var(--team-table-logo-height) minmax(0, 1fr) max-content 2.8em; grid-template-rows: 100%; align-items: center; gap: 8px; font-size: clamp(12px, 1.25vw, var(--team-table-change-font-size)); width: 100%; height: var(--team-table-item-height); min-height: 0; padding: 0 10px; border: 1px solid #C5C0B2; border-left: 4px solid var(--team-color); background: #E9E4D8; border-radius: 1px; overflow: hidden; transform-origin: center; }
 .team-table__rank, .team-table__name, .team-table__score, .team-table__change { display: flex; align-items: center; height: 100%; line-height: 1; font-variant-numeric: tabular-nums; }
 .team-table__rank { justify-content: center; color: var(--muted); font: 700 min(var(--team-table-rank-font-size), 1.3vw)/1 var(--mono); }
 .team-table__logo { display: block; justify-self: start; width: auto; height: min(var(--team-table-logo-height), 90%); max-width: 100%; object-fit: contain; }
 .team-table__logo--missing { visibility: hidden; }
 .team-table__name { min-width: 0; overflow: hidden; font-size: min(var(--team-table-name-font-size), 1.3vw); font-weight: 700; white-space: nowrap; }
 .team-table__score { justify-content: flex-end; font: 700 min(var(--team-table-score-font-size), 1.5vw)/1 var(--mono); letter-spacing: -.06em; }
-.team-table__change { position: absolute; right: 6px; bottom: 2px; height: auto; font: 9px/1 var(--mono); opacity: 0; }
+.team-table__change { justify-content: center; gap: .15em; font: 700 1em/1 var(--mono); white-space: nowrap; opacity: 0; }
 .team-table__change--up { color: #4E6864; }
 .team-table__change--down { color: #86483D; }
 .team-table__change--same { color: var(--muted); }
@@ -126,7 +133,7 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; opac
   .panel-header { padding-left: 10px; }
   .panel-header h2 { font-size: 12px; gap: 5px; }
   .game-table__name { padding-left: 3.4vw; }
-  .team-table__row { gap: 5px; grid-template-columns: 2ch 25px minmax(0, 1fr) max-content; padding: 0 5px; }
+  .team-table__row { gap: 5px; grid-template-columns: 2ch 25px minmax(0, 1fr) max-content 2.8em; padding: 0 5px; }
   .mission-footer { gap: 18px; }
   .telemetry { max-width: 430px; }
 }
@@ -152,7 +159,7 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; opac
   .dashboard { height: auto; min-height: 100svh; display: flex; flex-direction: column; gap: 16px; padding: 22px 18px 26px; }
   .dashboard__title { display: block; padding: 0; }
   .mission-heading { flex-wrap: wrap; gap: 14px; padding-top: 20px; }
-  .dashboard__title-text { font-size: clamp(21px, 5.6vw, 30px); line-height: 1.4; }
+  .dashboard__title-text { font-size: clamp(21px, 5.6vw, 30px); line-height: 1.4; text-wrap: balance; }
   .mission-spec { flex: 0 0 100%; border-left: 0; border-top: 1px solid var(--seam); padding: 12px 0 0; display: flex; align-items: center; gap: 10px; font-size: 8px; min-width: 0; }
   .mission-spec strong { font-size: 15px; }
   .retro-stripe { flex: 1; width: auto; height: 7px; margin: 0; }
@@ -164,11 +171,10 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; opac
   .game-table__name { font-size: 20px; padding-left: 62px; }
   .game-table__score-total { font-size: 23px; }
   .game-table__team-point { font-size: 12px; }
-  .team-table__title { font-size: 23px; }
-  .team-table__name { font-size: 16px; }
+  .team-table__name { font-size: 14px; }
   .team-table__rank { font-size: 16px; }
   .team-table__score { font-size: 20px; }
-  .team-table__row { gap: 5px; grid-template-columns: 2ch 29px minmax(0, 1fr) max-content; padding: 0 7px; }
+  .team-table__row { font-size: 16px; gap: 5px; grid-template-columns: 2ch 29px minmax(0, 1fr) max-content 2.8em; padding: 0 7px; }
   .mission-footer { display: flex; flex-wrap: wrap; gap: 20px; padding-top: 4px; }
   .telemetry { flex: 0 0 100%; order: -1; justify-content: space-between; font-size: 10px; gap: 9px; }
 }
@@ -186,7 +192,7 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; opac
 }
 
 .dashboard--debug-layout :is(.game-table__panel, .game-table__section, .game-table__header,
-    .game-table__list, .team-table__title, .team-table__list) {
+    .game-table__list, .team-table__list) {
   outline: 1px dashed #08916c;
   outline-offset: -1px;
 }

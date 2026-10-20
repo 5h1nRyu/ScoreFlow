@@ -183,8 +183,7 @@
     applyLayout();
     const data = await loadData();
     await Promise.all([
-      ScoreResources.prepareFont(title.text + data.games.map(game => game.info).join("")
-          + APP_CONFIG.teamTable.initialTitle + APP_CONFIG.teamTable.finalTitle),
+      ScoreResources.prepareFont(title.text + data.games.map(game => game.info).join("")),
       ScoreResources.prepareBackground(Boolean(options))
     ]);
     assertOpen();
@@ -228,13 +227,13 @@
       timeline.subscribe(teamTable.render);
       timeline.subscribe(chart.render);
       timeline.subscribe(state => {
-        document.getElementById("missionGame").textContent = '比赛 ' + String(Math.max(0, state.tableCompletedGame + 1)).padStart(2, "0") + ' / ' + String(data.games.length).padStart(2, "0");
-        const progress = state.cycleElapsed / timeline.durationMs * 100;
+        document.getElementById("missionGame").textContent = String(Math.max(0, state.tableCompletedGame + 1)).padStart(2, "0") + ' / ' + String(data.games.length).padStart(2, "0");
+        const progress = state.replayProgress * 100;
         const progressElement = document.getElementById("missionProgress");
         progressElement.setAttribute("aria-valuenow", String(Math.round(progress)));
         progressElement.firstElementChild.style.width = progress + '%';
         const isOverview = state.phase === "overview" || state.phase === "restart-hold";
-        document.getElementById("dataPanelTitle").textContent = isOverview ? "队伍总览" : "对局记录";
+        document.getElementById("dataPanelTitle").textContent = isOverview ? "队伍排名" : "对局记录";
       });
       timeline.subscribe(state => { lastState = state; });
       const resizeObserver = manual ? null : new ResizeObserver(() => {
