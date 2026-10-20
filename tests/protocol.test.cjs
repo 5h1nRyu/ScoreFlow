@@ -30,7 +30,8 @@ before(async () => {
   });
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   baseURL = `http://127.0.0.1:${server.address().port}/`;
-  browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined, args: ["--no-sandbox"] });
+  // Software rasterization avoids GPU cache antialiasing differences in pixel-exact snapshots.
+  browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined, args: ["--no-sandbox", "--disable-gpu"] });
 });
 
 after(async () => {
@@ -196,7 +197,7 @@ test("4K and DPR 3 increase both canvases without changing layout; prepare can b
       assert.equal(shot.readUInt32BE(20), o.output.height);
       await prepare(page, o);
       await advance(page, 0, 30);
-      assert.deepEqual(await page.screenshot({ animations: "allow" }), shot);
+      assert((await page.screenshot({ animations: "allow" })).equals(shot), "PNG screenshot changed");
     } finally { await page.close(); }
   }
 });
@@ -314,7 +315,7 @@ test("normal playback still pauses the whole page, resumes, reaches overview and
     await page.keyboard.press("Space");
     const shot = await page.screenshot({ animations: "allow" });
     await page.waitForTimeout(300);
-    assert.deepEqual(await page.screenshot({ animations: "allow" }), shot);
+    assert((await page.screenshot({ animations: "allow" })).equals(shot), "PNG screenshot changed");
     await page.keyboard.press("Space");
     await page.waitForTimeout(120);
     assert.notDeepEqual(await page.screenshot({ animations: "allow" }), shot);
@@ -351,12 +352,20 @@ test("simplified NASA-punk panels retain the original title, color portraits and
       if (viewport.width < 761) assert(rects[1].y >= rects[0].y + rects[0].height);
       else assert(rects[1].x >= rects[0].x + rects[0].width);
       await page.keyboard.press("Space");
-      assert.equal(await page.locator("#missionPhase").textContent(), "已暂停");
+      assert.equal(await page.locator("#missionPhase, #missionClock").count(), 0);
+      const footer = await page.evaluate(() => {
+        const progress = document.getElementById("missionProgress").getBoundingClientRect();
+        const game = document.getElementById("missionGame").getBoundingClientRect();
+        return { height: progress.height, beforeText: progress.right <= game.left,
+          sameRow: Math.abs((progress.y + progress.height / 2) - (game.y + game.height / 2)) < 1 };
+      });
+      assert.equal(footer.height, 10);
+      assert(footer.beforeText && footer.sameRow);
       const paused = await page.screenshot({ animations: "allow" });
       await page.waitForTimeout(150);
       assert.deepEqual(await page.screenshot({ animations: "allow" }), paused);
       await page.keyboard.press("Space");
-      assert.equal(await page.locator("#missionPhase").textContent(), "比赛回放");
+
     } finally { await page.close(); }
   }
 });

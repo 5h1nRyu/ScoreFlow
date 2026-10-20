@@ -150,10 +150,7 @@
       ]);
       if (!teamsResponse.ok) throw new Error(`读取 ${TEAMS_DATA_URL} 失败（HTTP ${teamsResponse.status}）`);
       if (!gamesResponse.ok) throw new Error(`读取 ${GAMES_DATA_URL} 失败（HTTP ${gamesResponse.status}）`);
-      const parsedTeams = TeamData.parseTeamsJson(await teamsResponse.text());
-      const teamData = Object.freeze({ ...parsedTeams, teams: Object.freeze(parsedTeams.teams.map((team, index) => Object.freeze({
-        ...team, color: APP_CONFIG.theme.teamColors[index % APP_CONFIG.theme.teamColors.length]
-      }))) });
+      const teamData = TeamData.parseTeamsJson(await teamsResponse.text());
       const gameData = GameData.parseGamesJson(await gamesResponse.text());
       const data = limitDataForDebug(TeamData.combineWithGames(teamData, gameData));
       data.teams.forEach((team, index) => {
@@ -223,7 +220,6 @@
         paused = !paused;
         if (paused) timeline.pause();
         else timeline.resume();
-        document.getElementById("missionPhase").textContent = paused ? "已暂停" : phaseNames[lastState.phase];
       };
       timeline.subscribe(renderEntrance);
       timeline.subscribe(renderTableLayout);
@@ -231,13 +227,8 @@
       timeline.subscribe(gameTable.render);
       timeline.subscribe(teamTable.render);
       timeline.subscribe(chart.render);
-      const phaseNames = { "background-hold": "等待回放", entrance: "载入画面", playing: "比赛回放",
-        "last-game-hold": "末场结束", "game-table-exit": "生成排名", overview: "排名总览", "restart-hold": "等待重播" };
       timeline.subscribe(state => {
-        const seconds = Math.floor(state.cycleElapsed / 1000);
-        document.getElementById("missionClock").textContent = '回放 ' + String(Math.floor(seconds / 60)).padStart(2, "0") + ':' + String(seconds % 60).padStart(2, "0");
         document.getElementById("missionGame").textContent = '比赛 ' + String(Math.max(0, state.tableCompletedGame + 1)).padStart(2, "0") + ' / ' + String(data.games.length).padStart(2, "0");
-        document.getElementById("missionPhase").textContent = paused ? "已暂停" : phaseNames[state.phase];
         const progress = state.cycleElapsed / timeline.durationMs * 100;
         const progressElement = document.getElementById("missionProgress");
         progressElement.setAttribute("aria-valuenow", String(Math.round(progress)));

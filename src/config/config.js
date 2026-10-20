@@ -13,10 +13,6 @@ const APP_CONFIG = Object.freeze({
   // NASA-punk 机身底色；旧纸张背景仍可通过开关启用。
   useBackgroundImage: false,
   backgroundColor: "#ECE5D6",
-  // 仅影响呈现，不改写原始队伍数据。所有队伍曲线保持实线。
-  theme: Object.freeze({
-    teamColors: Object.freeze(["#86483D", "#596674", "#96743E", "#4E6864", "#746549", "#72784B", "#73616B", "#3E5366", "#9A6252", "#555A47"])
-  }),
 
   layout: Object.freeze({
     // 页面外围留白分别相对于视口宽度和高度计算
