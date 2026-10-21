@@ -369,6 +369,14 @@ function layoutLabels(items, top, bottom) {
 }
 
 
+// 用物理像素清空整个画布，避免非整数 DPR 下边缘残留不足一像素的文字。
+function clearCanvas(context) {
+  context.save();
+  context.resetTransform();
+  context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+  context.restore();
+}
+
 // 绘制当前动画帧
 function render(timelineState) {
   lastTimelineState = timelineState;
@@ -532,12 +540,7 @@ function render(timelineState) {
 
 
   // 清空上一帧
-  ctx.clearRect(
-      0,
-      0,
-      width,
-      height
-  );
+  clearCanvas(ctx);
 
 
   const usesOverviewLabels = phase === "overview" || phase === "restart-hold";
@@ -722,7 +725,10 @@ function render(timelineState) {
     ctx.fillStyle = "rgba(28,30,25,.78)";
     const drawXLabel = (game, text) => {
       if (!text || game < viewStart || game > viewEnd) return;
-      ctx.fillText(text, xAt(game), height - margin.bottom + 14);
+      // 端点日期也必须完整落在画布内，避免右边缘只露出一个字形碎片。
+      const halfWidth = ctx.measureText(text).width / 2;
+      const labelX = Math.min(width - halfWidth - 2, Math.max(halfWidth + 2, xAt(game)));
+      ctx.fillText(text, labelX, height - margin.bottom + 14);
     };
     if (usesOverviewLabels) {
       drawXLabel(-1, xAxis.labels.initialText);
@@ -913,7 +919,7 @@ function render(timelineState) {
         height - margin.bottom - halfLabelHeight
     );
 
-    labelCtx.clearRect(0, 0, width, height);
+    clearCanvas(labelCtx);
     labelCtx.save();
     labelCtx.font = `${labels.fontWeight} ${responsiveFontSize(labels.fontSize)}px "Courier New", monospace`;
     labelCtx.textAlign = "left";
@@ -968,8 +974,8 @@ return Object.freeze({
   reset() {
     displayedRange = initialDisplayedRange;
     lastTimelineState = null;
-    ctx.clearRect(0, 0, width, height);
-    labelCtx.clearRect(0, 0, width, height);
+    clearCanvas(ctx);
+    clearCanvas(labelCtx);
   },
   destroy() {
     resizeObserver?.disconnect();

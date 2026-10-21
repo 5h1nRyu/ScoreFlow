@@ -1,13 +1,20 @@
 @font-face {
-  font-family: "Rajdhani";
-  src: url("../font/Rajdhani-Medium.ttf") format("truetype");
+  font-family: "Roboto Condensed";
+  src: url("../font/RobotoCondensed-Variable.ttf") format("truetype");
   font-style: normal;
-  font-weight: 500;
+  font-weight: 100 900;
+  font-display: block;
+}
+@font-face {
+  font-family: "Noto Sans SC";
+  src: url("../font/NotoSansSC-Variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100 900;
   font-display: block;
 }
 :root {
   color-scheme: light;
-  --title-font-family: "Rajdhani", "DengXian", "Microsoft YaHei", sans-serif;
+  --title-font-family: "Roboto Condensed", "Noto Sans SC", "Microsoft YaHei", sans-serif;
   --heading-font-family: "Arial", "Helvetica Neue", "Microsoft YaHei", sans-serif;
   --mono: "Cascadia Mono", "Consolas", "Courier New", "Microsoft YaHei", monospace;
   --background-color: #ECE5D6;
@@ -24,12 +31,12 @@ body.page--image-background { background-image: url("../images/background/paper.
 /* The chassis, screw slots and scratches are deterministic vector marks. */
 body::before { content: ""; position: fixed; inset: 12px; border: 1px solid var(--seam); border-radius: 5px; pointer-events: none; box-shadow: inset 0 0 0 3px #F5F0E3, inset 0 0 0 4px #c4bfb1; }
 body::after { content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .28; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='320'%3E%3Cg stroke='%23656155' stroke-width='.5' opacity='.35'%3E%3Cpath d='M8 23l24-2m-20 5l11-1M386 293l18-2m-23 5l15-1M212 159l7-1'/%3E%3C/g%3E%3C/svg%3E"); }
-.dashboard { --page-horizontal-margin: 2.5%; --page-top-margin: 2.5%; --page-bottom-margin: 5.5%; --title-height: 14.5%; --chart-height: 77.5%; --score-chart-width: 66%; --data-table-width: 29%; --title-font-size: 44px; display: grid; grid-template-columns: var(--page-horizontal-margin) minmax(0, 1fr) var(--page-horizontal-margin); grid-template-rows: var(--page-top-margin) var(--title-height) var(--chart-height) var(--page-bottom-margin); width: 100%; height: 100%; }
+.dashboard { --page-horizontal-margin: 2.5%; --page-top-margin: 2.5%; --page-bottom-margin: 5.5%; --title-height: 14.5%; --chart-height: 77.5%; --score-chart-width: 66%; --data-table-width: 29%; --title-font-size: 44px; display: grid; grid-template-columns: var(--page-horizontal-margin) minmax(0, 1fr) var(--page-horizontal-margin); grid-template-rows: var(--page-top-margin) minmax(min-content, var(--title-height)) minmax(0, 1fr) var(--page-bottom-margin); width: 100%; height: 100%; }
 .dashboard__title, .dashboard__chart-area { min-width: 0; min-height: 0; }
 .dashboard__title { grid-column: 2; grid-row: 2; display: flex; align-items: center; padding-bottom: 18px; }
 .mission-heading { display: flex; gap: 28px; align-items: center; min-height: 0; width: 100%; }
 .dashboard__title-section { min-width: 0; flex: 1; }
-.dashboard__title-text { margin: 0; width: calc(100% / .86); color: var(--ink); font-family: var(--title-font-family); font-size: min(var(--title-font-size), 2.6vw); font-weight: 500; line-height: 1.25; letter-spacing: .015em; transform: scaleX(.86); transform-origin: left center; }
+.dashboard__title-text { margin: 0; width: calc(100% / .86); color: var(--ink); font-family: var(--title-font-family); font-size: var(--title-font-size); font-weight: var(--title-font-weight, 900); font-synthesis: none; line-height: 1.25; text-wrap: balance; letter-spacing: .015em; transform: scaleX(.86); transform-origin: left center; }
 .mission-spec { flex: 0 0 auto; min-width: 225px; padding-left: 24px; border-left: 1px solid var(--seam); display: grid; gap: 6px; font: 10px/1.2 var(--mono); letter-spacing: .09em; }
 .mission-spec strong { font: 700 26px/1.1 var(--mono); letter-spacing: -.04em; }
 .retro-stripe { display: flex; height: 9px; width: 100%; margin-top: 4px; }
@@ -48,10 +55,8 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; opac
 .panel-header h2 { display: flex; align-items: center; gap: 9px; white-space: nowrap; margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .04em; }
 .chart-viewport { position: relative; min-width: 0; min-height: 0; padding: 20px 12px 0 0; }
 #scoreChart { opacity: 0; display: block; width: 100%; height: 100%; }
-.dashboard__title-character { opacity: 0; }
-/* Keep the original five-second clean opening and shared entrance timing. */
-.dashboard[data-phase="background-hold"] { visibility: hidden; }
-.dashboard[data-phase="entrance"] .table-stage { visibility: hidden; }
+/* 开场即显示机身、标题和面板装饰；仅数据内容等待入场。 */
+.dashboard[data-phase="background-hold"] .table-stage { visibility: hidden; }
 .table-stage { position: relative; min-height: 0; padding: 18px 14px 6px; }
 .game-table, .team-table-slot { width: 100%; height: 100%; }
 .game-table { position: relative; overflow: hidden; }
@@ -70,7 +75,7 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; opac
 .game-table__score { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; padding-right: var(--game-table-total-score-right-gap); font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .game-table__score-total { font-size: min(var(--game-table-total-score-font-size), 1.65vw); font-weight: 700; line-height: 1; letter-spacing: -.06em; white-space: nowrap; }
 .game-table__team-point { margin-top: 4px; color: var(--muted); font-size: min(var(--game-table-converted-score-font-size), .95vw); line-height: 1; white-space: nowrap; }
-.team-table-slot { position: absolute; inset: 18px 14px 6px; width: calc(100% - 28px); height: calc(100% - 24px); }
+.team-table-slot { position: absolute; inset: 18px 14px 22px; width: calc(100% - 28px); height: calc(100% - 40px); }
 .team-table { display: flex; flex-direction: column; overflow: hidden; padding: 0; }
 [hidden], .team-table[hidden] { display: none !important; }
 .team-table__list { position: relative; flex: 1 1 auto; min-height: 0; width: 100%; margin: 0; padding: 0; list-style: none; }
@@ -146,7 +151,7 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; opac
   .chart-instrument { grid-template-rows: 33px minmax(0, 1fr); }
   .table-instrument { grid-template-rows: 33px minmax(0, 1fr); }
   .table-stage { padding-top: 10px; }
-  .team-table-slot { top: 10px; height: calc(100% - 16px); }
+  .team-table-slot { top: 10px; height: calc(100% - 32px); }
   .game-table__header { min-height: 20px; padding-bottom: 5px; }
   .game-table__panel { gap: 5px; }
   .game-table__list { padding-top: 1px; }
@@ -159,7 +164,7 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; opac
   .dashboard { height: auto; min-height: 100svh; display: flex; flex-direction: column; gap: 16px; padding: 22px 18px 26px; }
   .dashboard__title { display: block; padding: 0; }
   .mission-heading { flex-wrap: wrap; gap: 14px; padding-top: 20px; }
-  .dashboard__title-text { font-size: clamp(21px, 5.6vw, 30px); line-height: 1.4; text-wrap: balance; }
+  .dashboard__title-text { line-height: 1.15; text-wrap: balance; }
   .mission-spec { flex: 0 0 100%; border-left: 0; border-top: 1px solid var(--seam); padding: 12px 0 0; display: flex; align-items: center; gap: 10px; font-size: 8px; min-width: 0; }
   .mission-spec strong { font-size: 15px; }
   .retro-stripe { flex: 1; width: auto; height: 7px; margin: 0; }

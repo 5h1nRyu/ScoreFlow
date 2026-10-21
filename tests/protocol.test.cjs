@@ -22,7 +22,9 @@ before(async () => {
       const pathname = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
       const file = path.resolve(root, `.${pathname === "/" ? "/index.html" : pathname}`);
       if (!file.startsWith(`${root}${path.sep}`)) throw new Error("路径无效");
-      const data = await readFile(file);
+      let data = await readFile(file);
+      // 固定测试时间配置；用户的实际开场停留配置可以独立调整。
+      if (pathname === "/src/config/config.js") data = Buffer.from(data.toString().replace(/backgroundHoldDuration:\s*\d+/, "backgroundHoldDuration: 5000"));
       response.writeHead(200, { "Content-Type": mime[path.extname(file)] || "application/octet-stream" });
       response.end(data);
     } catch {
@@ -434,7 +436,7 @@ test("ranking rows fill the panel and reserve a readable change column at every 
             contained: c.right <= r.right, readable: parseFloat(getComputedStyle(change).fontSize) >= 12 };
         });
         return { list: { top: list.top, bottom: list.bottom }, details,
-          font: document.fonts.check('500 16px Rajdhani'),
+          font: document.fonts.check('900 16px "Roboto Condensed"') && document.fonts.check('900 16px "Noto Sans SC"'),
           noOverflow: document.documentElement.scrollWidth === innerWidth };
       });
       assert.equal(result.details.length, 10);
@@ -448,8 +450,119 @@ test("ranking rows fill the panel and reserve a readable change column at every 
 });
 
 test("export preparation rejects a missing title font", async () => {
-  const page = await openExport(options(), page => page.route("**/assets/font/Rajdhani-Medium.ttf", route =>
+  const page = await openExport(options(), page => page.route("**/assets/font/RobotoCondensed-Variable.ttf", route =>
     route.fulfill({ status: 404, body: "Missing" })));
   try { await assert.rejects(() => prepare(page)); }
   finally { await page.close(); }
+});
+
+test("opening keeps the chassis visible and fades the first table together with the chart", async () => {
+  const page=await openExport();
+  try {
+    await prepare(page);
+    for (const time of [0, 2500, 4999, 6000, 7000]) {
+      const state=await page.evaluate(time=>{
+        ScoreApplication.renderFrame({timeMs:time,deltaMs:0});
+        return {
+          title:getComputedStyle(document.querySelector('h1')).visibility,
+          titleWeight:getComputedStyle(document.querySelector('h1')).fontWeight,
+          titleOpacity:getComputedStyle(document.querySelector('h1')).opacity,
+          panel:getComputedStyle(document.querySelector('.dashboard__region')).visibility,
+          header:getComputedStyle(document.querySelector('.panel-header')).visibility,
+          table:getComputedStyle(document.querySelector('.table-stage')).visibility,
+          chartOpacity:Number(getComputedStyle(document.querySelector('#scoreChart')).opacity),
+          tableOpacity:Number(getComputedStyle(document.querySelector('#gameTable')).opacity),
+          rows:[...document.querySelectorAll('#gameTable .game-table__row')].map(row=>({opacity:row.style.opacity,transform:row.style.transform})),
+          progress:document.querySelector('#missionProgress').getAttribute('aria-valuenow')
+        };
+      },time);
+      assert.equal(state.title,'visible');
+      assert.equal(state.titleOpacity,'1');
+      assert.equal(state.titleWeight,'900');
+      assert.equal(state.panel,'visible');
+      assert.equal(state.header,'visible');
+      assert.equal(state.table,time<5000?'hidden':'visible');
+      assert.equal(state.tableOpacity,state.chartOpacity);
+      if(time>=5000) {
+        assert.equal(state.rows.length,8);
+        assert(state.rows.every(row=>row.opacity==='1' && row.transform==='none'));
+      }
+      assert.equal(state.chartOpacity,time<5000?0:time<7000?.5:1);
+      assert.equal(state.progress,'0');
+    }
+    const later=await page.evaluate(()=>{
+      const config=APP_CONFIG.gameTable;
+      const time=7000+2*APP_CONFIG.animation.gameDuration+config.rowTransitionDuration+config.rowTransitionDelay*7+config.rowTransitionDuration/2;
+      ScoreApplication.renderFrame({timeMs:time,deltaMs:0});
+      return [...document.querySelectorAll('#gameTable .game-table__row')].map(row=>row.style.transform);
+    });
+    assert(later.some(transform=>/^translateX\([1-9]/.test(transform)),'later games should still slide in');
+    const restarted=await page.evaluate(()=>{
+      ScoreApplication.reset();
+      ScoreApplication.renderFrame({timeMs:6000,deltaMs:0});
+      return {opacity:document.querySelector('#gameTable').style.opacity,
+        stationary:[...document.querySelectorAll('#gameTable .game-table__row')].every(row=>row.style.transform==='none')};
+    });
+    assert.deepEqual(restarted,{opacity:'0.5',stationary:true});
+  } finally {await page.close();}
+});
+
+test("fractional pixel ratios clear edge remnants and keep all dates inside the canvas", {timeout:60000}, async () => {
+  for(const [width,height,scale] of [[2239,1399,1.25],[1593,996,1.5],[1366,768,1.25],[997,625,1.5]]) {
+    const o=options(scale,width,height);
+    o.output={width:Math.round(width*scale),height:Math.round(height*scale)};
+    const page=await openExport(o);
+    try {
+      await prepare(page,o);
+      const result=await page.evaluate(()=>{
+        const canvas=document.querySelector('#scoreChart');
+        const context=canvas.getContext('2d');
+        const original=context.fillText;
+        const outside=[];
+        context.fillText=function(text,x,y,...args){
+          if(this.textBaseline==='top') {
+            const half=this.measureText(text).width/2;
+            if(x-half<1.9 || x+half>canvas.clientWidth-1.9) outside.push({text,x,half});
+          }
+          return original.call(this,text,x,y,...args);
+        };
+        const dirtyEdge=target=>{
+          const ctx=target.getContext('2d');ctx.save();ctx.resetTransform();
+          ctx.fillStyle='#ff0000';ctx.fillRect(target.width-1,0,1,4);ctx.restore();
+        };
+        let clean=true;
+        for(let t=7000;t<79000;t+=375) {
+          dirtyEdge(canvas);createdCanvases.forEach(dirtyEdge);
+          ScoreApplication.renderFrame({timeMs:t,deltaMs:375});
+          for(const target of [canvas,...createdCanvases]) {
+            const pixels=target.getContext('2d').getImageData(target.width-1,0,1,4).data;
+            for(let index=3;index<pixels.length;index+=4) if(pixels[index]!==0) clean=false;
+          }
+        }
+        return {outside,clean};
+      });
+      assert.deepEqual(result.outside,[]);
+      assert(result.clean,'previous content remained at the physical canvas edge');
+      assert.deepEqual(page.pageErrors,[]);
+    } finally {await page.close();}
+  }
+});
+
+test("the ranking list leaves the bottom decorative pin unobstructed", async () => {
+  for(const [width,height] of [[2239,1399],[1920,1080],[1366,768],[960,540],[390,844]]) {
+    const o=options(1,width,height);
+    const page=await openExport(o);
+    try {
+      await prepare(page,o);
+      const gap=await page.evaluate(()=>{
+        ScoreApplication.renderFrame({timeMs:86000,deltaMs:100});
+        const panel=document.querySelector('.table-instrument').getBoundingClientRect();
+        const bottom=Math.max(...[...document.querySelectorAll('.team-table__row')].map(n=>n.getBoundingClientRect().bottom));
+        const pin=getComputedStyle(document.querySelector('.table-instrument'),'::after');
+        const pinTop=panel.bottom-1-parseFloat(pin.bottom)-parseFloat(pin.height);
+        return pinTop-bottom;
+      });
+      assert(gap>=5,'the last team row overlaps the bottom pin');
+    } finally {await page.close();}
+  }
 });

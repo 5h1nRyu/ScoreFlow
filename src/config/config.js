@@ -26,13 +26,15 @@ const APP_CONFIG = Object.freeze({
 
   title: Object.freeze({
     text: "M.LEAGUE 2026-2027赛季 9月 队伍积分演变",
-    fontSize: 44
+    fontSize: 60,
+    // 中西文可变字体均支持 100–900；900 使用真实 Black 字重，字号按 CSS 像素直接生效。
+    fontWeight: 900
   }),
 
   animation: Object.freeze({
-    // 每轮开始时只显示背景的时长，单位为毫秒；0 表示跳过
+    // 每轮开始时仅隐藏数据内容的时长；标题与面板装饰保持显示，0 表示跳过
     backgroundHoldDuration: 1000,
-    // 标题逐字淡入与折线图整体淡入共用的时长；0 表示立即显示
+    // 折线图与首组比赛数据整体同步淡入的时长；主标题始终显示，0 表示立即显示
     entranceDuration: 2000,
     // 设置每个 game 对应的动画毫秒数
     gameDuration: 1500,

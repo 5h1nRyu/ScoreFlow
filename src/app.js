@@ -56,6 +56,9 @@
     if (!Number.isFinite(title.fontSize) || title.fontSize <= 0) {
       throw new Error("title.fontSize 必须是大于 0 的数字");
     }
+    if (!Number.isInteger(title.fontWeight) || title.fontWeight < 100 || title.fontWeight > 900) {
+      throw new Error("title.fontWeight 必须是 100 到 900 的整数");
+    }
     if (typeof title.text !== "string" || title.text.length === 0) {
       throw new Error("title.text 必须是非空字符串");
     }
@@ -71,23 +74,13 @@
     });
     renderTableLayout({ tableLayoutProgress: 0 });
     dashboard.style.setProperty("--title-font-size", `${title.fontSize}px`);
+    dashboard.style.setProperty("--title-font-weight", String(title.fontWeight));
     const titleElement = document.getElementById("dashboardTitleText");
     titleElement.setAttribute("aria-label", title.text);
-    // 预先排好完整标题，只改变透明度，避免逐字入场时文字位置跳动。
-    const characters = typeof Intl.Segmenter === "function"
-        ? Array.from(new Intl.Segmenter("zh-CN", { granularity: "grapheme" }).segment(title.text), item => item.segment)
-        : Array.from(title.text);
-    titleCharacters = characters.map(character => {
-      const span = document.createElement("span");
-      span.className = "dashboard__title-character";
-      span.textContent = character;
-      span.setAttribute("aria-hidden", "true");
-      return span;
-    });
-    titleElement.replaceChildren(...titleCharacters);
+    // 主标题从背景停留阶段起显示，不参与图表内容的入场动画。
+    titleElement.textContent = title.text;
   }
 
-  let titleCharacters = [];
   let previousEntranceProgress = null;
   function renderEntrance({ phase, entranceProgress }) {
     document.getElementById("dashboard").dataset.phase = phase;
@@ -95,14 +88,7 @@
     previousEntranceProgress = entranceProgress;
     const easedProgress = entranceProgress * entranceProgress * (3 - 2 * entranceProgress);
     document.getElementById("scoreChart").style.opacity = String(easedProgress);
-    // 固定比例分配逐字错峰：最后一个字与 chart 一起在入场结束时完全显示。
-    const characterDuration = titleCharacters.length > 1 ? 0.35 : 1;
-    titleCharacters.forEach((span, index) => {
-      const start = titleCharacters.length > 1
-          ? index / (titleCharacters.length - 1) * (1 - characterDuration) : 0;
-      const progress = Math.min(1, Math.max(0, (entranceProgress - start) / characterDuration));
-      span.style.opacity = String(progress * progress * (3 - 2 * progress));
-    });
+
   }
 
   // 与表格退场共用时间轴，暂停冻结进度，循环首帧立即恢复比赛表布局。

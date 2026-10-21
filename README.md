@@ -34,7 +34,7 @@
 
 推荐视口为 `1920 × 1080` CSS 像素。输出 `3840 × 2160` 时使用 `deviceScaleFactor: 2`，主 Canvas 和标签 Canvas 的内部像素都按实际组件尺寸乘以该像素比，导出不受普通播放 DPR 上限 2 的限制。整个页面填满固定视口，截图使用 `animations: 'allow'`，无需 `fullPage` 或固定睡眠。
 
-导出时长是一轮完整循环，包含纯背景、入场、比赛动画、最后一场停留、比赛表退场、队伍排名四阶段及结尾 `restartDelay`。时长根据实际使用的数据和配置计算，不硬编码：
+导出时长是一轮完整循环，包含开场停留、入场、比赛动画、最后一场停留、比赛表退场、队伍排名四阶段及结尾 `restartDelay`。时长根据实际使用的数据和配置计算，不硬编码：
 
 ```text
 durationMs = backgroundHoldDuration + entranceDuration
@@ -42,11 +42,11 @@ durationMs = backgroundHoldDuration + entranceDuration
            + gameTableExitDuration + overviewDuration + restartDelay
 ```
 
-当前 48 场比赛及默认配置对应 **90900 ms（90.9 秒，5454 帧）**。`debug.finalGameId` 截断数据后，元数据时长同步缩短，最后一组也支持只有一场比赛。
+以 48 场比赛、5000ms 开场停留和其余默认配置为例，一轮对应 **90900 ms（90.9 秒，5454 帧）**；实际时长以当前配置计算。`debug.finalGameId` 截断数据后，元数据时长同步缩短，最后一组也支持只有一场比赛。
 
 `supportsSeeking` 固定为 `false`，因为 Y 轴缩放需要按固定帧间隔逐步平滑。每次 reset 后必须从全局帧 `0` 开始连续提交，`timeMs = index * 1000 / 60`；第 0 帧的 `deltaMs` 为 `0`，后续为 `1000 / 60`。导出中途片段时，由 VideoMaker 先顺序推进全部前置帧，不能把片段首帧重新编号为 0。重复帧、跳帧及不符合协议的帧时间会报错。当前效果不使用随机数，seed 被校验和保存，画面不依赖系统时钟或 `Math.random()`。
 
-所有可见动画由同一时间轴驱动，包括比赛表逐行错峰切换、标题淡入淡出、排名变化标记、图表缩放与布局变化；组件不再通过实时计时器、CSS animation 或 transition 改变画面。比赛面板提前创建，后续比赛的头像及队标也在准备阶段完成解码，逐帧切换不会再发起资源请求。
+所有可见动画由同一时间轴驱动，包括图表内容淡入、比赛表逐行错峰切换、排名变化标记、图表缩放与布局变化；组件不再通过实时计时器、CSS animation 或 transition 改变画面。比赛面板提前创建，后续比赛的头像及队标也在准备阶段完成解码，逐帧切换不会再发起资源请求。
 
 资源失败规则：
 
@@ -79,17 +79,20 @@ npm test
 
 比赛表开始退场时，折线图区同步平滑调整宽度；退场结束且宽度调整完成后，队伍表才开始进场。每轮重播时直接恢复比赛表对应的布局，不播放反向宽度动画。两个表格宽度相同时保持布局不动，队伍表更窄时折线图平滑变宽。
 
-标题区由左对齐的原始赛事标题、观测日期和复古彩条组成。大标题使用本地 Rajdhani Medium（500 字重），搭配 Windows 等线（DengXian）显示中文，缺失时回退到 Microsoft YaHei；整行水平缩至 86%，使中西文统一呈现瘦高的航天仪表字形。字体来源：[Google Fonts](https://fonts.google.com/specimen/Rajdhani)，随项目附带 SIL OFL 许可证，运行和导出不需要联网。表格仍使用 Arial / Helvetica Neue / Microsoft YaHei，设备标签使用 Cascadia Mono / Consolas 等宽字体；Canvas 使用 Courier New 等宽字体。可在 `title` 中调整（窄屏字号由 CSS 自适应限制）：
+标题区由左对齐的原始赛事标题、观测日期和复古彩条组成。大标题的英文和数字使用 [Roboto Condensed](https://github.com/google/fonts/blob/main/ofl/robotocondensed/METADATA.pb)，中文使用 [Noto Sans SC](https://github.com/google/fonts/blob/main/ofl/notosanssc/METADATA.pb)。两套本地可变字体都支持 100–900 字重，900 对应真实 Black，中文不再依赖系统等线的 700 字重。整行水平缩至 86%，保留窄长的航天仪表字形。字体随项目附带 SIL OFL 许可证，运行和导出不需要联网；准备阶段等待中西文字体全部就绪。表格仍使用 Arial / Helvetica Neue / Microsoft YaHei，设备标签使用 Cascadia Mono / Consolas 等宽字体；Canvas 使用 Courier New 等宽字体。可在 `title` 中调整：
 
 - `text`：标题文字。
-- `fontSize`：标题字号，单位为 CSS 像素。
+- `fontSize`：标题字号，单位为 CSS 像素，当前为 `64`；桌面和手机都直接采用该值，不再被 vw 或固定上限覆盖。
+- `fontWeight`：标题字重，支持 `100` 到 `900`，当前为 `900`；与字号、水平窄化比例独立。
+
+较大字号在窄屏会自然换行，桌面标题区域会按内容增高，图表使用剩余高度，避免标题与面板重叠。使用 Python 静态服务时，修改保存后刷新页面即可；若浏览器仍使用旧资源，按 Ctrl+F5 强制重新加载，无需重启服务。
 
 每轮循环先进入开场阶段，仅通过 `animation` 中两个配置控制（单位均为毫秒，允许为 `0`）：
 
-- `backgroundHoldDuration`：纯背景停留时长，默认 `5000`。沿用当前图片或纯色背景配置，标题、图表和表格均隐藏。
-- `entranceDuration`：标题与 chart 共用的入场时长，默认 `2000`。标题从左到右逐字淡入，chart 整体淡入；两者同时开始、同时完成，期间比赛进度冻结在初始积分。
+- `backgroundHoldDuration`：数据内容出现前的停留时长，默认 `5000`。主标题、日期、面板背景、表头和装饰图钉从首帧起显示；仅图表画布及表格数据内容隐藏。
+- `entranceDuration`：chart 与首组比赛数据共用的入场时长，默认 `2000`。主标题始终可见，chart 和首组表头、选手、头像、分数整体同步淡入，期间比赛进度冻结在初始积分。
 
-开场结束后开始推进比赛，首组比赛表格按原有逐行错峰样式从右侧进入。每次循环均重播开场；设为 `0` 时跳过对应阶段。开场期间表格保持隐藏、无入场动作，但保留其布局空间。
+背景停留阶段只显示标题和面板装饰；进入入场阶段后，首组比赛数据在原位与 chart 使用相同缓动渐显，不从右侧滑入。后续比赛继续使用逐行错峰滑入、滑出切换。每次循环都恢复首组并重播淡入；`entranceDuration` 为 `0` 时首组立即完整显示。
 
 `src/core/timeline.js` 提供页面级公共时间轴并统一驱动已注册组件，`src/components/score-chart.js` 只负责折线图本身的尺寸和绘制，`src/app.js` 负责数据加载与模块装配。新增依托比赛进度的组件时，可通过 `timeline.subscribe()` 订阅同一份时间状态。
 
@@ -279,7 +282,7 @@ games.json ──┘             │                          ↑
 绿色 `▲`、红色 `▼` 或灰色 `=` 显示，并附带上升或下降的名次数；分数右侧使用独立的固定宽度列，竖直居中，默认字号为 20px，窄屏自适应，分数相应左移。队标文件约定为
 `assets/images/icons/<team>.png`；缺少图片时会隐藏破损图像但保留布局。
 
-面板左上标题统一显示“队伍排名”，表格内部不再创建初始/最终排名标题。列表使用全部可用高度，默认 `itemHeightRatio: 0.0838` 和 `itemGapRatio: 0.018` 让 10 个条目与 9 个间距铺满列表，腾出的标题高度分配给各行。可在 `teamTable` 配置中调整 `itemHeightRatio`、`itemGapRatio`、`teamImageHeight`、`reorderScaleAmplitude`（重排时条目的最大缩放比例），以及
+面板左上标题统一显示“队伍排名”，表格内部不再创建初始/最终排名标题。列表使用全部可用高度，默认 `itemHeightRatio: 0.0838` 和 `itemGapRatio: 0.018` 让 10 个条目与 9 个间距铺满列表，腾出的标题高度分配给各行；列表底部另保留 22px，避开机身装饰图钉。可在 `teamTable` 配置中调整 `itemHeightRatio`、`itemGapRatio`、`teamImageHeight`、`reorderScaleAmplitude`（重排时条目的最大缩放比例），以及
 `itemFontSizes.rank`、`itemFontSizes.teamName`、`itemFontSizes.score`、
 `itemFontSizes.rankChange`。`teamImageHeight` 是队标高度的 CSS 像素值，可以大于条目高度；队标始终与条目竖直居中，超出条目的上下部分会被裁切。队标、排名、队伍名称、分数和排名变化文字均与条目的竖直中心对齐。
 
@@ -309,5 +312,5 @@ python3 -m http.server 8000
 
 然后访问 `http://localhost:8000/`。
 
-播放过程中按空格键可暂停整个动画，再按一次从原位置继续。暂停同时冻结纯背景停留、标题与图表入场、折线图、比赛表格切换、队伍总览及循环等待，不显示额外控件或状态提示；长按空格不会重复切换。
+播放过程中按空格键可暂停整个动画，再按一次从原位置继续。暂停同时冻结开场停留停留、标题与图表入场、折线图、比赛表格切换、队伍总览及循环等待，不显示额外控件或状态提示；长按空格不会重复切换。
 

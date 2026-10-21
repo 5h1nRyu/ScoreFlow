@@ -184,6 +184,17 @@
       });
     }
 
+    // 首组已在原位排好，与 chart 共用整体淡入，不逐行滑入。
+    function renderFirstPanel() {
+      const panel = panels[0];
+      showPanel(panel);
+      panel.rows.forEach(row => {
+        row.style.opacity = "1";
+        row.style.transform = "none";
+      });
+      panel.headers.forEach(header => { header.style.opacity = "1"; });
+    }
+
     function reset() {
       activePanel = null;
       root.replaceChildren();
@@ -203,7 +214,7 @@
       },
       render(state) {
         updateItemDimensions();
-        const isOpening = state.phase === "background-hold" || state.phase === "entrance";
+        const isOpening = state.phase === "background-hold";
         if (isOpening) {
           reset();
           return;
@@ -215,17 +226,27 @@
         teamTableSlot.hidden = !isOverview;
         const progress = state.tableLayoutProgress;
         const easedProgress = progress * progress * (3 - 2 * progress);
-        root.style.opacity = String(1 - easedProgress);
+        const entrance = state.entranceProgress;
+        const entranceOpacity = entrance * entrance * (3 - 2 * entrance);
+        root.style.opacity = String((1 - easedProgress) * entranceOpacity);
         root.style.transform = `translateX(${-5 * easedProgress}%)`;
         if (isOverview) return;
+        if (state.phase === "entrance") {
+          renderFirstPanel();
+          return;
+        }
 
         const playTime = Math.max(0, state.cycleElapsed - state.introDuration);
         const index = Math.min(panels.length - 1, Math.floor(playTime / (2 * state.gameDuration)));
         const localTime = playTime - index * 2 * state.gameDuration;
         const outgoing = index > 0 && localTime < transitionLength;
         const panel = panels[outgoing ? index - 1 : index];
-        showPanel(panel);
-        renderPanel(panel, outgoing ? localTime : localTime - (index > 0 ? transitionLength : 0), outgoing);
+        if (index === 0) {
+          renderFirstPanel();
+        } else {
+          showPanel(panel);
+          renderPanel(panel, outgoing ? localTime : localTime - transitionLength, outgoing);
+        }
       }
     });
   }

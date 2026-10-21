@@ -17,7 +17,7 @@
     const styles = getComputedStyle(document.documentElement);
     const fonts = [
       ['600 16px ' + styles.getPropertyValue("--heading-font-family").trim(), text],
-      ['500 16px ' + styles.getPropertyValue("--title-font-family").trim(), APP_CONFIG.title.text]
+      [APP_CONFIG.title.fontWeight + ' 16px ' + styles.getPropertyValue("--title-font-family").trim(), APP_CONFIG.title.text]
     ];
     await Promise.all(fonts.map(([font, sample]) => document.fonts.load(font, sample)));
     await document.fonts.ready;
