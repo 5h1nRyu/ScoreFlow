@@ -84,7 +84,7 @@
           ))
           : Number(cycleElapsed >= overviewStart);
       const overviewElapsed = Math.max(0, cycleElapsed - overviewStart);
-      // 退场时从比赛表布局平滑过渡到队伍表布局，重播时直接回到 0。
+      // 比赛表退场动画的进度，重播时直接回到 0；不改变布局宽度。
       const tableLayoutProgress = gameTableExitDuration > 0
           ? Math.min(1, Math.max(0, (cycleElapsed - lastGameHoldEnd) / gameTableExitDuration))
           : Number(cycleElapsed >= lastGameHoldEnd);

@@ -449,6 +449,63 @@ test("ranking rows fill the panel and reserve a readable change column at every 
   }
 });
 
+test("ranking names fit beside worst-case scores and rank changes", async () => {
+  for (const [width, height] of [[2239, 1150], [1920, 1080], [1593, 900], [1366, 768], [960, 540], [390, 844]]) {
+    const o = options(1, width, height);
+    const page = await openExport(o);
+    try {
+      await prepare(page, o);
+      const failures = await page.evaluate(async () => {
+        const manifest = await __VIDEO_EXPORT__.getManifest();
+        const a = APP_CONFIG.animation;
+        const start = manifest.durationMs - a.restartDelay - a.overviewDuration;
+        const times = [
+          start + a.overview.teamTableEnterDuration + 1,
+          start + a.overview.teamTableEnterDuration + a.overview.initialHoldDuration + a.overview.reorderDuration / 2,
+          start + a.overviewDuration - 1
+        ];
+        const failures = [];
+        for (const timeMs of times) {
+          ScoreApplication.renderFrame({ timeMs, deltaMs: 0 });
+          document.querySelectorAll(".team-table__row").forEach(row => {
+            const name = row.querySelector(".team-table__name");
+            const score = row.querySelector(".team-table__score");
+            const change = row.querySelector(".team-table__change");
+            const originalScore = score.textContent;
+            const originalChange = change.textContent;
+            const widthBefore = score.getBoundingClientRect().width;
+            for (const changeText of ["▲9", "▼9", "="]) {
+              score.textContent = "-999.9";
+              change.textContent = changeText;
+              const n = name.getBoundingClientRect();
+              const s = score.getBoundingClientRect();
+              const c = change.getBoundingClientRect();
+              const range = document.createRange();
+              range.selectNodeContents(name);
+              const text = range.getBoundingClientRect();
+              const fits = text.left >= n.left - 1 && text.right <= n.right + 1
+                  && text.top >= n.top - 1 && text.bottom <= n.bottom + 1
+                  && score.scrollWidth <= score.clientWidth + 1
+                  && change.scrollWidth <= change.clientWidth + 1;
+              const stable = Math.abs(widthBefore - s.width) < 0.1;
+              const separate = n.right < s.left && s.right < c.left
+                  && c.right <= row.getBoundingClientRect().right;
+              if (!fits || !stable || !separate) {
+                failures.push({ name: name.textContent, changeText, timeMs, fits, stable, separate });
+              }
+            }
+            score.textContent = originalScore;
+            change.textContent = originalChange;
+          });
+        }
+        return failures;
+      });
+      assert.deepEqual(failures, [], `ranking content clipped at ${width}×${height}`);
+      assert.deepEqual(page.pageErrors, []);
+    } finally { await page.close(); }
+  }
+});
+
 test("export preparation rejects a missing title font", async () => {
   const page = await openExport(options(), page => page.route("**/assets/font/RobotoCondensed-Variable.ttf", route =>
     route.fulfill({ status: 404, body: "Missing" })));

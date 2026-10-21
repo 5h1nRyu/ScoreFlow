@@ -47,12 +47,9 @@
     if (Math.abs(verticalTotal - 1) > Number.EPSILON * 10) {
       throw new Error("layout 的纵向比例之和必须为 1");
     }
-    // 两个表格不会同时占列，分别校验各自的布局，边距仅扣除一次。
-    ["gameTable", "teamTable"].forEach(name => {
-      percentage(chartColumns[name], `layout.chartColumns.${name}`);
-      const scoreChart = 1 - pageMargin.horizontal * 2 - chartColumns[name];
-      percentage(scoreChart, `layout.chartColumns.${name} 对应的剩余折线图比例`);
-    });
+    // 两个表格共用同一列，切换时保持表格与折线图宽度不变。
+    const tableWidth = chartColumns.dataTable;
+    const scoreChartWidth = 1 - pageMargin.horizontal * 2 - tableWidth;
     if (!Number.isFinite(title.fontSize) || title.fontSize <= 0) {
       throw new Error("title.fontSize 必须是大于 0 的数字");
     }
@@ -67,12 +64,13 @@
       "--page-top-margin": [pageMargin.top, "layout.pageMargin.top"],
       "--page-bottom-margin": [pageMargin.bottom, "layout.pageMargin.bottom"],
       "--title-height": [rows.title, "layout.rows.title"],
-      "--chart-height": [rows.chart, "layout.rows.chart"]
+      "--chart-height": [rows.chart, "layout.rows.chart"],
+      "--data-table-width": [tableWidth, "layout.chartColumns.dataTable"],
+      "--score-chart-width": [scoreChartWidth, "layout.chartColumns.dataTable 对应的剩余折线图比例"]
     };
     Object.entries(variables).forEach(([property, [value, name]]) => {
       dashboard.style.setProperty(property, percentage(value, name));
     });
-    renderTableLayout({ tableLayoutProgress: 0 });
     dashboard.style.setProperty("--title-font-size", `${title.fontSize}px`);
     dashboard.style.setProperty("--title-font-weight", String(title.fontWeight));
     const titleElement = document.getElementById("dashboardTitleText");
@@ -89,20 +87,6 @@
     const easedProgress = entranceProgress * entranceProgress * (3 - 2 * entranceProgress);
     document.getElementById("scoreChart").style.opacity = String(easedProgress);
 
-  }
-
-  // 与表格退场共用时间轴，暂停冻结进度，循环首帧立即恢复比赛表布局。
-  let previousTableWidth = null;
-  function renderTableLayout({ tableLayoutProgress }) {
-    const { pageMargin, chartColumns } = layout;
-    const progress = tableLayoutProgress * tableLayoutProgress * (3 - 2 * tableLayoutProgress);
-    const tableWidth = chartColumns.gameTable
-        + (chartColumns.teamTable - chartColumns.gameTable) * progress;
-    if (tableWidth === previousTableWidth) return;
-    previousTableWidth = tableWidth;
-    const dashboard = document.getElementById("dashboard");
-    dashboard.style.setProperty("--data-table-width", `${tableWidth * 100}%`);
-    dashboard.style.setProperty("--score-chart-width", `${(1 - pageMargin.horizontal * 2 - tableWidth) * 100}%`);
   }
 
   // 调试时保留从 game0 到指定 gameId 的数据，并同步截断各队积分序列。
@@ -165,10 +149,10 @@
     assertOpen();
     applyAppearance();
     previousEntranceProgress = null;
-    previousTableWidth = null;
     applyLayout();
     const data = await loadData();
     await Promise.all([
+      ScoreResources.prepareImage(document.querySelector(".creator-brand__logo"), true),
       ScoreResources.prepareFont(title.text + data.games.map(game => game.info).join("")),
       ScoreResources.prepareBackground(Boolean(options))
     ]);
@@ -207,8 +191,7 @@
         else timeline.resume();
       };
       timeline.subscribe(renderEntrance);
-      timeline.subscribe(renderTableLayout);
-      // 先设置表格可见性和新布局，再测量尺寸、绘制当前帧。
+      // 先设置表格可见性，再测量尺寸、绘制当前帧。
       timeline.subscribe(gameTable.render);
       timeline.subscribe(teamTable.render);
       timeline.subscribe(chart.render);
@@ -274,7 +257,6 @@
     gameTable.reset();
     teamTable.reset();
     previousEntranceProgress = null;
-    previousTableWidth = null;
     timeline.renderAt(0, 0);
     chart.finishFrame();
     document.documentElement.getBoundingClientRect();

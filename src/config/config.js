@@ -19,9 +19,9 @@ const APP_CONFIG = Object.freeze({
     pageMargin: Object.freeze({ horizontal: 0.025, top: 0.025, bottom: 0.055 }),
     // 页面主体按标题和图表区从上到下紧凑排列
     rows: Object.freeze({ title: 0.145, chart: 0.775 }),
-    // 两个表格分别占整页的比例；折线图自动使用扣除左右边距和当前表格后的空间
+    // 比赛表与队伍表共用固定宽度；折线图使用扣除左右边距和表格后的空间
     // 列间距包含在折线图区内，不额外占用页面宽度
-    chartColumns: Object.freeze({ gameTable: 0.29, teamTable: 0.32 })
+    chartColumns: Object.freeze({ dataTable: 0.29 })
   }),
 
   title: Object.freeze({
@@ -40,7 +40,7 @@ const APP_CONFIG = Object.freeze({
     gameDuration: 1500,
     // 限制单帧参与缩放计算的最大秒数
     maximumFrameDelta: 0.05,
-    // 比赛表退场与布局宽度变化同步完成，结束后才开始队伍表进场；0 表示立即切换
+    // 比赛表退场结束后才开始队伍表进场，期间布局宽度保持不变；0 表示立即切换
     gameTableExitDuration: 400,
     // 四段时长之和作为完整的队伍表总览阶段时间
     overview: OVERVIEW_PHASES,

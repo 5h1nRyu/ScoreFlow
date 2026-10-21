@@ -95,11 +95,11 @@
       const change = createElement("span", "team-table__change");
       if (difference > 0) {
         change.classList.add("team-table__change--up");
-        change.textContent = `▲ ${difference}`;
+        change.textContent = `▲${difference}`;
         change.setAttribute("aria-label", `排名上升 ${difference} 位`);
       } else if (difference < 0) {
         change.classList.add("team-table__change--down");
-        change.textContent = `▼ ${Math.abs(difference)}`;
+        change.textContent = `▼${Math.abs(difference)}`;
         change.setAttribute("aria-label", `排名下降 ${Math.abs(difference)} 位`);
       } else {
         change.classList.add("team-table__change--same");
