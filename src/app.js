@@ -79,6 +79,38 @@
     titleElement.textContent = title.text;
   }
 
+  function fitDataTableWidth(teamTable) {
+    const panelStyle = getComputedStyle(document.querySelector(".table-instrument"));
+    const slotStyle = getComputedStyle(document.getElementById("teamTableSlot"));
+    const insets = parseFloat(slotStyle.left) + parseFloat(slotStyle.right)
+        + parseFloat(panelStyle.borderLeftWidth) + parseFloat(panelStyle.borderRightWidth);
+    const width = Math.min(teamTable.getRequiredWidth() + insets,
+        innerWidth * layout.chartColumns.dataTable);
+    const dashboard = document.getElementById("dashboard");
+    dashboard.style.setProperty("--data-table-width", `${width}px`);
+    dashboard.style.setProperty("--score-chart-width",
+        `calc(${(1 - 2 * layout.pageMargin.horizontal) * 100}% - ${width}px)`);
+  }
+
+  function fitProgressScale(gameCount) {
+    const progress = document.getElementById("missionProgress");
+    const counter = document.getElementById("missionGame");
+    // Keep the bar width constant when the completed count gains another digit.
+    counter.style.minWidth = `${2 * Math.max(2, String(gameCount).length) + 3}ch`;
+    const style = getComputedStyle(progress);
+    const width = progress.getBoundingClientRect().width
+        - ["paddingLeft", "paddingRight", "borderLeftWidth", "borderRightWidth"]
+            .reduce((sum, property) => sum + parseFloat(style[property]), 0);
+    if (width <= 0) return;
+    let gamesPerTick = 1;
+    let spacing = width / gameCount;
+    // Halve/double the tick count, keeping each tick tied to a power-of-two game interval.
+    while (spacing < 12) { gamesPerTick *= 2; spacing *= 2; }
+    while (spacing > 24) { gamesPerTick /= 2; spacing /= 2; }
+    progress.style.setProperty("--progress-tick-spacing", `${spacing}px`);
+    progress.dataset.gamesPerTick = String(gamesPerTick);
+  }
+
   let previousEntranceProgress = null;
   function renderEntrance({ phase, entranceProgress }) {
     document.getElementById("dashboard").dataset.phase = phase;
@@ -175,6 +207,7 @@
           document.getElementById("teamTableSlot"), data.teams, APP_CONFIG.teamTable
       );
       components.push(teamTable);
+      fitDataTableWidth(teamTable);
       const timeline = ScoreTimeline.createTimeline({ animation, finalGame: data.games.length - 1, manual });
       components.push(timeline);
       let lastState = null;
@@ -195,8 +228,10 @@
       timeline.subscribe(gameTable.render);
       timeline.subscribe(teamTable.render);
       timeline.subscribe(chart.render);
+      const currentGameElement = document.getElementById("missionGameCurrent");
+      document.getElementById("missionGameTotal").textContent = String(data.games.length).padStart(2, "0");
       timeline.subscribe(state => {
-        document.getElementById("missionGame").textContent = String(Math.max(0, state.tableCompletedGame + 1)).padStart(2, "0") + ' / ' + String(data.games.length).padStart(2, "0");
+        currentGameElement.textContent = String(Math.max(0, state.tableCompletedGame + 1)).padStart(2, "0");
         const progress = state.replayProgress * 100;
         const progressElement = document.getElementById("missionProgress");
         progressElement.setAttribute("aria-valuenow", String(Math.round(progress)));
@@ -206,7 +241,9 @@
       });
       timeline.subscribe(state => { lastState = state; });
       const resizeObserver = manual ? null : new ResizeObserver(() => {
+        fitDataTableWidth(teamTable);
         if (lastState) timeline.renderAt(lastState.elapsed, 0);
+        fitProgressScale(data.games.length);
       });
       resizeObserver?.observe(document.getElementById("dashboard"));
       if (!manual) {
@@ -216,6 +253,7 @@
       await Promise.all([gameTable.ready, teamTable.ready]);
       assertOpen();
       timeline.renderAt(0, 0);
+      fitProgressScale(data.games.length);
       chart.finishFrame();
       document.getElementById("dataError").hidden = true;
       return application;

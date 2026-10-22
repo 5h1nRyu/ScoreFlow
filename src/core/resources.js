@@ -16,7 +16,9 @@
   async function prepareFont(text) {
     const styles = getComputedStyle(document.documentElement);
     const fonts = [
-      ['600 16px ' + styles.getPropertyValue("--heading-font-family").trim(), text],
+      ['700 16px ' + styles.getPropertyValue("--heading-font-family").trim(), text],
+      ['700 16px ' + styles.getPropertyValue("--mono").trim(), '0123456789-+./'],
+      ['900 16px ' + styles.getPropertyValue("--title-font-family").trim(), '0123456789-'],
       ['800 16px ' + styles.getPropertyValue("--brand-font-family").trim(), "豬頭神龍"],
       [APP_CONFIG.title.fontWeight + ' 16px ' + styles.getPropertyValue("--title-font-family").trim(), APP_CONFIG.title.text]
     ];

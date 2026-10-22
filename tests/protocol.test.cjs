@@ -449,8 +449,8 @@ test("ranking rows fill the panel and reserve a readable change column at every 
   }
 });
 
-test("ranking names fit beside worst-case scores and rank changes", async () => {
-  for (const [width, height] of [[2239, 1150], [1920, 1080], [1593, 900], [1366, 768], [960, 540], [390, 844]]) {
+test("16:9 layout fits ranking names tightly and aligns full-width progress", async () => {
+  for (const [width, height] of [[2560, 1440], [1920, 1080], [1600, 900], [1280, 720], [960, 540]]) {
     const o = options(1, width, height);
     const page = await openExport(o);
     try {
@@ -498,9 +498,71 @@ test("ranking names fit beside worst-case scores and rank changes", async () => 
             change.textContent = originalChange;
           });
         }
+        const names = [...document.querySelectorAll(".team-table__name")].map(name => {
+          const range = document.createRange();
+          range.selectNodeContents(name);
+          const ink = range.getBoundingClientRect().width;
+          return { ink, spare: name.getBoundingClientRect().width - ink };
+        }).sort((a, b) => b.ink - a.ink);
+        if (names[0].spare > 6) failures.push({ extraNameSpace: names[0].spare });
+        const chart = document.querySelector(".chart-instrument").getBoundingClientRect();
+        const table = document.querySelector(".table-instrument").getBoundingClientRect();
+        const footer = document.querySelector(".telemetry").getBoundingClientRect();
+        if (Math.abs(footer.left - chart.left) > 1 || Math.abs(footer.right - table.right) > 1) {
+          failures.push({ footerAlignment: false });
+        }
+        if (getComputedStyle(document.querySelector(".mission-progress"), "::after").content !== "none") {
+          failures.push({ bottomTicksPresent: true });
+        }
         return failures;
       });
       assert.deepEqual(failures, [], `ranking content clipped at ${width}×${height}`);
+      assert.deepEqual(page.pageErrors, []);
+    } finally { await page.close(); }
+  }
+});
+
+test("progress is centered in the frame and ticks adapt to whole-game subdivisions", async () => {
+  const source = JSON.parse(await readFile(path.join(root, "data/games.json"), "utf8"));
+  for (const [width, height, count] of [[1920, 1080, 3], [1920, 1080, 32], [1920, 1080, 512], [1280, 720, 3], [1280, 720, 512]]) {
+    const o = options(1, width, height);
+    const games = Array.from({ length: count }, (_, index) => ({ ...source.games[index % source.games.length], gameId: index }));
+    const page = await openExport(o, page => page.route("**/data/games.json", route =>
+      route.fulfill({ contentType: "application/json", body: JSON.stringify({ games }) })));
+    try {
+      await prepare(page, o);
+      const result = await page.evaluate(async count => {
+        const bar = document.getElementById("missionProgress");
+        const style = getComputedStyle(bar);
+        const rect = bar.getBoundingClientRect();
+        const contentWidth = rect.width - ["paddingLeft", "paddingRight", "borderLeftWidth", "borderRightWidth"]
+            .reduce((sum, property) => sum + parseFloat(style[property]), 0);
+        const spacing = parseFloat(style.getPropertyValue("--progress-tick-spacing"));
+        const gamesPerTick = Number(bar.dataset.gamesPerTick);
+        const panel = document.querySelector(".table-instrument").getBoundingClientRect();
+        const frameBottom = innerHeight - parseFloat(getComputedStyle(document.body, "::before").bottom);
+        const topGap = rect.top - panel.bottom;
+        const bottomGap = frameBottom - rect.bottom;
+        const initialWidth = rect.width;
+        const manifest = await __VIDEO_EXPORT__.getManifest();
+        ScoreApplication.renderFrame({ timeMs: manifest.durationMs - 1, deltaMs: 0 });
+        return { spacing, gamesPerTick, expectedSpacing: contentWidth / count * gamesPerTick,
+          topGap, bottomGap, stableWidth: Math.abs(bar.getBoundingClientRect().width - initialWidth) < 0.1,
+          background: style.backgroundImage, filledBackground: getComputedStyle(bar.firstElementChild).backgroundImage,
+          topMargin: APP_CONFIG.layout.pageMargin.top, titleHeight: APP_CONFIG.layout.rows.title };
+      }, count);
+      assert(result.spacing >= 12 && result.spacing <= 24);
+      assert(Math.abs(result.spacing - result.expectedSpacing) < 0.001);
+      assert(Math.abs(Math.log2(result.gamesPerTick) - Math.round(Math.log2(result.gamesPerTick))) < 0.001);
+      if (count === 512) assert(result.gamesPerTick > 1, "crowded ticks should be halved");
+      else assert(result.gamesPerTick < 1, "sparse ticks should be subdivided");
+      assert(Math.abs(result.topGap - result.bottomGap) < 1, "progress should sit midway between panel and frame");
+      assert(result.topGap > 0 && result.stableWidth);
+      const stops = background => [...background.matchAll(/(-?[\d.]+)px/g)].map(match => Number(match[1]));
+      assert(Math.abs(stops(result.background).at(-1) - result.spacing) < 0.001);
+      assert.deepEqual(stops(result.background), stops(result.filledBackground));
+      assert.equal(result.topMargin, 0.025);
+      assert.equal(result.titleHeight, 0.145);
       assert.deepEqual(page.pageErrors, []);
     } finally { await page.close(); }
   }

@@ -19,7 +19,7 @@ const APP_CONFIG = Object.freeze({
     pageMargin: Object.freeze({ horizontal: 0.025, top: 0.025, bottom: 0.055 }),
     // 页面主体按标题和图表区从上到下紧凑排列
     rows: Object.freeze({ title: 0.145, chart: 0.775 }),
-    // 比赛表与队伍表共用固定宽度；折线图使用扣除左右边距和表格后的空间
+    // 比赛表与队伍表共用宽度；dataTable 为比例上限，按完整队名所需宽度收紧
     // 列间距包含在折线图区内，不额外占用页面宽度
     chartColumns: Object.freeze({ dataTable: 0.29 })
   }),
@@ -87,11 +87,11 @@ const APP_CONFIG = Object.freeze({
     // 队标高使用 CSS 像素
     teamImageHeight: 38,
     // 控制重排后是否显示排名变化图标，并始终保留其布局空间
-    showRankChange: true,
+    showRankChange: false,
     // 设置重排过程中条目放大或缩小的最大比例
     reorderScaleAmplitude: 0.012,
     itemFontSizes: Object.freeze({
-      rank: 20,
+      rank: 26,
       teamName: 21,
       score: 24,
       rankChange: 20

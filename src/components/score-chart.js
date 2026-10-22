@@ -4,6 +4,10 @@
 function createScoreChart(canvas, teams, games, config, renderOptions = {}) {
 const ctx = canvas.getContext("2d", { willReadFrequently: renderOptions.deviceScaleFactor !== undefined });
 const { chart, labels, xAxis, yAxis } = config;
+// Canvas and the right-hand tables share the same text and numeric font families.
+const fontStyles = getComputedStyle(document.documentElement);
+const textFontFamily = fontStyles.getPropertyValue("--heading-font-family").trim();
+const numberFontFamily = fontStyles.getPropertyValue("--mono").trim();
 const finalGame = games.length - 1;
 
 // 校验 Canvas 线条配置，避免无效数值导致图表样式异常
@@ -539,8 +543,9 @@ function render(timelineState) {
       );
 
 
-  // 清空上一帧
+  // Clear both layers even when the overview hides endpoint labels.
   clearCanvas(ctx);
+  clearCanvas(labelCtx);
 
 
   const usesOverviewLabels = phase === "overview" || phase === "restart-hold";
@@ -552,7 +557,7 @@ function render(timelineState) {
       : xAxis.labels.showInNormal;
 
   // 设置 Y 轴文字样式
-  ctx.font = `600 ${responsiveFontSize(yAxis.labels.fontSize)}px "Courier New", monospace`;
+  ctx.font = `700 ${responsiveFontSize(yAxis.labels.fontSize)}px ${numberFontFamily}`;
 
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
@@ -681,7 +686,7 @@ function render(timelineState) {
   // 设置 X 轴文字样式
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
-  ctx.font = `600 ${responsiveFontSize(xAxis.labels.fontSize)}px "Courier New", monospace`;
+  ctx.font = `700 ${responsiveFontSize(xAxis.labels.fontSize)}px ${numberFontFamily}`;
 
 
   // 全景及循环等待阶段共用间隔，下一轮开始时才恢复逐场竖线。
@@ -919,9 +924,10 @@ function render(timelineState) {
         height - margin.bottom - halfLabelHeight
     );
 
-    clearCanvas(labelCtx);
     labelCtx.save();
-    labelCtx.font = `${labels.fontWeight} ${responsiveFontSize(labels.fontSize)}px "Courier New", monospace`;
+    const nameFont = `${labels.fontWeight} ${responsiveFontSize(labels.fontSize)}px ${textFontFamily}`;
+    const scoreFont = `${labels.fontWeight} ${responsiveFontSize(labels.fontSize)}px ${numberFontFamily}`;
+    labelCtx.font = nameFont;
     labelCtx.textAlign = "left";
     labelCtx.textBaseline = "middle";
 
@@ -934,7 +940,9 @@ function render(timelineState) {
     arrangedLabels.forEach((label) => {
       const labelX = label.tipX + labels.horizontalGap;
       labelCtx.fillStyle = label.color;
+      labelCtx.font = nameFont;
       labelCtx.fillText(label.shortName, labelX, label.labelY);
+      labelCtx.font = scoreFont;
       labelCtx.fillText(label.scoreText, labelX + scoreOffset, label.labelY);
     });
 

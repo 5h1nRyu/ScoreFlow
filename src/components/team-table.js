@@ -84,6 +84,7 @@
       const row = createElement("li", "team-table__row");
       row.style.setProperty("--team-color", entry.team.color);
       const rank = createElement("span", "team-table__rank", String(entry.rank));
+      rank.classList.toggle("team-table__rank--first", entry.rank === 1);
       const logo = createElement("img", "team-table__logo");
       logo.src = imageUrl(TEAM_IMAGE_BASE_URL, entry.team.name);
       logo.alt = `${entry.team.name}队标`;
@@ -117,6 +118,26 @@
       return previous?.score === entry.score ? "-" : String(entry.rank);
     }
 
+    // Measure only typography and fixed columns, so the longest name gets just enough room.
+    const measureContext = new OffscreenCanvas(1, 1).getContext("2d");
+    function getRequiredWidth() {
+      const sample = list.firstElementChild;
+      const rowStyle = getComputedStyle(sample);
+      const measure = (selector, text) => {
+        const style = getComputedStyle(sample.querySelector(selector));
+        measureContext.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+        return measureContext.measureText(text).width;
+      };
+      const nameWidth = Math.max(...teams.map(team => measure(".team-table__name", team.name)));
+      const fixedWidth = measure(".team-table__rank", "00")
+          + parseFloat(rowStyle.getPropertyValue("--team-table-logo-column-width"))
+          + measure(".team-table__score", "000000")
+          + measure(".team-table__change", "00");
+      const insets = ["paddingLeft", "paddingRight", "borderLeftWidth", "borderRightWidth"]
+          .reduce((sum, property) => sum + parseFloat(rowStyle[property]), 0);
+      return Math.ceil(nameWidth + fixedWidth + 4 * parseFloat(rowStyle.columnGap) + insets + 4);
+    }
+
     function updateDimensions() {
       const height = list.getBoundingClientRect().height;
       itemHeight = height * config.itemHeightRatio;
@@ -137,6 +158,7 @@
         elements.row.style.transform = "none";
         elements.row.style.zIndex = String(100 - finalByName.get(entry.team.name).position);
         elements.rank.textContent = rankText(initialOrder, entry);
+        elements.rank.classList.toggle("team-table__rank--first", elements.rank.textContent === "1");
         elements.score.textContent = scoreFormatter(entry.score);
         elements.change.classList.remove("team-table__change--visible");
         elements.change.style.opacity = "0";
@@ -178,6 +200,7 @@
         elements.rank.textContent = isReordered
             ? rankText(finalOrder, finalEntry)
             : rankText(initialOrder, initialEntry);
+        elements.rank.classList.toggle("team-table__rank--first", elements.rank.textContent === "1");
         const shownScore = initialEntry.score + (finalEntry.score - initialEntry.score) * progress;
         elements.score.textContent = scoreFormatter(shownScore);
         const showChange = config.showRankChange && isReordered;
@@ -193,6 +216,7 @@
 
     return Object.freeze({
       ready,
+      getRequiredWidth,
       render,
       reset,
       destroy() {
