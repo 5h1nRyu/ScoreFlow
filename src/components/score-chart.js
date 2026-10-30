@@ -131,10 +131,12 @@ function easeInOut(progress) {
 // 根据窗口大小调整 Canvas 分辨率
 function resizeCanvas() {
   // 普通播放保留性能限制；导出使用协议的像素比，主画布和标签画布只缩放一次。
-  const dpr = renderOptions.deviceScaleFactor ?? Math.min(
+  const presentationScale = Number(getComputedStyle(document.getElementById("presentation"))
+      .getPropertyValue("--presentation-scale")) || 1;
+  const dpr = (renderOptions.deviceScaleFactor ?? Math.min(
       window.devicePixelRatio || 1,
       2
-  );
+  )) * presentationScale;
 
   const nextWidth = canvas.clientWidth;
   const nextHeight = canvas.clientHeight;

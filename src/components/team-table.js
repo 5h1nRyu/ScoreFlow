@@ -139,7 +139,7 @@
     }
 
     function updateDimensions() {
-      const height = list.getBoundingClientRect().height;
+      const height = list.clientHeight;
       itemHeight = height * config.itemHeightRatio;
       itemGap = height * config.itemGapRatio;
       root.style.setProperty("--team-table-item-height", `${itemHeight}px`);

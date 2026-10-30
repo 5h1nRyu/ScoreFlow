@@ -1,0 +1,21 @@
+name: Layout regression
+on:
+  push:
+    branches: [dev_v6]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-layout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node --test tests/layout.test.cjs
+      - run: node --test --test-name-pattern="metadata works|HeroShow wipes directly|HeroShow required assets|4K and DPR 3|required data failures" tests/protocol.test.cjs

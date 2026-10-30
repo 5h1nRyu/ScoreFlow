@@ -150,7 +150,7 @@
     root.style.setProperty("--game-table-header-item-gap", `${config.headerItemGap}px`);
 
     function updateItemDimensions() {
-      const regionHeight = root.getBoundingClientRect().height;
+      const regionHeight = root.clientHeight;
       root.style.setProperty(
           "--game-table-item-height",
           `${regionHeight * config.itemHeightRatio}px`

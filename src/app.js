@@ -15,6 +15,13 @@
   const loadHeroModule = () => heroModulePromise ??= import("./hero-show/integration.js");
   const dataController = new AbortController();
 
+  // 先在固定设计尺寸中完成排版，再整体缩放；黑边由 body 提供。
+  function fitPresentation() {
+    const viewport = document.documentElement;
+    const scale = Math.min(viewport.clientWidth / 1920, viewport.clientHeight / 1080);
+    document.getElementById("presentation").style.setProperty("--presentation-scale", String(scale));
+  }
+
   // 将布局比例转换为 CSS 百分比
   function percentage(value, name) {
     if (!Number.isFinite(value) || value <= 0 || value >= 1) {
@@ -87,7 +94,7 @@
     const insets = parseFloat(slotStyle.left) + parseFloat(slotStyle.right)
         + parseFloat(panelStyle.borderLeftWidth) + parseFloat(panelStyle.borderRightWidth);
     const width = Math.min(teamTable.getRequiredWidth() + insets,
-        innerWidth * layout.chartColumns.dataTable);
+        document.getElementById("dashboard").clientWidth * layout.chartColumns.dataTable);
     const dashboard = document.getElementById("dashboard");
     dashboard.style.setProperty("--data-table-width", `${width}px`);
     dashboard.style.setProperty("--score-chart-width",
@@ -100,8 +107,8 @@
     // Keep the bar width constant when the completed count gains another digit.
     counter.style.minWidth = `${2 * Math.max(2, String(gameCount).length) + 3}ch`;
     const style = getComputedStyle(progress);
-    const width = progress.getBoundingClientRect().width
-        - ["paddingLeft", "paddingRight", "borderLeftWidth", "borderRightWidth"]
+    const width = progress.clientWidth
+        - ["paddingLeft", "paddingRight"]
             .reduce((sum, property) => sum + parseFloat(style[property]), 0);
     if (width <= 0) return;
     let gamesPerTick = 1;
@@ -182,6 +189,10 @@
 
   async function initialize(options) {
     assertOpen();
+    const presentation = document.getElementById("presentation");
+    presentation.classList.remove("presentation--ready");
+    presentation.setAttribute("aria-busy", "true");
+    fitPresentation();
     applyAppearance();
     previousEntranceProgress = null;
     applyLayout();
@@ -250,11 +261,11 @@
       });
       timeline.subscribe(state => { lastState = state; });
       const resizeObserver = manual ? null : new ResizeObserver(() => {
-        fitDataTableWidth(teamTable);
+        fitPresentation();
         if (lastState) timeline.renderAt(lastState.elapsed, 0);
         fitProgressScale(data.games.length);
       });
-      resizeObserver?.observe(document.getElementById("dashboard"));
+      resizeObserver?.observe(document.documentElement);
       if (!manual) {
         document.addEventListener("keydown", onKeydown);
       }
@@ -265,6 +276,9 @@
       fitProgressScale(data.games.length);
       chart.finishFrame();
       document.getElementById("dataError").hidden = true;
+      // 字体、表格最终列宽和首帧全部确定后才显示，避免开场布局跳变。
+      presentation.classList.add("presentation--ready");
+      presentation.setAttribute("aria-busy", "false");
       return application;
     } catch (error) {
       if (application) destroyApplication();
