@@ -120,7 +120,7 @@ body.page--image-background .presentation { background-image: url("../images/bac
   width: 0;
   height: 100%;
   overflow: hidden;
-  background: repeating-linear-gradient(90deg, #4C5A68 0 calc(var(--progress-tick-spacing, 14px) - 2px), #ECE5D6 calc(var(--progress-tick-spacing, 14px) - 2px) var(--progress-tick-spacing, 14px));
+  background: repeating-linear-gradient(90deg, var(--red) 0 calc(var(--progress-tick-spacing, 14px) - 2px), #ECE5D6 calc(var(--progress-tick-spacing, 14px) - 2px) var(--progress-tick-spacing, 14px));
 }
 .mission-progress span::after {
   content: "";

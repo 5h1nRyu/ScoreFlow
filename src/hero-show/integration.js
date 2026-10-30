@@ -16,7 +16,9 @@ for (const font of Object.values(source.assets.fonts)) {
 }
 const config = createConfig(source);
 const startMs = config.timing.bridge.start;
-export const durationMs = config.stage.duration - startMs;
+// 结尾整段半速播放：转场、入场、展示停留和环境动画共用同一时间倍率。
+const playbackRate = 0.5;
+export const durationMs = (config.stage.duration - startMs) / playbackRate;
 
 // ScoreFlow owns playback, looping, pausing and video export. This component
 // only evaluates the original HeroShow wipe and board at the supplied time.
@@ -37,7 +39,7 @@ export async function createHeroShow(host) {
   const bridge = root.getElementById("bridge");
   const dashboard = document.getElementById("dashboard");
   const animation = createAnimation(config, root);
-  const sceneSwitch = config.timing.bridge.enter + config.timing.bridge.pause;
+  const sceneSwitch = (config.timing.bridge.enter + config.timing.bridge.pause) / playbackRate;
   host.hidden = false;
   host.style.opacity = "0";
   try {
@@ -70,7 +72,7 @@ export async function createHeroShow(host) {
       // Until the strips assemble, the original score overview remains visible.
       viewport.style.background = boardVisible ? config.theme.paper : "transparent";
       grain.style.visibility = boardVisible ? "visible" : "hidden";
-      animation.render(startMs + state.heroElapsed);
+      animation.render(startMs + state.heroElapsed * playbackRate);
     },
     destroy() {
       host.hidden = true;

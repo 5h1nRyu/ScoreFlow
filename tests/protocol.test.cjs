@@ -8,7 +8,8 @@ const { chromium } = require("playwright");
 const root = path.resolve(__dirname, "..");
 const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg", ".ttf": "font/ttf", ".svg": "image/svg+xml" };
 const gameCount = JSON.parse(require("node:fs").readFileSync(path.join(root, "data/games.json"), "utf8")).games.length;
-const heroDuration = 6417; // HeroShow dev_v4: bridge + entrance/settle + five-second display.
+const heroTimeScale = 2; // HeroShow plays at half speed, including its display hold.
+const heroDuration = 6417 * heroTimeScale;
 const heroStart = 5000 + 2000 + (gameCount + 1) * 1500 + 400 + 7000;
 const cycleDuration = heroStart + heroDuration + 3000;
 let server;
@@ -143,15 +144,15 @@ test("HeroShow wipes directly over the final overview, displays without UI and r
     assert.equal(first.background, "transparent");
     assert.equal(first.progress, "100");
     assert.deepEqual(await page.screenshot(), before, "the wipe must start on the exact final ScoreFlow image");
-    const entering = await at(heroStart + 200);
+    const entering = await at(heroStart + 200 * heroTimeScale);
     assert.equal(entering.board, "hidden");
     assert.equal(entering.background, "transparent");
-    const assembled = await at(heroStart + 330);
+    const assembled = await at(heroStart + 330 * heroTimeScale);
     assert.equal(assembled.bridge, "visible");
-    const switched = await at(heroStart + 450);
+    const switched = await at(heroStart + 450 * heroTimeScale);
     assert.equal(switched.board, "visible");
     assert.notEqual(switched.background, "transparent");
-    const display = await at(heroStart + 1500);
+    const display = await at(heroStart + 1500 * heroTimeScale);
     assert.equal(display.bridge, "hidden");
     assert.equal(display.board, "visible");
     assert.equal(display.controls, 0);
@@ -160,8 +161,8 @@ test("HeroShow wipes directly over the final overview, displays without UI and r
     await page.waitForTimeout(120);
     await page.keyboard.press("Space");
     assert.deepEqual(await page.screenshot(), hero, "export must not advance the HeroShow renderer");
-    await at(heroStart + 200);
-    await at(heroStart + 1500);
+    await at(heroStart + 200 * heroTimeScale);
+    await at(heroStart + 1500 * heroTimeScale);
     assert.deepEqual(await page.screenshot(), hero, "HeroShow must reproduce a directly requested frame");
     assert.equal((await at(heroStart + heroDuration)).phase, "restart-hold");
     assert.equal((await at(cycleDuration - 1)).hidden, false);
@@ -169,7 +170,7 @@ test("HeroShow wipes directly over the final overview, displays without UI and r
     assert.equal(await page.locator("#dashboard").getAttribute("data-phase"), "background-hold");
     await prepare(page);
     assert.equal(await page.locator("#heroShow").isHidden(), true);
-    assert.equal((await at(heroStart + 1500)).controls, 0);
+    assert.equal((await at(heroStart + 1500 * heroTimeScale)).controls, 0);
     assert.deepEqual(page.pageErrors, []);
   } finally { await page.close(); }
 });
@@ -195,7 +196,7 @@ test("HeroShow wipe covers the shared 16:9 presentation in portrait and 4K viewp
         const board = root.getElementById("board").getBoundingClientRect();
         return { x: bridge.x, y: bridge.y, width: bridge.width, height: bridge.height,
           ratio: board.width / board.height };
-      }, heroStart + 380);
+      }, heroStart + 380 * heroTimeScale);
       const scale = Math.min(o.viewport.width / 1600, o.viewport.height / 900);
       assert(Math.abs(bounds.x - (o.viewport.width - 1600 * scale) / 2) < 0.01);
       assert(Math.abs(bounds.y - (o.viewport.height - 900 * scale) / 2) < 0.01);
@@ -657,6 +658,7 @@ test("progress is centered in the frame and ticks adapt to whole-game subdivisio
         return { spacing, gamesPerTick, expectedSpacing: contentWidth / count * gamesPerTick,
           topGap, bottomGap, stableWidth: Math.abs(bar.getBoundingClientRect().width - initialWidth) < 0.1,
           background: style.backgroundImage, filledBackground: getComputedStyle(bar.firstElementChild).backgroundImage,
+          cursorColor: getComputedStyle(bar.firstElementChild, "::after").backgroundColor,
           topMargin: APP_CONFIG.layout.pageMargin.top, titleHeight: APP_CONFIG.layout.rows.title };
       }, count);
       assert(result.spacing >= 12 && result.spacing <= 24);
@@ -669,6 +671,7 @@ test("progress is centered in the frame and ticks adapt to whole-game subdivisio
       const stops = background => [...background.matchAll(/(-?[\d.]+)px/g)].map(match => Number(match[1]));
       assert(Math.abs(stops(result.background).at(-1) - result.spacing) < 0.001);
       assert.deepEqual(stops(result.background), stops(result.filledBackground));
+      assert(result.filledBackground.includes(result.cursorColor), "completed ticks must use the cursor color");
       assert.equal(result.topMargin, 0.025);
       assert.equal(result.titleHeight, 0.145);
       assert.deepEqual(page.pageErrors, []);

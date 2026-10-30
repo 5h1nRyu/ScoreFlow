@@ -110,7 +110,7 @@ test("all replay phases and HeroShow stay inside a centered 16:9 frame with pure
         const count = Number(document.getElementById("missionGameTotal").textContent);
         const overview = a.backgroundHoldDuration + a.entranceDuration + (count + 1) * a.gameDuration + a.gameTableExitDuration;
         const hero = overview + a.overviewDuration;
-        return [0, a.backgroundHoldDuration + a.entranceDuration + 1, overview + a.overviewDuration - 1, hero + 200, hero + 380, hero + 1500, manifest.durationMs - 1, manifest.durationMs];
+        return [0, a.backgroundHoldDuration + a.entranceDuration + 1, overview + a.overviewDuration - 1, hero + 400, hero + 760, hero + 3000, manifest.durationMs - 1, manifest.durationMs];
       });
       const scale = Math.min(viewport.width / 1600, viewport.height / 900);
       const expected = { width: 1600 * scale, height: 900 * scale };
