@@ -38,7 +38,6 @@ export async function createHeroShow(host) {
   const grain = root.querySelector(".grain");
   const bridge = root.getElementById("bridge");
   const dashboard = document.getElementById("dashboard");
-  const animation = createAnimation(config, root);
   const sceneSwitch = (config.timing.bridge.enter + config.timing.bridge.pause) / playbackRate;
   host.hidden = false;
   host.style.opacity = "0";
@@ -55,6 +54,8 @@ export async function createHeroShow(host) {
   }
   host.hidden = true;
   host.style.opacity = "";
+  // 文字与指标由 applyContent 动态创建，内容就绪后才能收集动画节点。
+  const animation = createAnimation(config, root);
   return Object.freeze({
     durationMs,
     render(state) {

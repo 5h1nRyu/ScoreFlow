@@ -129,6 +129,8 @@ test("HeroShow wipes directly over the final overview, displays without UI and r
           bridge: root.getElementById("bridge").style.visibility,
           controls: root.querySelectorAll("button,input,select,#controls,.transport,.chapters").length,
           score: root.getElementById("score-number").textContent,
+          nameTransforms: [...root.querySelectorAll(".name-glyph")].map(node => node.style.transform),
+          metricTransforms: [...root.querySelectorAll(".metric-body")].map(node => node.style.transform),
           progress: document.getElementById("missionProgress").getAttribute("aria-valuenow"),
         };
       });
@@ -143,6 +145,9 @@ test("HeroShow wipes directly over the final overview, displays without UI and r
     assert.equal(first.bridge, "visible");
     assert.equal(first.background, "transparent");
     assert.equal(first.progress, "100");
+    assert(first.nameTransforms.length > 0 && first.metricTransforms.length > 0);
+    assert(first.nameTransforms.every(value => value === "translateY(115%)"));
+    assert(first.metricTransforms.every(value => value === "translateY(115%)"));
     assert.deepEqual(await page.screenshot(), before, "the wipe must start on the exact final ScoreFlow image");
     const entering = await at(heroStart + 200 * heroTimeScale);
     assert.equal(entering.board, "hidden");
@@ -152,16 +157,26 @@ test("HeroShow wipes directly over the final overview, displays without UI and r
     const switched = await at(heroStart + 450 * heroTimeScale);
     assert.equal(switched.board, "visible");
     assert.notEqual(switched.background, "transparent");
+    const textEntrance = await at(heroStart + 1000 * heroTimeScale);
+    for (const transforms of [textEntrance.nameTransforms, textEntrance.metricTransforms]) {
+      assert(transforms.some(value => value !== "translateY(115%)" && value !== "translateY(0%)"),
+        "team-name glyphs and metric rows must animate during the entrance");
+      assert(new Set(transforms).size > 1, "text entrance must preserve the original stagger");
+    }
     const display = await at(heroStart + 1500 * heroTimeScale);
     assert.equal(display.bridge, "hidden");
     assert.equal(display.board, "visible");
     assert.equal(display.controls, 0);
     assert.equal(display.score, "+197.2");
+    assert(display.nameTransforms.every(value => value === "translateY(0%)"));
+    assert(display.metricTransforms.every(value => value === "translateY(0%)"));
     const hero = await page.screenshot();
     await page.waitForTimeout(120);
     await page.keyboard.press("Space");
     assert.deepEqual(await page.screenshot(), hero, "export must not advance the HeroShow renderer");
-    await at(heroStart + 200 * heroTimeScale);
+    const rewound = await at(heroStart + 200 * heroTimeScale);
+    assert.deepEqual(rewound.nameTransforms, first.nameTransforms);
+    assert.deepEqual(rewound.metricTransforms, first.metricTransforms);
     await at(heroStart + 1500 * heroTimeScale);
     assert.deepEqual(await page.screenshot(), hero, "HeroShow must reproduce a directly requested frame");
     assert.equal((await at(heroStart + heroDuration)).phase, "restart-hold");
