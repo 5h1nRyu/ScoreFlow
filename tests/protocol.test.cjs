@@ -287,12 +287,13 @@ test("4K and DPR 3 increase both canvases without changing layout; prepare can b
       await advance(page, 0, 30);
       const dimensions = await page.evaluate(() => {
         const c = document.querySelector("#scoreChart");
-        return { width: c.width, height: c.height, cssWidth: c.getBoundingClientRect().width, cssHeight: c.getBoundingClientRect().height,
+        return { width: c.width, height: c.height, cssWidth: c.clientWidth, cssHeight: c.clientHeight,
+          presentationScale: Number(document.getElementById("presentation").style.getPropertyValue("--presentation-scale")),
           labels: createdCanvases.map(canvas => [canvas.width, canvas.height]),
           viewport: [document.documentElement.scrollWidth, document.documentElement.scrollHeight] };
       });
-      assert.equal(dimensions.width, Math.round(dimensions.cssWidth * scale));
-      assert.equal(dimensions.height, Math.round(dimensions.cssHeight * scale));
+      assert.equal(dimensions.width, Math.round(dimensions.cssWidth * scale * dimensions.presentationScale));
+      assert.equal(dimensions.height, Math.round(dimensions.cssHeight * scale * dimensions.presentationScale));
       assert.deepEqual(dimensions.labels, [[dimensions.width, dimensions.height]]);
       assert.deepEqual(dimensions.viewport, [1920, 1080]);
       const shot = await page.screenshot({ animations: "allow" });
