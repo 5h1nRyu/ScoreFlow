@@ -98,7 +98,7 @@ test("the first visible frame already has the final chart/table widths, even wit
 
 test("all replay phases and HeroShow stay inside a centered 16:9 frame with pure black bars", async () => {
   for (const viewport of [
-    { width: 1920, height: 1080 }, { width: 2560, height: 1080 },
+    { width: 1600, height: 900 }, { width: 1920, height: 1080 }, { width: 2560, height: 1080 },
     { width: 1024, height: 768 }, { width: 390, height: 844 },
     { width: 844, height: 390 }, { width: 3840, height: 2160 }
   ]) {
@@ -112,8 +112,8 @@ test("all replay phases and HeroShow stay inside a centered 16:9 frame with pure
         const hero = overview + a.overviewDuration;
         return [0, a.backgroundHoldDuration + a.entranceDuration + 1, overview + a.overviewDuration - 1, hero + 200, hero + 380, hero + 1500, manifest.durationMs - 1, manifest.durationMs];
       });
-      const scale = Math.min(viewport.width / 1920, viewport.height / 1080);
-      const expected = { width: 1920 * scale, height: 1080 * scale };
+      const scale = Math.min(viewport.width / 1600, viewport.height / 900);
+      const expected = { width: 1600 * scale, height: 900 * scale };
       const x = (viewport.width - expected.width) / 2, y = (viewport.height - expected.height) / 2;
       let columns;
       for (const timeMs of times) {
@@ -166,7 +166,7 @@ test("resizing normal playback only scales the design, and background images nev
     const original = await page.locator(".dashboard__region").evaluateAll(nodes => nodes.map(node => [node.offsetWidth, node.offsetHeight]));
     for (const viewport of [{ width: 390, height: 844 }, { width: 2560, height: 1080 }, { width: 1024, height: 768 }]) {
       await page.setViewportSize(viewport);
-      const scale = Math.min(viewport.width / 1920, viewport.height / 1080);
+      const scale = Math.min(viewport.width / 1600, viewport.height / 900);
       await page.waitForFunction(scale => Math.abs(Number(document.getElementById("presentation").style.getPropertyValue("--presentation-scale")) - scale) < 0.00001, scale);
       assert.deepEqual(await page.locator(".dashboard__region").evaluateAll(nodes => nodes.map(node => [node.offsetWidth, node.offsetHeight])), original);
       await blackPixel(page, 0, 0);

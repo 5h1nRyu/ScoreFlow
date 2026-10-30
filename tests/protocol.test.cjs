@@ -98,7 +98,7 @@ test("metadata works before prepare; export startup schedules no playback; metad
     const manifest = await page.evaluate(() => __VIDEO_EXPORT__.getManifest());
     assert.equal(manifest.durationMs, cycleDuration);
     assert.equal(manifest.supportsSeeking, false);
-    assert.deepEqual(manifest.recommendedViewport, { width: 1920, height: 1080 });
+    assert.deepEqual(manifest.recommendedViewport, { width: 1600, height: 900 });
     assert(manifest.name.length);
     assert.equal(await page.evaluate(() => __VIDEO_EXPORT__.version), 1);
     const before = await page.screenshot({ animations: "allow" });
@@ -196,11 +196,11 @@ test("HeroShow wipe covers the shared 16:9 presentation in portrait and 4K viewp
         return { x: bridge.x, y: bridge.y, width: bridge.width, height: bridge.height,
           ratio: board.width / board.height };
       }, heroStart + 380);
-      const scale = Math.min(o.viewport.width / 1920, o.viewport.height / 1080);
-      assert(Math.abs(bounds.x - (o.viewport.width - 1920 * scale) / 2) < 0.01);
-      assert(Math.abs(bounds.y - (o.viewport.height - 1080 * scale) / 2) < 0.01);
-      assert(Math.abs(bounds.width - 1920 * scale) < 0.01);
-      assert(Math.abs(bounds.height - 1080 * scale) < 0.01);
+      const scale = Math.min(o.viewport.width / 1600, o.viewport.height / 900);
+      assert(Math.abs(bounds.x - (o.viewport.width - 1600 * scale) / 2) < 0.01);
+      assert(Math.abs(bounds.y - (o.viewport.height - 900 * scale) / 2) < 0.01);
+      assert(Math.abs(bounds.width - 1600 * scale) < 0.01);
+      assert(Math.abs(bounds.height - 900 * scale) < 0.01);
       assert(Math.abs(bounds.ratio - 16 / 9) < 0.01);
       assert.deepEqual(page.pageErrors, []);
     } finally { await page.close(); }
@@ -287,7 +287,7 @@ test("4K and DPR 3 increase both canvases without changing layout; prepare can b
       await advance(page, 0, 30);
       const dimensions = await page.evaluate(() => {
         const c = document.querySelector("#scoreChart");
-        return { width: c.width, height: c.height, cssWidth: c.clientWidth, cssHeight: c.clientHeight,
+        return { width: c.width, height: c.height, cssWidth: c.getBoundingClientRect().width, cssHeight: c.getBoundingClientRect().height,
           labels: createdCanvases.map(canvas => [canvas.width, canvas.height]),
           viewport: [document.documentElement.scrollWidth, document.documentElement.scrollHeight] };
       });
@@ -467,7 +467,7 @@ test("simplified NASA-punk panels retain the original title, color portraits and
         return { height: progress.height, beforeText: progress.right <= game.left,
           sameRow: Math.abs((progress.y + progress.height / 2) - (game.y + game.height / 2)) < 1 };
       });
-      assert(Math.abs(footer.height - 10 * Math.min(viewport.width / 1920, viewport.height / 1080)) < 0.01);
+      assert(Math.abs(footer.height - 10 * Math.min(viewport.width / 1600, viewport.height / 900)) < 0.01);
       assert(footer.beforeText && footer.sameRow);
       const paused = await page.screenshot({ animations: "allow" });
       await page.waitForTimeout(150);

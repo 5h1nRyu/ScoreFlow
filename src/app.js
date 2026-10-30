@@ -18,7 +18,7 @@
   // 先在固定设计尺寸中完成排版，再整体缩放；黑边由 body 提供。
   function fitPresentation() {
     const viewport = document.documentElement;
-    const scale = Math.min(viewport.clientWidth / 1920, viewport.clientHeight / 1080);
+    const scale = Math.min(viewport.clientWidth / 1600, viewport.clientHeight / 900);
     document.getElementById("presentation").style.setProperty("--presentation-scale", String(scale));
   }
 
@@ -293,7 +293,7 @@
     if (!(durationMs > 0 && durationMs <= 24 * 60 * 60 * 1000)) throw new Error("导出时长必须在 0 到 24 小时之间");
     if (typeof title.text !== "string" || !title.text.trim()) throw new Error("导出名称不能为空");
     // 元数据只加载数据，不创建组件、不依赖 prepare，更不启动播放。
-    return { name: title.text, durationMs, recommendedViewport: { width: 1920, height: 1080 }, supportsSeeking: false };
+    return { name: title.text, durationMs, recommendedViewport: { width: 1600, height: 900 }, supportsSeeking: false };
   }
 
   async function prepare(options) {

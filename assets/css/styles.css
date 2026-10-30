@@ -29,8 +29,8 @@
 * { box-sizing: border-box; }
 html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
 body { color: var(--ink); background: #000; font-family: var(--heading-font-family); }
-/* A single 1920×1080 design is contained in every viewport, including HeroShow. */
-.presentation { position: fixed; left: 50%; top: 50%; width: 1920px; height: 1080px; overflow: hidden; isolation: isolate; visibility: hidden; background: var(--background-color); transform: translate(-50%, -50%) scale(var(--presentation-scale, 1)); transform-origin: center; }
+/* A single 1600×900 design is contained in every viewport, including HeroShow. */
+.presentation { position: fixed; left: 50%; top: 50%; width: 1600px; height: 900px; overflow: hidden; isolation: isolate; visibility: hidden; background: var(--background-color); transform: translate(-50%, -50%) scale(var(--presentation-scale, 1)); transform-origin: center; }
 .presentation--ready { visibility: visible; }
 body.page--image-background .presentation { background-image: url("../images/background/paper.jpg"); background-size: cover; background-position: center; }
 /* The chassis, screw slots and scratches are deterministic vector marks. */
