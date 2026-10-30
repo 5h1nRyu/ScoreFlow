@@ -4,7 +4,7 @@
       "name": "EX风林火山",
       "shortName": "火山",
       "color": "#890c12",
-      "initialScore": 0,
+      "initialScore": -33,
       "players": [
         "二阶堂亚树",
         "胜又健志",
@@ -16,7 +16,7 @@
       "name": "科乐美麻将格斗俱乐部",
       "shortName": "格斗",
       "color": "#df3116",
-      "initialScore": 0,
+      "initialScore": 11.1,
       "players": [
         "佐佐木寿人",
         "泷泽和典",
@@ -28,7 +28,7 @@
       "name": "雷电",
       "shortName": "雷电",
       "color": "#d6870d",
-      "initialScore": 0,
+      "initialScore": -12.9,
       "players": [
         "萩原圣人",
         "濑户熊直树",
@@ -40,7 +40,7 @@
       "name": "野兽X",
       "shortName": "野兽",
       "color": "#0c494d",
-      "initialScore": 0,
+      "initialScore": 55.3,
       "players": [
         "铃木大介",
         "中田花奈",
@@ -52,7 +52,7 @@
       "name": "世嘉飒美凤凰",
       "shortName": "凤凰",
       "color": "#d76209",
-      "initialScore": 0,
+      "initialScore": -122.8,
       "players": [
         "茅森早香",
         "竹内元太",
@@ -64,7 +64,7 @@
       "name": "赤坂驱动力",
       "shortName": "赤坂",
       "color": "#7b9818",
-      "initialScore": 0,
+      "initialScore": 1.8,
       "players": [
         "园田贤",
         "铃木太郎",
@@ -76,7 +76,7 @@
       "name": "涩谷ABEMAS",
       "shortName": "AB",
       "color": "#9f6f1a",
-      "initialScore": 0,
+      "initialScore": 70.1,
       "players": [
         "多井隆晴",
         "松本吉弘",
@@ -88,7 +88,7 @@
       "name": "U-NEXT海盗",
       "shortName": "海盗",
       "color": "#3754a8",
-      "initialScore": 0,
+      "initialScore": 18.1,
       "players": [
         "仲林圭",
         "瑞原明奈",
@@ -100,7 +100,7 @@
       "name": "角川樱花骑士",
       "shortName": "樱花",
       "color": "#db5b96",
-      "initialScore": 0,
+      "initialScore": 197.2,
       "players": [
         "堀慎吾",
         "冈田纱佳",
@@ -112,7 +112,7 @@
       "name": "地球喷射机",
       "shortName": "地球",
       "color": "#085029",
-      "initialScore": 0,
+      "initialScore": -184.9,
       "players": [
         "石井一马",
         "HIRO柴田",

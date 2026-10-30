@@ -25,7 +25,7 @@ const APP_CONFIG = Object.freeze({
   }),
 
   title: Object.freeze({
-    text: "M.LEAGUE 2026-2027赛季 9月 队伍积分演变",
+    text: "M.LEAGUE 2026-2027赛季 10月 队伍积分演变",
     fontSize: 60,
     // 中西文可变字体均支持 100–900；900 使用真实 Black 字重，字号按 CSS 像素直接生效。
     fontWeight: 900
@@ -87,7 +87,7 @@ const APP_CONFIG = Object.freeze({
     // 队标高使用 CSS 像素
     teamImageHeight: 38,
     // 控制重排后是否显示排名变化图标，并始终保留其布局空间
-    showRankChange: false,
+    showRankChange: true,
     // 设置重排过程中条目放大或缩小的最大比例
     reorderScaleAmplitude: 0.012,
     itemFontSizes: Object.freeze({
@@ -132,9 +132,9 @@ const APP_CONFIG = Object.freeze({
       showInOverview: true,
       fontSize: 18,
       // 初始积分（game -1）处的文字，仅从全景开始显示到本轮结束
-      initialText: "9/14",
+      initialText: "10/1",
       // 从全景开始到本轮结束，最后一场 game 处显示的文字
-      finalText: "9/30"
+      finalText: "10/31"
     }),
     // 全景阶段期望显示的竖直网格线数量；间隔保持到下一轮开始
     overviewTargetGridLineCount: 12,
