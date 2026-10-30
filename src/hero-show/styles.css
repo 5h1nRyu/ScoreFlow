@@ -1,0 +1,65 @@
+/* HeroShow dev_v4 visual styles, isolated in a shadow root. No playback UI. */
+:host { position:fixed; inset:0; z-index:100; pointer-events:none; display:block; }
+:host([hidden]) { display:none; }
+* { box-sizing:border-box; }
+img { display:block; user-select:none; pointer-events:none; }
+#viewport { position:absolute; inset:0; overflow:hidden; font-family:system-ui,'Microsoft YaHei',sans-serif; }
+#stage { width:1920px; height:1080px; position:absolute; overflow:hidden; isolation:isolate; background:var(--paper); transform-origin:0 0; visibility:hidden; }
+#stage.ready { visibility:visible; }
+#stage * { pointer-events:none; }
+#stage [hidden] { display:none!important; }
+.scene { position:absolute; inset:0; overflow:hidden; }
+.instrument-field { position:absolute; inset:-40px; background:var(--background-image,none) center/cover; transform-origin:center; opacity:.24; }
+.board,.reveal { background:var(--paper); }
+.board-header { position:absolute; left:92px; top:47px; width:1480px; height:100px; z-index:4; }
+.label-mask { height:94px; overflow:hidden; max-width:1300px; }
+#eyebrow { font:900 68px/94px MatchTitle,sans-serif; letter-spacing:8px; white-space:nowrap; color:var(--accent); }
+.photo-panel { position:absolute; left:936px; top:178px; width:984px; height:568px; background:linear-gradient(125deg,var(--panelLight),var(--panel)); overflow:hidden; transform-origin:right center; }
+.photo-texture { position:absolute; inset:0; background:radial-gradient(ellipse at 85% 10%,#fff9,transparent 68%),radial-gradient(ellipse at 20% 100%,var(--panelGlow),transparent 75%); }
+.identity { position:absolute; left:44px; top:201px; width:272px; height:272px; z-index:4; }
+.identity-mark { position:absolute; inset:0; }
+#team-logo { width:100%; height:100%; object-fit:contain; object-position:center; }
+.team-name { position:absolute; left:324px; top:204px; width:540px; margin:0; z-index:4; font:900 100px/1.17 MatchTitle,sans-serif; letter-spacing:2px; color:var(--ink); }
+.name-line { display:block; height:1.21em; overflow:hidden; white-space:nowrap; }
+.name-glyph { display:inline-block; will-change:transform; }
+.score-panel { position:absolute; left:92px; top:517px; width:710px; z-index:4; }
+.score-caption-mask { position:absolute; left:4px; top:var(--score-caption-top,-6px); height:calc(var(--score-caption-size,30px) * 4 / 3); overflow:hidden; }
+#score-caption { font:600 var(--score-caption-size,30px)/1.333333 system-ui,'Microsoft YaHei',sans-serif; letter-spacing:4px; color:var(--scoreCaption); }
+.score-mask { height:269px; overflow:hidden; }
+#score-row { display:flex; align-items:baseline; gap:18px; width:max-content; transform-origin:left center; will-change:transform; }
+#score-number { font:800 250px/1 MatchScore,'Arial Narrow',sans-serif; letter-spacing:-4px; font-variant-numeric:tabular-nums; color:var(--ink); }
+#score-unit { font:800 98px/1 MatchScore,sans-serif; color:var(--accent); letter-spacing:2px; }
+.portrait-reveal { position:absolute; left:797px; top:82px; width:1070px; height:720px; z-index:5; }
+.portrait-motion { position:absolute; inset:0; will-change:transform; }
+#portrait { width:100%; height:100%; object-fit:contain; object-position:center bottom; filter:drop-shadow(-8px 9px 8px #21181615); }
+/* 指标列数和跨列宽度由配置驱动。 */
+.metrics-panel { position:absolute; left:0; top:818px; width:1920px; height:262px; padding:18px 92px 0; z-index:7; background:var(--data); color:var(--dataInk); }
+.metrics-note { font-size:16px; line-height:24px; letter-spacing:3px; color:var(--dataMuted); margin-bottom:15px; }
+.metrics { display:grid; gap:var(--metric-gap,46px); }
+.metrics-note[hidden] + .metrics { margin-top:32px; }
+.metric { overflow:hidden; min-width:0; height:161px; }
+.metric-body { width:100%; }
+.metric-label { width:100%; font:600 24px/34px system-ui,'Microsoft YaHei',sans-serif; color:var(--metric-label); letter-spacing:3px; white-space:nowrap; }
+.metric-value { display:flex; gap:10px; align-items:baseline; width:max-content; margin-top:11px; max-width:none; }
+.metric-number { font:800 92px/1 MatchScore,sans-serif; letter-spacing:-1px; white-space:nowrap; color:var(--metric-number); }
+.metric--placements .metric-value { width:calc(100% - 12px); gap:0; }
+.metric--placements .metric-number { display:flex; column-gap:var(--placement-gap,0px); flex:1; }
+.metric-unit:empty { display:none; }
+.metric-decimal { color:var(--metric-decimal); }
+.metric-separator { color:var(--metric-separator); }
+.metric-accent { color:var(--metric-first); }
+.metric-suffix { color:var(--metric-suffix); }
+.metric-unit { font:800 27px/1 MatchScore,system-ui,sans-serif; color:var(--metric-unit); }
+.reveal { z-index:10; }
+.reveal-name { position:absolute; left:0; top:277px; font:900 380px/1.1 MatchTitle,sans-serif; white-space:nowrap; letter-spacing:-6px; color:var(--ink); }
+.bridge { z-index:20; }
+.bridge-slices { position:absolute; inset:0; }
+.wipe-slice { position:absolute; top:-360px; width:700px; height:1800px; left:-350px; background:linear-gradient(90deg,var(--bridgeStart),var(--bridgeMiddle) 65%,var(--bridgeEnd)); transform-origin:center; }
+.wipe-slice:nth-child(2) { left:185px; }
+.wipe-slice:nth-child(3) { left:720px; }
+.wipe-slice:nth-child(4) { left:1255px; }
+.wipe-slice:nth-child(5) { left:1790px; }
+.grain { position:absolute; inset:0; z-index:46; opacity:.035; pointer-events:none; background-image:var(--grain-image,none); mix-blend-mode:multiply; }
+
+#stage { background:transparent; overflow:visible; }
+#reveal { display:none; }

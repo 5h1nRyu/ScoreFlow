@@ -1,7 +1,7 @@
 (function exposeTimeline(global) {
   "use strict";
 
-  function getCycleDuration(animation, finalGame) {
+  function getCycleDuration(animation, finalGame, heroDuration = 0) {
     ["backgroundHoldDuration", "entranceDuration", "gameTableExitDuration", "restartDelay"]
         .forEach(name => {
           if (!Number.isFinite(animation[name]) || animation[name] < 0) {
@@ -21,9 +21,10 @@
         }, 0);
     if (overviewDuration !== animation.overviewDuration) throw new Error("总览阶段总时长不一致");
     if (!Number.isInteger(finalGame) || finalGame < 0) throw new Error("时间轴缺少比赛数据");
+    if (!Number.isFinite(heroDuration) || heroDuration < 0) throw new Error("特写时长必须是有限非负数");
     return animation.backgroundHoldDuration + animation.entranceDuration
         + (finalGame + 2) * animation.gameDuration + animation.gameTableExitDuration
-        + overviewDuration + animation.restartDelay;
+        + overviewDuration + heroDuration + animation.restartDelay;
   }
 
   // 与原 CSS cubic-bezier 相同的缓动，直接从时间计算，不创建实时动画。
@@ -54,7 +55,8 @@
       overviewDuration
     } = options.animation;
     const finalGame = options.finalGame;
-    const cycleDuration = getCycleDuration(options.animation, finalGame);
+    const heroDuration = options.heroDuration ?? 0;
+    const cycleDuration = getCycleDuration(options.animation, finalGame, heroDuration);
     const subscribers = new Set();
     let animationFrame = 0;
     let startTime = 0;
@@ -70,6 +72,7 @@
       const lastGameHoldEnd = animationDuration + gameDuration;
       const overviewStart = lastGameHoldEnd + gameTableExitDuration;
       const overviewEnd = overviewStart + overviewDuration;
+      const heroEnd = overviewEnd + heroDuration;
       const cycleElapsed = cycleDuration > 0 ? elapsed % cycleDuration : 0;
       const cycleIndex = cycleDuration > 0 ? Math.floor(elapsed / cycleDuration) : 0;
       const playhead = Math.min(finalGame, Math.max(0, cycleElapsed - introDuration) / gameDuration - 1);
@@ -121,7 +124,9 @@
                           ? "game-table-exit"
                           : cycleElapsed < overviewEnd
                               ? "overview"
-                              : "restart-hold";
+                              : cycleElapsed < heroEnd
+                                  ? "hero-show"
+                                  : "restart-hold";
       const state = Object.freeze({
         completedGame: Math.floor(playhead),
         deltaSeconds: Math.max(0, deltaMs) / 1000,
@@ -129,6 +134,9 @@
         elapsed,
         cycleElapsed,
         gameDuration,
+        heroActive: heroDuration > 0 && cycleElapsed >= overviewEnd,
+        heroElapsed: Math.min(heroDuration, Math.max(0, cycleElapsed - overviewEnd)),
+        heroDuration,
         introDuration,
         // 仅比赛回顾推进进度；开场为 0，最后一场完成后保持 1，重播时归零。
         replayProgress: Math.min(1, Math.max(0,

@@ -11,6 +11,8 @@
   let dataPromise = null;
   let application = null;
   let initializing = null;
+  let heroModulePromise = null;
+  const loadHeroModule = () => heroModulePromise ??= import("./hero-show/integration.js");
   const dataController = new AbortController();
 
   // 将布局比例转换为 CSS 百分比
@@ -170,6 +172,7 @@
     const previous = application;
     application = null;
     previous.timeline.destroy();
+    previous.heroShow.destroy();
     previous.resizeObserver?.disconnect();
     document.removeEventListener("keydown", previous.onKeydown);
     previous.chart.destroy();
@@ -182,7 +185,7 @@
     applyAppearance();
     previousEntranceProgress = null;
     applyLayout();
-    const data = await loadData();
+    const [data, heroModule] = await Promise.all([loadData(), loadHeroModule()]);
     await Promise.all([
       ScoreResources.prepareImage(document.querySelector(".creator-brand__logo"), true),
       ScoreResources.prepareFont(title.text + data.games.map(game => game.info).join("")),
@@ -192,6 +195,9 @@
     const manual = Boolean(options);
     const components = [];
     try {
+      const heroShow = await heroModule.createHeroShow(document.getElementById("heroShow"));
+      components.push(heroShow);
+      assertOpen();
       const chart = ScoreChart.createScoreChart(
           document.getElementById("scoreChart"), data.teams, data.games, APP_CONFIG,
           // 应用级尺寸观察统一重绘所有组件；导出不注册任何尺寸观察回调。
@@ -208,7 +214,7 @@
       );
       components.push(teamTable);
       fitDataTableWidth(teamTable);
-      const timeline = ScoreTimeline.createTimeline({ animation, finalGame: data.games.length - 1, manual });
+      const timeline = ScoreTimeline.createTimeline({ animation, finalGame: data.games.length - 1, manual, heroDuration: heroShow.durationMs });
       components.push(timeline);
       let lastState = null;
       let paused = false;
@@ -225,9 +231,12 @@
       };
       timeline.subscribe(renderEntrance);
       // 先设置表格可见性，再测量尺寸、绘制当前帧。
-      timeline.subscribe(gameTable.render);
-      timeline.subscribe(teamTable.render);
-      timeline.subscribe(chart.render);
+      // During the wipe, keep the completed ScoreFlow overview underneath.
+      const scoreState = state => state.heroActive ? { ...state, phase: "restart-hold" } : state;
+      timeline.subscribe(state => gameTable.render(scoreState(state)));
+      timeline.subscribe(state => teamTable.render(scoreState(state)));
+      timeline.subscribe(state => chart.render(scoreState(state)));
+      timeline.subscribe(heroShow.render);
       const currentGameElement = document.getElementById("missionGameCurrent");
       document.getElementById("missionGameTotal").textContent = String(data.games.length).padStart(2, "0");
       timeline.subscribe(state => {
@@ -236,7 +245,7 @@
         const progressElement = document.getElementById("missionProgress");
         progressElement.setAttribute("aria-valuenow", String(Math.round(progress)));
         progressElement.firstElementChild.style.width = progress + '%';
-        const isOverview = state.phase === "overview" || state.phase === "restart-hold";
+        const isOverview = state.phase === "overview" || state.phase === "restart-hold" || state.heroActive;
         document.getElementById("dataPanelTitle").textContent = isOverview ? "队伍排名" : "对局记录";
       });
       timeline.subscribe(state => { lastState = state; });
@@ -249,7 +258,7 @@
       if (!manual) {
         document.addEventListener("keydown", onKeydown);
       }
-      application = { timeline, chart, gameTable, teamTable, resizeObserver, onKeydown };
+      application = { timeline, chart, gameTable, teamTable, heroShow, resizeObserver, onKeydown };
       await Promise.all([gameTable.ready, teamTable.ready]);
       assertOpen();
       timeline.renderAt(0, 0);
@@ -265,8 +274,8 @@
   }
 
   async function getManifest() {
-    const data = await loadData();
-    const durationMs = ScoreTimeline.getCycleDuration(animation, data.games.length - 1);
+    const [data, heroModule] = await Promise.all([loadData(), loadHeroModule()]);
+    const durationMs = ScoreTimeline.getCycleDuration(animation, data.games.length - 1, heroModule.durationMs);
     if (!(durationMs > 0 && durationMs <= 24 * 60 * 60 * 1000)) throw new Error("导出时长必须在 0 到 24 小时之间");
     if (typeof title.text !== "string" || !title.text.trim()) throw new Error("导出名称不能为空");
     // 元数据只加载数据，不创建组件、不依赖 prepare，更不启动播放。

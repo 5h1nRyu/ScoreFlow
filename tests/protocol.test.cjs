@@ -8,7 +8,9 @@ const { chromium } = require("playwright");
 const root = path.resolve(__dirname, "..");
 const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg", ".ttf": "font/ttf", ".svg": "image/svg+xml" };
 const gameCount = JSON.parse(require("node:fs").readFileSync(path.join(root, "data/games.json"), "utf8")).games.length;
-const cycleDuration = 5000 + 2000 + (gameCount + 1) * 1500 + 400 + 7000 + 3000;
+const heroDuration = 6417; // HeroShow dev_v4: bridge + entrance/settle + five-second display.
+const heroStart = 5000 + 2000 + (gameCount + 1) * 1500 + 400 + 7000;
+const cycleDuration = heroStart + heroDuration + 3000;
 let server;
 let browser;
 let baseURL;
@@ -108,6 +110,101 @@ test("metadata works before prepare; export startup schedules no playback; metad
   } finally { await page.close(); }
 });
 
+test("HeroShow wipes directly over the final overview, displays without UI and resets with the cycle", async () => {
+  const page = await openExport(options());
+  try {
+    await prepare(page);
+    const at = async timeMs => {
+      await page.evaluate(timeMs => ScoreApplication.renderFrame({ timeMs, deltaMs: 0 }), timeMs);
+      return page.evaluate(() => {
+        const host = document.getElementById("heroShow");
+        const root = host.shadowRoot;
+        return {
+          hidden: host.hidden,
+          phase: document.getElementById("dashboard").dataset.phase,
+          background: root.getElementById("viewport").style.background,
+          board: root.getElementById("board").style.visibility,
+          reveal: root.getElementById("reveal").style.visibility,
+          bridge: root.getElementById("bridge").style.visibility,
+          controls: root.querySelectorAll("button,input,select,#controls,.transport,.chapters").length,
+          score: root.getElementById("score-number").textContent,
+          progress: document.getElementById("missionProgress").getAttribute("aria-valuenow"),
+        };
+      });
+    };
+    assert.equal((await at(heroStart - 1)).hidden, true);
+    const before = await page.screenshot();
+    const first = await at(heroStart);
+    assert.equal(first.phase, "hero-show");
+    assert.equal(first.hidden, false);
+    assert.equal(first.board, "hidden");
+    assert.equal(first.reveal, "hidden");
+    assert.equal(first.bridge, "visible");
+    assert.equal(first.background, "transparent");
+    assert.equal(first.progress, "100");
+    assert.deepEqual(await page.screenshot(), before, "the wipe must start on the exact final ScoreFlow image");
+    const entering = await at(heroStart + 200);
+    assert.equal(entering.board, "hidden");
+    assert.equal(entering.background, "transparent");
+    const assembled = await at(heroStart + 330);
+    assert.equal(assembled.bridge, "visible");
+    const switched = await at(heroStart + 450);
+    assert.equal(switched.board, "visible");
+    assert.notEqual(switched.background, "transparent");
+    const display = await at(heroStart + 1500);
+    assert.equal(display.bridge, "hidden");
+    assert.equal(display.board, "visible");
+    assert.equal(display.controls, 0);
+    assert.equal(display.score, "+197.2");
+    const hero = await page.screenshot();
+    await page.waitForTimeout(120);
+    await page.keyboard.press("Space");
+    assert.deepEqual(await page.screenshot(), hero, "export must not advance the HeroShow renderer");
+    await at(heroStart + 200);
+    await at(heroStart + 1500);
+    assert.deepEqual(await page.screenshot(), hero, "HeroShow must reproduce a directly requested frame");
+    assert.equal((await at(heroStart + heroDuration)).phase, "restart-hold");
+    assert.equal((await at(cycleDuration - 1)).hidden, false);
+    assert.equal((await at(cycleDuration)).hidden, true);
+    assert.equal(await page.locator("#dashboard").getAttribute("data-phase"), "background-hold");
+    await prepare(page);
+    assert.equal(await page.locator("#heroShow").isHidden(), true);
+    assert.equal((await at(heroStart + 1500)).controls, 0);
+    assert.deepEqual(page.pageErrors, []);
+  } finally { await page.close(); }
+});
+
+test("HeroShow required assets fail preparation instead of showing an incomplete close-up", async () => {
+  const page = await openExport(options(), page => page.route("**/assets/hero-show/images/player.png",
+    route => route.fulfill({ status: 404, body: "Missing" })));
+  try {
+    await assert.rejects(() => prepare(page), /HeroShow|素材|图片/);
+    assert.equal(await page.locator("#heroShow").isHidden(), true);
+  } finally { await page.close(); }
+});
+
+test("HeroShow wipe covers portrait and 4K viewports while the board keeps its design ratio", async () => {
+  for (const o of [options(1, 390, 844), options(2, 1920, 1080)]) {
+    const page = await openExport(o);
+    try {
+      await prepare(page, o);
+      const bounds = await page.evaluate(timeMs => {
+        ScoreApplication.renderFrame({ timeMs, deltaMs: 0 });
+        const root = document.getElementById("heroShow").shadowRoot;
+        const bridge = root.getElementById("bridge").getBoundingClientRect();
+        const board = root.getElementById("board").getBoundingClientRect();
+        return { x: bridge.x, y: bridge.y, width: bridge.width, height: bridge.height,
+          ratio: board.width / board.height };
+      }, heroStart + 380);
+      assert(Math.abs(bounds.x) < 0.01 && Math.abs(bounds.y) < 0.01);
+      assert(Math.abs(bounds.width - o.viewport.width) < 0.01);
+      assert(Math.abs(bounds.height - o.viewport.height) < 0.01);
+      assert(Math.abs(bounds.ratio - 16 / 9) < 0.01);
+      assert.deepEqual(page.pageErrors, []);
+    } finally { await page.close(); }
+  }
+});
+
 test("every frame in a complete cycle reproduces its Canvas PNG and DOM after reset", { timeout: Math.max(180000, cycleDuration * 4) }, async () => {
   const page = await openExport();
   try {
@@ -137,7 +234,7 @@ test("every frame in a complete cycle reproduces its Canvas PNG and DOM after re
     });
     assert.equal(result.mismatch, undefined, `frame mismatch: ${result.mismatch}`);
     assert.equal(result.count, Math.ceil(cycleDuration * 60 / 1000));
-    assert.deepEqual(result.phases, ["background-hold", "entrance", "playing", "last-game-hold", "game-table-exit", "overview", "restart-hold"]);
+    assert.deepEqual(result.phases, ["background-hold", "entrance", "playing", "last-game-hold", "game-table-exit", "overview", "hero-show", "restart-hold"]);
     assert.deepEqual(result.work, { frames: 0, timers: 0, observers: 0 });
     assert.equal(result.animations, 0);
     assert.deepEqual(page.pageErrors, []);
@@ -265,7 +362,7 @@ test("zero-duration phases and odd debug game counts retain correct layout and i
     await route.fulfill({ response, body });
   }));
   try {
-    assert.equal((await page.evaluate(() => __VIDEO_EXPORT__.getManifest())).durationMs, 16000);
+    assert.equal((await page.evaluate(() => __VIDEO_EXPORT__.getManifest())).durationMs, 16000 + heroDuration);
     await prepare(page);
     await advance(page, 0, 0);
     assert.equal(await page.locator("#dashboard").getAttribute("data-phase"), "playing");
@@ -299,7 +396,7 @@ test("dispose cancels data preparation in flight and remains safe to repeat", as
   } finally { await page.close(); }
 });
 
-test("normal playback still pauses the whole page, resumes, reaches overview and restarts", { timeout: 30000 }, async () => {
+test("normal playback still pauses the whole page, resumes, reaches overview and restarts", { timeout: 45000 }, async () => {
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
   const errors = [];
   page.on("pageerror", error => errors.push(error.message));
@@ -325,6 +422,13 @@ test("normal playback still pauses the whole page, resumes, reaches overview and
     assert.notDeepEqual(await page.screenshot({ animations: "allow" }), shot);
     await page.waitForFunction(() => document.querySelector("#dashboard").dataset.phase === "overview");
     assert(await page.locator("#teamTableSlot").isVisible());
+    await page.waitForFunction(() => document.querySelector("#dashboard").dataset.phase === "hero-show");
+    await page.keyboard.press("Space");
+    const heroShot = await page.screenshot({ animations: "allow" });
+    await page.waitForTimeout(200);
+    assert.deepEqual(await page.screenshot({ animations: "allow" }), heroShot, "space must pause the HeroShow wipe too");
+    assert.equal(await page.locator("#heroShow button, #heroShow input, #heroShow select").count(), 0);
+    await page.keyboard.press("Space");
     await page.waitForFunction(() => document.querySelector("#dashboard").dataset.phase === "background-hold");
     assert.deepEqual(errors, []);
   } finally { await page.close(); }
