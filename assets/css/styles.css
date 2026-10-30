@@ -129,7 +129,7 @@ body.page--image-background .presentation { background-image: url("../images/bac
   width: 2px;
   background: var(--red);
 }
-#dataError { position: fixed; z-index: 20; inset: 50% auto auto 50%; width: min(1728px, 680px); padding: 20px; margin: 0; color: var(--ink); background: var(--panel); border: 2px solid var(--red); font: 600 16px/1.6 var(--mono); text-align: center; transform: translate(-50%, -50%); }
+#dataError { position: fixed; z-index: 20; inset: 50% auto auto 50%; width: min(90vw, 680px); padding: 20px; margin: 0; color: var(--ink); background: var(--panel); border: 2px solid var(--red); font: 600 16px/1.6 var(--mono); text-align: center; transform: translate(-50%, -50%); }
 /* 布局调试：轮廓向内绘制，避免被 overflow 裁掉，且不参与尺寸计算。 */
 .dashboard--debug-layout,
 .dashboard--debug-layout :is(.dashboard__title, .dashboard__chart-area, .dashboard__region) {

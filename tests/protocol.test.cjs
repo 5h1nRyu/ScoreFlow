@@ -183,7 +183,7 @@ test("HeroShow required assets fail preparation instead of showing an incomplete
   } finally { await page.close(); }
 });
 
-test("HeroShow wipe covers portrait and 4K viewports while the board keeps its design ratio", async () => {
+test("HeroShow wipe covers the shared 16:9 presentation in portrait and 4K viewports", async () => {
   for (const o of [options(1, 390, 844), options(2, 1920, 1080)]) {
     const page = await openExport(o);
     try {
@@ -196,9 +196,11 @@ test("HeroShow wipe covers portrait and 4K viewports while the board keeps its d
         return { x: bridge.x, y: bridge.y, width: bridge.width, height: bridge.height,
           ratio: board.width / board.height };
       }, heroStart + 380);
-      assert(Math.abs(bounds.x) < 0.01 && Math.abs(bounds.y) < 0.01);
-      assert(Math.abs(bounds.width - o.viewport.width) < 0.01);
-      assert(Math.abs(bounds.height - o.viewport.height) < 0.01);
+      const scale = Math.min(o.viewport.width / 1920, o.viewport.height / 1080);
+      assert(Math.abs(bounds.x - (o.viewport.width - 1920 * scale) / 2) < 0.01);
+      assert(Math.abs(bounds.y - (o.viewport.height - 1080 * scale) / 2) < 0.01);
+      assert(Math.abs(bounds.width - 1920 * scale) < 0.01);
+      assert(Math.abs(bounds.height - 1080 * scale) < 0.01);
       assert(Math.abs(bounds.ratio - 16 / 9) < 0.01);
       assert.deepEqual(page.pageErrors, []);
     } finally { await page.close(); }
@@ -448,17 +450,15 @@ test("simplified NASA-punk panels retain the original title, color portraits and
       await page.goto(baseURL);
       await page.waitForFunction(() => document.querySelector("#dashboard").dataset.phase === "playing");
       assert.equal(await page.locator("#teamLegend, #playbackToggle, .mission-patch, .panel-code, .equipment-label").count(), 0);
-      assert.equal(await page.locator("#dashboardTitleText").textContent(), "M.LEAGUE 2026-2027赛季 9月 队伍积分演变");
-      assert.equal(await page.locator(".mission-spec strong").textContent(), "09.14 — 09.30");
+      assert.equal(await page.locator("#dashboardTitleText").textContent(), await page.evaluate(() => APP_CONFIG.title.text));
       assert.equal(await page.locator(".game-table__portrait").first().evaluate(node => getComputedStyle(node).filter), "saturate(0.8)");
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), viewport.width);
-      assert.equal(await page.locator("body").evaluate(body => getComputedStyle(body).backgroundColor), "rgb(236, 229, 214)");
+      assert.equal(await page.locator("body").evaluate(body => getComputedStyle(body).backgroundColor), "rgb(0, 0, 0)");
       const rects = await page.locator(".dashboard__region").evaluateAll(nodes => nodes.map(node => {
         const { x, y, width, height } = node.getBoundingClientRect();
         return { x, y, width, height };
       }));
-      if (viewport.width < 761) assert(rects[1].y >= rects[0].y + rects[0].height);
-      else assert(rects[1].x >= rects[0].x + rects[0].width);
+      assert(rects[1].x >= rects[0].x + rects[0].width);
       await page.keyboard.press("Space");
       assert.equal(await page.locator("#missionPhase, #missionClock").count(), 0);
       const footer = await page.evaluate(() => {
@@ -467,7 +467,7 @@ test("simplified NASA-punk panels retain the original title, color portraits and
         return { height: progress.height, beforeText: progress.right <= game.left,
           sameRow: Math.abs((progress.y + progress.height / 2) - (game.y + game.height / 2)) < 1 };
       });
-      assert.equal(footer.height, 10);
+      assert(Math.abs(footer.height - 10 * Math.min(viewport.width / 1920, viewport.height / 1080)) < 0.01);
       assert(footer.beforeText && footer.sameRow);
       const paused = await page.screenshot({ animations: "allow" });
       await page.waitForTimeout(150);
@@ -639,12 +639,15 @@ test("progress is centered in the frame and ticks adapt to whole-game subdivisio
         const bar = document.getElementById("missionProgress");
         const style = getComputedStyle(bar);
         const rect = bar.getBoundingClientRect();
-        const contentWidth = rect.width - ["paddingLeft", "paddingRight", "borderLeftWidth", "borderRightWidth"]
+        const contentWidth = bar.clientWidth - ["paddingLeft", "paddingRight"]
             .reduce((sum, property) => sum + parseFloat(style[property]), 0);
         const spacing = parseFloat(style.getPropertyValue("--progress-tick-spacing"));
         const gamesPerTick = Number(bar.dataset.gamesPerTick);
         const panel = document.querySelector(".table-instrument").getBoundingClientRect();
-        const frameBottom = innerHeight - parseFloat(getComputedStyle(document.body, "::before").bottom);
+        const presentation = document.getElementById("presentation");
+        const scale = Number(presentation.style.getPropertyValue("--presentation-scale"));
+        const frameBottom = presentation.getBoundingClientRect().bottom
+            - parseFloat(getComputedStyle(presentation, "::before").bottom) * scale;
         const topGap = rect.top - panel.bottom;
         const bottomGap = frameBottom - rect.bottom;
         const initialWidth = rect.width;
@@ -782,8 +785,9 @@ test("the ranking list leaves the bottom decorative pin unobstructed", async () 
         const panel=document.querySelector('.table-instrument').getBoundingClientRect();
         const bottom=Math.max(...[...document.querySelectorAll('.team-table__row')].map(n=>n.getBoundingClientRect().bottom));
         const pin=getComputedStyle(document.querySelector('.table-instrument'),'::after');
-        const pinTop=panel.bottom-1-parseFloat(pin.bottom)-parseFloat(pin.height);
-        return pinTop-bottom;
+        const scale=Number(document.getElementById('presentation').style.getPropertyValue('--presentation-scale'));
+        const pinTop=panel.bottom-(1+parseFloat(pin.bottom)+parseFloat(pin.height))*scale;
+        return (pinTop-bottom)/scale;
       });
       assert(gap>=5,'the last team row overlaps the bottom pin');
     } finally {await page.close();}

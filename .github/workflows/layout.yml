@@ -18,4 +18,4 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: node --test tests/layout.test.cjs
-      - run: node --test --test-name-pattern="metadata works|HeroShow wipes directly|HeroShow required assets|4K and DPR 3|required data failures" tests/protocol.test.cjs
+      - run: node --test --test-name-pattern="metadata works|HeroShow|4K and DPR 3|required data failures|simplified NASA-punk|ranking rows fill|16:9 layout fits|progress is centered|opening keeps|bottom decorative pin" tests/protocol.test.cjs
