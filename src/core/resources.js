@@ -20,7 +20,7 @@
       ['700 16px ' + styles.getPropertyValue("--mono").trim(), '0123456789-+./'],
       ['900 16px ' + styles.getPropertyValue("--title-font-family").trim(), '0123456789-'],
       ['800 16px ' + styles.getPropertyValue("--brand-font-family").trim(), "豬頭神龍"],
-      [APP_CONFIG.title.fontWeight + ' 16px ' + styles.getPropertyValue("--title-font-family").trim(), APP_CONFIG.title.text]
+      [APP_CONFIG.title.fontWeight + ' 16px ' + styles.getPropertyValue("--title-font-family").trim(), text]
     ];
     await Promise.all(fonts.map(([font, sample]) => document.fonts.load(font, sample)));
     await document.fonts.ready;

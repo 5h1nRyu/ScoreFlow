@@ -2,7 +2,7 @@
   "name": "scoreflow",
   "private": true,
   "scripts": {
-    "test": "node --test tests/protocol.test.cjs"
+    "test": "node --test --test-concurrency=1 tests/*.test.cjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

@@ -1,10 +1,9 @@
 (function startApplication() {
   "use strict";
 
-  const { animation, backgroundColor, useBackgroundImage, debug, layout, title } = APP_CONFIG;
-  // 数据文件位置固定，不作为外观配置提供。
-  const TEAMS_DATA_URL = "data/teams.json";
-  const GAMES_DATA_URL = "data/games.json";
+  const { animation, backgroundColor, useBackgroundImage, debug, layout } = APP_CONFIG;
+  let title;
+  let chartConfig;
   // 导出器在脚本运行前注入；从启动阶段就禁止自动播放。
   let exportMode = Boolean(globalThis.__VIDEO_EXPORT_REQUEST__);
   let disposed = false;
@@ -155,21 +154,20 @@
   function loadData() {
     assertOpen();
     if (!dataPromise) dataPromise = (async () => {
-      const [teamsResponse, gamesResponse] = await Promise.all([
-        fetch(TEAMS_DATA_URL, { cache: "no-store", signal: dataController.signal }),
-        fetch(GAMES_DATA_URL, { cache: "no-store", signal: dataController.signal })
-      ]);
-      if (!teamsResponse.ok) throw new Error(`读取 ${TEAMS_DATA_URL} 失败（HTTP ${teamsResponse.status}）`);
-      if (!gamesResponse.ok) throw new Error(`读取 ${GAMES_DATA_URL} 失败（HTTP ${gamesResponse.status}）`);
-      const teamData = TeamData.parseTeamsJson(await teamsResponse.text());
-      const gameData = GameData.parseGamesJson(await gamesResponse.text());
-      const data = limitDataForDebug(TeamData.combineWithGames(teamData, gameData));
+      const month = await MonthData.load({ baseUrl: document.baseURI, signal: dataController.signal });
+      const data = limitDataForDebug(TeamData.combineWithGames(month.teamData, month.gameData));
+      title = { ...APP_CONFIG.title, text: month.chart.title };
+      chartConfig = { ...APP_CONFIG, title, xAxis: { ...APP_CONFIG.xAxis,
+        labels: { ...APP_CONFIG.xAxis.labels, initialText: month.chart.initialText, finalText: month.chart.finalText }
+      } };
+      const heroModule = await loadHeroModule();
+      const hero = heroModule.createHeroPresentation(month.hero, month.heroTeam);
       data.teams.forEach((team, index) => {
         if (!CSS.supports("color", team.color)) throw new Error(`第 ${index + 1} 支队伍的 color“${team.color}”无效`);
       });
       ScoreTimeline.getCycleDuration(animation, data.games.length - 1);
       assertOpen();
-      return data;
+      return { ...data, hero, month: month.month, heroMonth: month.heroMonth };
     })();
     return dataPromise;
   }
@@ -195,8 +193,8 @@
     fitPresentation();
     applyAppearance();
     previousEntranceProgress = null;
+    const data = await loadData();
     applyLayout();
-    const [data, heroModule] = await Promise.all([loadData(), loadHeroModule()]);
     await Promise.all([
       ScoreResources.prepareImage(document.querySelector(".creator-brand__logo"), true),
       ScoreResources.prepareFont(title.text + data.games.map(game => game.info).join("")),
@@ -206,11 +204,11 @@
     const manual = Boolean(options);
     const components = [];
     try {
-      const heroShow = await heroModule.createHeroShow(document.getElementById("heroShow"));
+      const heroShow = await data.hero.createHeroShow(document.getElementById("heroShow"));
       components.push(heroShow);
       assertOpen();
       const chart = ScoreChart.createScoreChart(
-          document.getElementById("scoreChart"), data.teams, data.games, APP_CONFIG,
+          document.getElementById("scoreChart"), data.teams, data.games, chartConfig,
           // 应用级尺寸观察统一重绘所有组件；导出不注册任何尺寸观察回调。
           { manual: true, deviceScaleFactor: options?.deviceScaleFactor }
       );
@@ -288,8 +286,8 @@
   }
 
   async function getManifest() {
-    const [data, heroModule] = await Promise.all([loadData(), loadHeroModule()]);
-    const durationMs = ScoreTimeline.getCycleDuration(animation, data.games.length - 1, heroModule.durationMs);
+    const data = await loadData();
+    const durationMs = ScoreTimeline.getCycleDuration(animation, data.games.length - 1, data.hero.durationMs);
     if (!(durationMs > 0 && durationMs <= 24 * 60 * 60 * 1000)) throw new Error("导出时长必须在 0 到 24 小时之间");
     if (typeof title.text !== "string" || !title.text.trim()) throw new Error("导出名称不能为空");
     // 元数据只加载数据，不创建组件、不依赖 prepare，更不启动播放。

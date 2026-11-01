@@ -7,7 +7,7 @@ const { chromium } = require("playwright");
 
 const root = path.resolve(__dirname, "..");
 const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".png": "image/png", ".jpg": "image/jpeg", ".ttf": "font/ttf", ".svg": "image/svg+xml" };
-const gameCount = JSON.parse(require("node:fs").readFileSync(path.join(root, "data/games.json"), "utf8")).games.length;
+const gameCount = JSON.parse(require("node:fs").readFileSync(path.join(root, "data/months/2026-10/games.json"), "utf8")).games.length;
 const heroTimeScale = 2; // HeroShow plays at half speed, including its display hold.
 const heroDuration = 6417 * heroTimeScale;
 const heroStart = 5000 + 2000 + (gameCount + 1) * 1500 + 400 + 7000;
@@ -191,12 +191,111 @@ test("HeroShow wipes directly over the final overview, displays without UI and r
 });
 
 test("HeroShow required assets fail preparation instead of showing an incomplete close-up", async () => {
-  const page = await openExport(options(), page => page.route("**/assets/hero-show/images/player.png",
+  const page = await openExport(options(), page => page.route("**/data/months/2026-09/assets/portrait.png",
     route => route.fulfill({ status: 404, body: "Missing" })));
   try {
     await assert.rejects(() => prepare(page), /HeroShow|素材|图片/);
     assert.equal(await page.locator("#heroShow").isHidden(), true);
   } finally { await page.close(); }
+});
+
+test("monthly selection updates chart content, opening scores, endpoint labels and export metadata together", async () => {
+  for (const month of ["2026-09", "2026-10"]) {
+    const config = JSON.parse(await readFile(path.join(root, `data/months/${month}/month.json`), "utf8"));
+    const games = JSON.parse(await readFile(path.join(root, `data/months/${month}/games.json`), "utf8"));
+    const page = await openExport(options(), page => page.route("**/data/active-month.json", route =>
+      route.fulfill({ json: { month, availableMonths: ["2026-09", "2026-10"] } })));
+    try {
+      const manifest = await page.evaluate(() => __VIDEO_EXPORT__.getManifest());
+      assert.equal(manifest.name, config.chart.title);
+      assert.equal(manifest.durationMs, 5000 + 2000 + (games.games.length + 1) * 1500 + 400 + 7000 + heroDuration + 3000);
+      await prepare(page);
+      const content = await page.evaluate(async () => {
+        ScoreApplication.renderFrame({ timeMs: 7000, deltaMs: 0 });
+        const source = await MonthData.load({ baseUrl: document.baseURI });
+        const root = document.getElementById("heroShow").shadowRoot;
+        return { title: document.getElementById("dashboardTitleText").textContent,
+          count: document.getElementById("missionGameTotal").textContent,
+          info: document.querySelector(".game-table__title").textContent,
+          scores: Object.fromEntries(source.teamData.teams.map(team => [team.name, team.initialScore])),
+          label: root.getElementById("eyebrow").textContent,
+          portrait: root.getElementById("portrait").src,
+          accent: root.getElementById("stage").style.getPropertyValue("--accent") };
+      });
+      assert.equal(content.title, config.chart.title);
+      assert.equal(Number(content.count), games.games.length);
+      assert.equal(content.info, games.games[0].info);
+      assert.deepEqual(content.scores, config.initialScores);
+      assert.equal(content.label, "九月队伍积分冠军");
+      assert(content.portrait.endsWith("/data/months/2026-09/assets/portrait.png"));
+      assert.equal(content.accent, "#EF92AE");
+      const labels = await page.evaluate(timeMs => {
+        const ctx = document.getElementById("scoreChart").getContext("2d");
+        const text = [];
+        const fill = ctx.fillText;
+        ctx.fillText = function (value, ...args) { text.push(value); return fill.call(this, value, ...args); };
+        ScoreApplication.renderFrame({ timeMs, deltaMs: 0 });
+        return text;
+      }, manifest.durationMs - heroDuration - 3000 - 1);
+      assert(labels.includes(config.chart.initialText));
+      assert(labels.includes(config.chart.finalText));
+      assert.deepEqual(page.pageErrors, []);
+    } finally { await page.close(); }
+  }
+});
+
+test("a newly configured close-up uses its own team, assets, text and derived chart-color fallback", async () => {
+  const config = JSON.parse(await readFile(path.join(root, "data/months/2026-10/month.json"), "utf8"));
+  const september = JSON.parse(await readFile(path.join(root, "data/months/2026-09/month.json"), "utf8"));
+  config.hero = september.hero;
+  config.hero.team = "U-NEXT海盗";
+  config.hero.content.teamName = "U-NEXT海盗";
+  config.hero.content.label = "十月队伍积分冠军";
+  config.hero.content.score = "+123.4";
+  config.hero.assets = { portrait: "../2026-09/assets/portrait.png", logo: "../2026-09/assets/logo.png" };
+  const page = await openExport(options(), page => page.route("**/data/months/2026-10/month.json", route => route.fulfill({ json: config })));
+  try {
+    await prepare(page);
+    const result = await page.evaluate(async () => {
+      const manifest = await __VIDEO_EXPORT__.getManifest();
+      ScoreApplication.renderFrame({ timeMs: manifest.durationMs - 3001, deltaMs: 0 });
+      const root = document.getElementById("heroShow").shadowRoot;
+      const stage = root.getElementById("stage");
+      return { name: root.getElementById("team-name").textContent,
+        score: root.getElementById("score-number").textContent,
+        label: root.getElementById("eyebrow").textContent,
+        accent: getComputedStyle(root.getElementById("eyebrow")).color,
+        panel: getComputedStyle(root.querySelector(".photo-panel")).backgroundImage,
+        glow: stage.style.getPropertyValue("--panelGlow"),
+        first: getComputedStyle(root.querySelector(".metric-accent")).color };
+    });
+    assert.equal(result.name, "U-NEXT海盗");
+    assert.equal(result.score, "+123.4");
+    assert.equal(result.label, "十月队伍积分冠军");
+    assert.equal(result.accent, "rgb(55, 84, 168)");
+    assert.equal(result.first, result.accent);
+    assert.match(result.panel, /color\(srgb/);
+    assert(result.glow.includes("#3754a8"));
+    assert.deepEqual(page.pageErrors, []);
+  } finally { await page.close(); }
+});
+
+test("missing all close-ups and invalid heroColor reject export rather than silently using other content", async () => {
+  for (const invalidColor of [false, true]) {
+    const page = await openExport(options(), async page => {
+      if (invalidColor) {
+        const teams = JSON.parse(await readFile(path.join(root, "data/teams.json"), "utf8"));
+        teams.teams.find(team => team.name === "角川樱花骑士").heroColor = "invalid-color";
+        await page.route("**/data/teams.json", route => route.fulfill({ json: teams }));
+      } else {
+        const september = JSON.parse(await readFile(path.join(root, "data/months/2026-09/month.json"), "utf8"));
+        september.hero = null;
+        await page.route("**/data/months/2026-09/month.json", route => route.fulfill({ json: september }));
+      }
+    });
+    try { await assert.rejects(() => prepare(page), invalidColor ? /heroColor/ : /均未配置特写/); }
+    finally { await page.close(); }
+  }
 });
 
 test("HeroShow wipe covers the shared 16:9 presentation in portrait and 4K viewports", async () => {
@@ -273,18 +372,18 @@ test("1080p screenshots stay fixed across real waits, keyboard input, reset and 
       const shot = await page.screenshot({ animations: "allow" });
       shots.set(index, shot);
       await page.waitForTimeout(index === 630 ? 350 : 35);
-      assert.deepEqual(await page.screenshot({ animations: "allow" }), shot, `frame ${index} moved after return`);
+      assert((await page.screenshot({ animations: "allow" })).equals(shot), `frame ${index} moved after return`);
     }
     await page.keyboard.press("Space");
     await page.waitForTimeout(80);
-    assert.deepEqual(await page.screenshot({ animations: "allow" }), shots.get(3990));
+    assert((await page.screenshot({ animations: "allow" })).equals(shots.get(3990)), "screenshot mismatch at frame 3990");
     await page.evaluate(() => __VIDEO_EXPORT__.reset());
     await advance(page, 0, 0);
-    assert.deepEqual(await page.screenshot({ animations: "allow" }), shots.get(0));
+    assert((await page.screenshot({ animations: "allow" })).equals(shots.get(0)), "screenshot mismatch at frame 0");
     await advance(page, 1, 630); // VideoMaker pre-roll for a segment starting inside a table entrance.
-    assert.deepEqual(await page.screenshot({ animations: "allow" }), shots.get(630));
+    assert((await page.screenshot({ animations: "allow" })).equals(shots.get(630)), "screenshot mismatch at frame 630");
     await advance(page, 631, 3605); // Continue pre-roll to a segment inside the leaderboard reorder.
-    assert.deepEqual(await page.screenshot({ animations: "allow" }), shots.get(3605));
+    assert((await page.screenshot({ animations: "allow" })).equals(shots.get(3605)), "screenshot mismatch at frame 3605");
     assert.deepEqual(page.pageErrors, []);
   } finally { await page.close(); }
 });
@@ -342,7 +441,7 @@ test("prepare settles missing optional images, including later games; no resourc
 });
 
 test("required data failures reject preparation", async () => {
-  for (const pattern of ["**/data/games.json"]) {
+  for (const pattern of ["**/data/months/2026-10/games.json"]) {
     const page = await openExport(options(), page => page.route(pattern, route => route.fulfill({ status: 404, body: "Missing" })));
     try {
       await assert.rejects(() => prepare(page));
@@ -402,7 +501,7 @@ test("zero-duration phases and odd debug game counts retain correct layout and i
 test("dispose cancels data preparation in flight and remains safe to repeat", async () => {
   let resolveRequest;
   const requested = new Promise(resolve => { resolveRequest = resolve; });
-  const page = await openExport(options(), page => page.route("**/data/games.json", route => { resolveRequest(route); }));
+  const page = await openExport(options(), page => page.route("**/data/months/2026-10/games.json", route => { resolveRequest(route); }));
   try {
     const pending = page.evaluate(o => __VIDEO_EXPORT__.prepare(o), options())
         .then(() => null, error => error.message);
@@ -467,7 +566,7 @@ test("simplified NASA-punk panels retain the original title, color portraits and
       await page.goto(baseURL);
       await page.waitForFunction(() => document.querySelector("#dashboard").dataset.phase === "playing");
       assert.equal(await page.locator("#teamLegend, #playbackToggle, .mission-patch, .panel-code, .equipment-label").count(), 0);
-      assert.equal(await page.locator("#dashboardTitleText").textContent(), await page.evaluate(() => APP_CONFIG.title.text));
+      assert.equal(await page.locator("#dashboardTitleText").textContent(), JSON.parse(await readFile(path.join(root, "data/months/2026-10/month.json"), "utf8")).chart.title);
       assert.equal(await page.locator(".game-table__portrait").first().evaluate(node => getComputedStyle(node).filter), "saturate(0.8)");
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), viewport.width);
       assert.equal(await page.locator("body").evaluate(body => getComputedStyle(body).backgroundColor), "rgb(0, 0, 0)");
@@ -577,9 +676,11 @@ test("16:9 layout fits ranking names tightly and aligns full-width progress", as
     try {
       await prepare(page, o);
       const failures = await page.evaluate(async () => {
-        const manifest = await __VIDEO_EXPORT__.getManifest();
         const a = APP_CONFIG.animation;
-        const start = manifest.durationMs - a.restartDelay - a.overviewDuration;
+        const count = Number(document.getElementById("missionGameTotal").textContent);
+        const start = a.backgroundHoldDuration + a.entranceDuration
+            + (count + 1) * a.gameDuration + a.gameTableExitDuration;
+        const scale = Number(document.getElementById("presentation").style.getPropertyValue("--presentation-scale"));
         const times = [
           start + a.overview.teamTableEnterDuration + 1,
           start + a.overview.teamTableEnterDuration + a.overview.initialHoldDuration + a.overview.reorderDuration / 2,
@@ -623,7 +724,7 @@ test("16:9 layout fits ranking names tightly and aligns full-width progress", as
           const range = document.createRange();
           range.selectNodeContents(name);
           const ink = range.getBoundingClientRect().width;
-          return { ink, spare: name.getBoundingClientRect().width - ink };
+          return { ink, spare: (name.getBoundingClientRect().width - ink) / scale };
         }).sort((a, b) => b.ink - a.ink);
         if (names[0].spare > 6) failures.push({ extraNameSpace: names[0].spare });
         const chart = document.querySelector(".chart-instrument").getBoundingClientRect();
@@ -644,11 +745,11 @@ test("16:9 layout fits ranking names tightly and aligns full-width progress", as
 });
 
 test("progress is centered in the frame and ticks adapt to whole-game subdivisions", async () => {
-  const source = JSON.parse(await readFile(path.join(root, "data/games.json"), "utf8"));
+  const source = JSON.parse(await readFile(path.join(root, "data/months/2026-10/games.json"), "utf8"));
   for (const [width, height, count] of [[1920, 1080, 3], [1920, 1080, 32], [1920, 1080, 512], [1280, 720, 3], [1280, 720, 512]]) {
     const o = options(1, width, height);
     const games = Array.from({ length: count }, (_, index) => ({ ...source.games[index % source.games.length], gameId: index }));
-    const page = await openExport(o, page => page.route("**/data/games.json", route =>
+    const page = await openExport(o, page => page.route("**/data/months/2026-10/games.json", route =>
       route.fulfill({ contentType: "application/json", body: JSON.stringify({ games }) })));
     try {
       await prepare(page, o);

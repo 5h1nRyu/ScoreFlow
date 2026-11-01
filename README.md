@@ -1,5 +1,36 @@
 # ScoreFlow
 
+## dev_v7：按月份统一导入内容
+
+修改 `data/active-month.json` 的 `month` 后刷新页面，即可切换月份。当前默认是 `2026-10`：图表显示十月，十月 `hero: null`，特写自动回溯到九月。
+
+```json
+{
+  "month": "2026-10",
+  "availableMonths": ["2026-09", "2026-10"]
+}
+```
+
+`availableMonths` 是已有月份的登记表，顺序任意，不能重复，且必须包含当前月份。添加新月份时，将年月加入此列表，并新增 `data/months/YYYY-MM/`：
+
+- `games.json`：该月比赛，保持现有 GamesEditor JSON 格式，`gameId` 从 0 连续排列。
+- `month.json`：`month` 必须与目录名一致；`chart.title` 是图表及导出的标题，`chart.initialText` / `finalText` 是全景日期端点；`initialScores` 按完整队名保存全部十支队伍的月初积分。
+- `assets/`：该月特写的合影和队标。`hero.assets.portrait` / `logo` 路径相对于该月的 `month.json`，空字符串表示主动隐藏该图片。
+
+月初积分是**独立保存的快照**。九月全部为 0；十月保存九月结束时的累计积分。播放和导出直接使用所选月份的快照，不加载历史比赛推导、不自动修改快照。新月份的分数需提前算好并保存。
+
+`month.json` 的 `hero` 为完整特写内容，包含：
+
+- `team`：对应 `data/teams.json` 中的完整队名，用于获取该队的特征色。
+- `content`：`label`、`teamName`（可用 `\n` 手动换行）、`scoreLabel`、`score`、`unit`、`metricsNote` 和 `metrics`。指标保存 `label`、`value`、`unit`，顺位统计使用 `format: "placements"`；数值使用字符串，原样显示，不自动统计。
+- `assets`：`portrait`、`logo`。完整示例见 `data/months/2026-09/month.json`。
+
+尚未制作特写时，省略 `hero` 或设置 `"hero": null`。程序只在登记表中查找不晚于当前月份的特写，按年月倒序查找，直到找到第一份已配置的内容。文字、指标、队伍、合影、队标及配色整套使用该月配置；例如十月回溯九月，特写标题仍是「九月队伍积分冠军」。图表不随特写回溯。所有更早月份也没有特写时直接报错；配置有误、文件或已配置图片缺失同样报错，不以回溯隐藏错误。
+
+公共队伍资料在 `data/teams.json`，不再包含月初积分。每支队伍可以新增 `heroColor`，作为特写基础色；**省略 `heroColor` 时使用该队的 `color`**。樱花骑士保存了 `heroColor: "#EF92AE"`，延续九月粉色特征。空字符串或非法颜色属于配置错误。
+
+特写布局、字体、动画和中性色仍在 `src/hero-show/show-config.js` 的 `SHOW_DEFAULTS`。`teamColorTransforms` 定义从基础色生成 `accent`、`panel`、`panelLight`、`panelGlow` 的规则：`mix` 为混合目标颜色，`amount` 为混合比例（0–1），`alpha` 为可选不透明度（0–1）。`metricFormats` 保存顺位统计的列数、强调颜色等展示规则。新增月份不需要复制这些公共视觉设置。
+
 ## dev_v6：1600 × 900 排版基准
 
 主界面在固定的 `1600 × 900` CSS 像素画布中排版，再整体等比例缩放至窗口；多余区域保持纯黑。现有字号保持不变，因此同一窗口下主界面文字比原 `1920 × 1080` 基准相对放大约 20%。推荐导出视口同步改为 `1600 × 900`；仍可指定其他输出尺寸。HeroShow 沿用自身设计比例，自动适配共享画布。
@@ -12,7 +43,7 @@
 
 HeroShow 的播放栏、进度条、倍速、章节按钮以及独立播放驱动均未引入。空格暂停、循环和 60fps 视频导出由 ScoreFlow 的同一时间轴控制；导出时长包含新增的特写段（默认 12834ms，转场、入场动画、展示停留及环境动画均按原速度的 0.5 倍播放）和末尾停留。
 
-特写文字、指标、素材和动画时长统一在 `src/hero-show/show-config.js` 修改。当前保留 HeroShow `dev_v4` 的九月冠军内容与原始合影，不从 ScoreFlow 的十月比赛数据自动计算。资源路径相对于该配置文件，所有图片、纹理和字体均随仓库提供；标题字体复用 ScoreFlow 已有的 Noto Sans SC。
+特写文字、指标、合影和队标按月份保存在 `data/months/YYYY-MM/`；公共视觉与动画在 `src/hero-show/show-config.js`。沿用九月冠军内容与原始合影，指标手动配置，不从比赛数据自动计算。所有素材均随仓库提供；标题字体复用 ScoreFlow 已有的 Noto Sans SC。
 
 HeroShow 使用 Shadow DOM 隔离样式；素材在播放/导出前准备完成，循环时不重新加载。动画节点在动态内容生成后收集，保留原版队名逐字错峰入场、底部指标逐项滑入，以及标题、分数、单位、队徽和合影的入场动画；重播及逐帧导出使用同一时间轴。
 
@@ -28,7 +59,7 @@ HeroShow 使用 Shadow DOM 隔离样式；素材在播放/导出前准备完成�
 
 - 暖灰机身（#ECE5D6）、浅色面板、细线接缝与槽口铆钉，搭配轻微矢量划痕。
 - 标题恢复原始赛事文字并靠左，右侧显示上传的创作者 logo 与「豬頭神龍」，统一使用 #D63A2C；logo 保持原图主体比例并去除底色，署名采用 Noto Sans SC 800 字重。移除任务徽章、设备编号、装饰文案和图例。
-- 头像饱和度降至 80%，队标保留原色；队伍代表色直接读取 data/teams.json，不再覆盖配色，所有队伍曲线均为实线，沿用队伍简称与分数标签，原始 teams.json 保留不变。
+- 头像饱和度降至 80%，队标保留原色；队伍代表色直接读取 data/teams.json，不再覆盖配色，所有队伍曲线均为实线，沿用队伍简称与分数标签，月初积分另存到对应月份的配置。
 - 移除回放按钮，空格键仍可暂停、继续整页回放。底部仅保留同排的进度条与比赛场次，进度条在场次左边，高度为 10px，采用嵌入式分段槽，已完成部分与游标统一使用红色，去掉下沿刻度；进度条与数字合计铺满上方两块面板的总宽度，并在图表底边与外框底线之间居中；条内刻度以一场为基础，过密时将刻度数量减半、过疏时加倍，直到间距落在 12–24px；因此每格代表 2 的整数次幂场数，支持半场、四分之一场等细分，已填充和未填充部分共用刻度原点，仅统计比赛回顾区段：开场保持 0，最后一场积分回放完成时达到 100%，之后直到本轮结束始终保持满格，重播时归零；场次只显示数字。导出模式锁定操作。
 - 所有窗口下均保持横向双面板，在固定的 1600 × 900 画布中排版并等比例缩放；推荐视频导出视口为 1600 × 900。
 
@@ -55,10 +86,10 @@ HeroShow 使用 Shadow DOM 隔离样式；素材在播放/导出前准备完成�
 ```text
 durationMs = backgroundHoldDuration + entranceDuration
            + (比赛场数 + 1) × gameDuration
-           + gameTableExitDuration + overviewDuration + restartDelay
+           + gameTableExitDuration + overviewDuration + heroDuration + restartDelay
 ```
 
-以 48 场比赛、5000ms 开场停留和其余默认配置为例，一轮对应 **90900 ms（90.9 秒，5454 帧）**；实际时长以当前配置计算。`debug.finalGameId` 截断数据后，元数据时长同步缩短，最后一组也支持只有一场比赛。
+以 48 场比赛、5000ms 开场停留、12834ms 特写和其余默认配置为例，一轮对应 **103734 ms**；实际时长以当前配置计算。`debug.finalGameId` 截断数据后，元数据时长同步缩短，最后一组也支持只有一场比赛。
 
 `supportsSeeking` 固定为 `false`，因为 Y 轴缩放需要按固定帧间隔逐步平滑。每次 reset 后必须从全局帧 `0` 开始连续提交，`timeMs = index * 1000 / 60`；第 0 帧的 `deltaMs` 为 `0`，后续为 `1000 / 60`。导出中途片段时，由 VideoMaker 先顺序推进全部前置帧，不能把片段首帧重新编号为 0。重复帧、跳帧及不符合协议的帧时间会报错。当前效果不使用随机数，seed 被校验和保存，画面不依赖系统时钟或 `Math.random()`。
 
@@ -96,7 +127,7 @@ npm test
 
 标题区由左对齐的原始赛事标题和右侧创作者署名组成。logo 位于 `assets/images/brand/zhutou-shenlong.svg`，嵌入上传的原图并通过 SVG 滤色保留原始轮廓与边缘，将底色透明化、主体改为 #D63A2C；CSS 仅等比例缩放。后接「豬頭神龍」，采用本地 Noto Sans SC 800 字重，与 logo 的厚实笔画搭配。logo 缩至文字的可见高度并与文字下边沿对齐；logo 直接替代原来的 @，紧接「豬頭神龍」组成署名；下方放置与整组署名等宽的 #D63A2C 实心矩形装饰条。署名字体和 logo 均在导出准备阶段等待就绪。大标题的英文和数字使用 [Roboto Condensed](https://github.com/google/fonts/blob/main/ofl/robotocondensed/METADATA.pb)，中文使用 [Noto Sans SC](https://github.com/google/fonts/blob/main/ofl/notosanssc/METADATA.pb)。两套本地可变字体都支持 100–900 字重，900 对应真实 Black，中文不再依赖系统等线的 700 字重。整行水平缩至 86%，保留窄长的航天仪表字形。字体随项目附带 SIL OFL 许可证，运行和导出不需要联网；准备阶段等待中西文字体全部就绪。图表队名和表格队名统一使用 Arial / Helvetica Neue / Microsoft YaHei；图表分数、坐标轴和表格分数统一使用 Cascadia Mono / Consolas 等宽字体，默认采用 700 字重。队伍名次使用 Roboto Condensed 900 字重，默认字号增至 26px。右下角场次文字保持加粗，仅当前场数使用 #D63A2C，斜杠和总场数使用原始墨色。可在 `title` 中调整：
 
-- `text`：标题文字。
+- 标题文字由当月 `month.json` 的 `chart.title` 提供。
 - `fontSize`：标题字号，单位为 CSS 像素，当前为 `64`；桌面和手机都直接采用该值，不再被 vw 或固定上限覆盖。
 - `fontWeight`：标题字重，支持 `100` 到 `900`，当前为 `900`；与字号、水平窄化比例独立。
 
@@ -116,7 +147,9 @@ npm test
 | 用途 | 固定路径 |
 | --- | --- |
 | 队伍数据 | `data/teams.json` |
-| 比赛数据 | `data/games.json` |
+| 比赛数据 | `data/months/YYYY-MM/games.json` |
+| 当前月份 | `data/active-month.json` |
+| 月度内容与月初积分 | `data/months/YYYY-MM/month.json` |
 | 选手头像 | `assets/images/players` |
 | 队伍排行榜队标 | `assets/images/icons` |
 
@@ -142,9 +175,9 @@ X 轴的日期标签和 Y 轴的积分刻度文字可分别配置。`xAxis.label
 - `showInOverview`：全景展开和全景停留阶段是否显示该轴的文字标签。
 - `fontSize`：该轴文字标签的字号，单位为 CSS 像素。
 
-普通播放时，X 轴在有 `labelx` 的 game 的分数变化起点显示该字符串，即绘制在 `game - 1` 坐标（例如 game0 的标签位于初始积分坐标 -1），没有此属性的 game 不显示文字；位置仍按比赛间隔计算，不按日期间隔缩放。`data/games.json` 中按 `info` 的日期为每天第一场比赛添加 `labelx`（例如 `"9/14"`），同一天的后续比赛不添加。数据解析层保留并校验这个可选的非空字符串，图表直接读取它；后续追加数据时按同样规则填写。
+普通播放时，X 轴在有 `labelx` 的 game 的分数变化起点显示该字符串，即绘制在 `game - 1` 坐标（例如 game0 的标签位于初始积分坐标 -1），没有此属性的 game 不显示文字；位置仍按比赛间隔计算，不按日期间隔缩放。`data/months/YYYY-MM/games.json` 中按 `info` 的日期为每天第一场比赛添加 `labelx`（例如 `"9/14"`），同一天的后续比赛不添加。数据解析层保留并校验这个可选的非空字符串，图表直接读取它；后续追加数据时按同样规则填写。
 
-`xAxis.labels.initialText` 设置初始积分（`game -1`）处的文字，默认 `"9/13"`，常规阶段不显示。`xAxis.labels.finalText` 设置全景阶段最后一场 game 处的文字，默认 `"9/30"`。从进入 `overview` 开始，经过全景各阶段和 `restart-hold`，只显示这两个端点文字，不显示中间日期；端点不前移，随坐标移动，处于视窗外时不绘制。下一轮开始时恢复普通日期标签并隐藏 `initialText`。启用 `debug.finalGameId` 时，右端点为实际演示的最后一场 game，文字仍使用配置值。
+当月 `month.json` 的 `chart.initialText` 设置初始积分（`game -1`）处的文字，九月为 `"9/13"`，常规阶段不显示。`chart.finalText` 设置全景阶段最后一场 game 处的文字，九月为 `"9/30"`。从进入 `overview` 开始，经过全景各阶段和 `restart-hold`，只显示这两个端点文字，不显示中间日期；端点不前移，随坐标移动，处于视窗外时不绘制。下一轮开始时恢复普通日期标签并隐藏 `initialText`。启用 `debug.finalGameId` 时，右端点为实际演示的最后一场 game，文字仍使用配置值。
 
 标签开关只控制刻度文字，不会隐藏坐标刻度线或网格线，也不会影响由 `labels.enabled` 控制的折线末端队伍简称。
 
@@ -159,8 +192,13 @@ ScoreFlow/
 │       ├── players/                # 以选手 name 命名的 PNG 头像
 │       └── teams/                  # 以 team 命名的 PNG 队标
 ├── data/
-│   ├── games.json                  # 按顺序存储的单个 game 选手详情与得分
-│   └── teams.json                  # 队伍属性、初始积分和队员名单
+│   ├── active-month.json           # 当前月份与已登记月份
+│   ├── teams.json                  # 公共队伍属性、队员名单及可选 heroColor
+│   └── months/
+│       └── YYYY-MM/
+│           ├── month.json         # 图表文字、月初积分和特写内容
+│           ├── games.json         # 当月比赛
+│           └── assets/            # 当月特写合影和队标
 ├── src/
 │   ├── components/
 │   │   ├── game-table.js           # 比赛详情表及逐项切换动画
@@ -173,6 +211,7 @@ ScoreFlow/
 │   │   ├── resources.js            # 字体及图片准备、缺图处理
 │   │   └── video-export.js         # VideoMaker v1 接口及生命周期校验
 │   ├── data/
+│   │   ├── month-data.js           # 月度内容加载与特写回溯
 │   │   ├── game-data.js            # game JSON 校验与转换
 │   │   └── team-data.js            # 队伍 JSON 校验、归属关联和积分累计
 │   └── app.js                      # 应用入口与模块装配
@@ -189,27 +228,27 @@ ScoreFlow/
 项目采用无构建工具的浏览器端分层结构，各脚本按依赖顺序由 `index.html` 加载：
 
 1. **配置层**：`src/config/config.js` 创建只读的 `APP_CONFIG`，集中提供布局比例、动画速度、背景和图表参数
-2. **数据层**：`src/data/team-data.js` 和 `src/data/game-data.js` 校验两份 JSON，根据队员名关联队伍，并按 game 累加队伍积分
+2. **数据层**：`src/data/month-data.js` 加载所选月份的内容并回溯特写；`team-data.js` 和 `game-data.js` 校验月初积分快照及队伍、比赛资料，根据队员名关联队伍，并按 game 累加队伍积分
 3. **时间轴层**：`src/core/timeline.js` 根据配置按 game 计算播放头、帧间隔和循环状态，通过订阅机制向组件广播统一状态
 4. **组件层**：`src/components/score-chart.js` 负责 Canvas 尺寸适配、坐标映射、曲线插值、标签避让和逐帧绘制
-5. **装配层**：`src/app.js` 应用布局配置，加载两份 JSON，创建时间轴和图表并连接订阅关系，同时集中处理初始化错误
+5. **装配层**：`src/app.js` 应用布局配置，加载月度内容，创建时间轴、图表及特写并连接订阅关系，同时集中处理初始化错误
 
 核心数据流如下：
 
 ```text
-APP_CONFIG ──> 应用入口 ──> 页面布局
-                    │
-teams.json ──┐
-             ├──> 数据校验与关联 ──> 队伍时间序列 ──> 积分图表
-games.json ──┘             │                          ↑
-                           └──> 公共时间轴 ───────────┘
+active-month.json → 月份选择
+  ├─ 当月 month.json + games.json + teams.json → 积分图表与队伍排名
+  └─ 当月特写（缺省向前回溯）+ 队伍特征色 → HeroShow
+
+APP_CONFIG / SHOW_DEFAULTS → 公共布局与动画
+公共时间轴 → 同步驱动图表、表格与特写
 ```
 
 模块通过 `globalThis` 暴露只读入口，避免跨层访问内部状态。时间轴只发布状态而不负责绘图，因此后续组件可以订阅同一时间轴，与积分图表保持同步。
 
 ## 比赛详情表
 
-右上区域的 `game-table` 从 `data/games.json` 读取按 `gameId` 连续排列的 game 数据，并使用每个 game 的 `info` 字符串作为表头。详情表与折线图订阅同一条公共时间轴：积分图每个 game 更新一次，详情表则将相邻的两个 game 组成一组，每两个 game 更新一次。切换时，旧的八个条目按照两个 game 各自从上到下的顺序向左滑出，新条目随后从右滑入。时间轴进入 `game-table-exit` 后比赛详情开始退场，随后进入 `overview` 才显示 `team-table` 容器；循环重启时先隐藏并重置表格，待开场完成后再从右侧进入前两个 game。
+右上区域的 `game-table` 从 `data/months/YYYY-MM/games.json` 读取按 `gameId` 连续排列的 game 数据，并使用每个 game 的 `info` 字符串作为表头。详情表与折线图订阅同一条公共时间轴：积分图每个 game 更新一次，详情表则将相邻的两个 game 组成一组，每两个 game 更新一次。切换时，旧的八个条目按照两个 game 各自从上到下的顺序向左滑出，新条目随后从右滑入。时间轴进入 `game-table-exit` 后比赛详情开始退场，随后进入 `overview` 才显示 `team-table` 容器；循环重启时先隐藏并重置表格，待开场完成后再从右侧进入前两个 game。
 
 每轮新增的 `game -1` 到 `game0` 折线动画不会延后比赛详情：`game-table` 的内容及换组动画相对公共播放头前移一个 `gameDuration`。该偏移不影响总览切换，最后一组比赛仍会额外展示一个 `gameDuration`，再经过独立的比赛表退场阶段，才进入 `overview` 并切换到 `team-table`。
 
@@ -241,7 +280,7 @@ games.json ──┘             │                          ↑
 
 ## 数据文件
 
-队伍基础信息从 `data/teams.json` 读取。文件固定包含 10 支队伍，每支队伍包含唯一的队伍名、折线标签简称、折线颜色、初始分数和 4 名队员：
+队伍基础信息从 `data/teams.json` 读取。文件固定包含 10 支队伍，每支队伍包含唯一的队伍名、折线标签简称、折线颜色和 4 名队员，可选 `heroColor` 作为特写基础色；初始积分在对应月份的 `initialScores` 中保存：
 
 ```json
 {
@@ -250,20 +289,20 @@ games.json ──┘             │                          ↑
       "name": "team01",
       "shortName": "T01",
       "color": "#cf3f27",
-      "initialScore": 0,
+      "heroColor": "#EF92AE",
       "players": ["player01", "player02", "player03", "player04"]
     }
   ]
 }
 ```
 
-`data/games.json` 中每名选手只保存 `name`、`score` 和 `teamPoint`。`gameId` 必须从 0 开始连续排列，每个 game 必须恰好有 4 名来自不同队伍的选手，允许部分选手从未出场；未出场选手不会产生积分变化。
+`data/months/YYYY-MM/games.json` 中每名选手只保存 `name`、`score` 和 `teamPoint`。`gameId` 必须从 0 开始连续排列，每个 game 必须恰好有 4 名来自不同队伍的选手，允许部分选手从未出场；未出场选手不会产生积分变化。
 
 将 `debug.showLayoutBorders` 设为 `true` 可显示布局调试边框，默认为 `false`。红色标识主要区域，蓝色标识标题槽位、画布与表格容器，绿色标识表格分组、标题和列表，橙色标识条目，紫色标识内容列。边框不改变布局尺寸；隐藏但仍占位的排名变化列也会显示轮廓，文字保持隐藏。修改配置后刷新页面生效。
 
 调试时可将 `debug.finalGameId` 设为大于 `0` 且小于 game 总场数的整数 `x`，页面将只演示 `game0` 到 `gamex`（包含 `gamex`），并据此计算最终积分和排名。默认值 `-1` 表示使用完整数据。
 
-积分时间序列从各队的 `initialScore` 开始计算。每场比赛结束时，程序根据选手名找到 `teams.json` 中的所属队伍，将该选手的 `teamPoint` 累加到队伍当前分数；没有选手出场的队伍保持原分数。同一场中每支队伍至多有一名选手。图表使用 `x = -1` 完整显示纯初始分数，并在每轮开场结束后的第一个 `gameDuration` 内过渡到 `x = 0` 的“初始分数 + game0 的 teamPoint”。最后一个 game 播放完并停留数秒后，图表会重新播放。
+积分时间序列从所选月份 `month.json` 的 `initialScores` 快照开始计算，内部合并为各队的 `initialScore`。每场比赛结束时，程序根据选手名找到 `teams.json` 中的所属队伍，将该选手的 `teamPoint` 累加到队伍当前分数；没有选手出场的队伍保持原分数。同一场中每支队伍至多有一名选手。图表使用 `x = -1` 完整显示纯初始分数，并在每轮开场结束后的第一个 `gameDuration` 内过渡到 `x = 0` 的“初始分数 + game0 的 teamPoint”。最后一个 game 播放完并停留数秒后，图表会重新播放。
 
 ## 循环结束动画
 
@@ -289,7 +328,7 @@ games.json ──┘             │                          ↑
 ## 队伍总分排名
 
 进入全景阶段后，右上区域依次展示 10 支队伍的初始排名和最终排名。初始排名直接使用
-`teams.json` 的 `initialScore`，不包含 `game0`；重排时分数平滑变化至最后一场结束后的累计分数，
+所选月份 `month.json` 的 `initialScores`，不包含 `game0`；重排时分数平滑变化至最后一场结束后的累计分数，
 条目同步上下交换。分数相同的队伍采用竞赛排名（例如 `1、2、2、4`），同分时保持数据文件中的
 原始先后顺序。每组并列队伍只有第一支显示数字排名，后续队伍以 `-` 表示并列。
 

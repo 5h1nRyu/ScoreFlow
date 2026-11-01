@@ -25,7 +25,6 @@ const APP_CONFIG = Object.freeze({
   }),
 
   title: Object.freeze({
-    text: "M.LEAGUE 2026-2027赛季 10月 队伍积分演变",
     fontSize: 60,
     // 中西文可变字体均支持 100–900；900 使用真实 Black 字重，字号按 CSS 像素直接生效。
     fontWeight: 900
@@ -128,13 +127,10 @@ const APP_CONFIG = Object.freeze({
 
   xAxis: Object.freeze({
     labels: Object.freeze({
+      // 首尾日期文字由所选月份的 month.json 提供。
       showInNormal: true,
       showInOverview: true,
-      fontSize: 18,
-      // 初始积分（game -1）处的文字，仅从全景开始显示到本轮结束
-      initialText: "10/1",
-      // 从全景开始到本轮结束，最后一场 game 处显示的文字
-      finalText: "10/31"
+      fontSize: 18
     }),
     // 全景阶段期望显示的竖直网格线数量；间隔保持到下一轮开始
     overviewTargetGridLineCount: 12,

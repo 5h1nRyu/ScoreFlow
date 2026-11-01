@@ -1,0 +1,58 @@
+{
+  "month": "2026-09",
+  "chart": {
+    "title": "M.LEAGUE 2026-2027赛季 9月 队伍积分演变",
+    "initialText": "9/13",
+    "finalText": "9/30"
+  },
+  "initialScores": {
+    "EX风林火山": 0,
+    "科乐美麻将格斗俱乐部": 0,
+    "雷电": 0,
+    "野兽X": 0,
+    "世嘉飒美凤凰": 0,
+    "赤坂驱动力": 0,
+    "涩谷ABEMAS": 0,
+    "U-NEXT海盗": 0,
+    "角川樱花骑士": 0,
+    "地球喷射机": 0
+  },
+  "hero": {
+    "team": "角川樱花骑士",
+    "content": {
+      "label": "九月队伍积分冠军",
+      "teamName": "角川樱花骑士",
+      "scoreLabel": "月间队伍得分",
+      "score": "+197.2",
+      "unit": "PT",
+      "metricsNote": "",
+      "metrics": [
+        {
+          "label": "月间顺位统计",
+          "value": "6-2-2-2",
+          "unit": "",
+          "format": "placements"
+        },
+        {
+          "label": "平均顺位",
+          "value": "2.00",
+          "unit": ""
+        },
+        {
+          "label": "一位率",
+          "value": "50.00%",
+          "unit": ""
+        },
+        {
+          "label": "避四率",
+          "value": "83.33%",
+          "unit": ""
+        }
+      ]
+    },
+    "assets": {
+      "portrait": "assets/portrait.png",
+      "logo": "assets/logo.png"
+    }
+  }
+}

@@ -1,27 +1,6 @@
-// 复用入口：文字、数据、素材路径和视觉设置都在这里修改。
-// 素材路径相对于当前 show-config.js 文件；数值字符串会原样展示，不自动计算或补单位。
-export const SHOW_CONFIG = {
-  content: {
-    label: "九月队伍积分冠军",
-    teamName: "角川樱花骑士", // 支持 \n 手动换行；不换行时使用 layout.nameBreakAfter。
-    scoreLabel: "月间队伍得分",
-    score: "+197.2",
-    unit: "PT",
-    metricsNote: "", // 留空隐藏说明。
-    metrics: [
-      {
-        label: "月间顺位统计", value: "6-2-2-2", unit: "",
-        format: "placements", columns: 2, spacing: 0.5,
-        colors: { first: "accent" },
-      },
-      { label: "平均顺位", value: "2.00", unit: "" },
-      { label: "一位率", value: "50.00%", unit: "" },
-      { label: "避四率", value: "83.33%", unit: "" },
-    ],
-  },
+// 公共视觉设置：月度文字、指标数值、合影和队标在 data/months/<年月>/month.json。
+export const SHOW_DEFAULTS = {
   assets: {
-    portrait: "../../assets/hero-show/images/player.png", // 留空隐藏合影。
-    logo: "../../assets/hero-show/images/team-logo.png", // 留空隐藏队徽。
     background: "../../assets/hero-show/images/instrument-grid.svg", // 留空隐藏纹理。
     grain: "../../assets/hero-show/images/grain.svg",
     fonts: {
@@ -44,10 +23,19 @@ export const SHOW_CONFIG = {
     portrait: { x: 0, y: 0, scale: 1, origin: "50% 50%" },
     logoScale: 0.84,
   },
+  // 以队伍 heroColor（缺省使用 color）为基础，与目标色按比例混合。
+  teamColorTransforms: {
+    accent: { mix: "#FFFFFF", amount: 0 },
+    panel: { mix: "#FFFFFF", amount: 0.32 },
+    panelLight: { mix: "#FFFFFF", amount: 0.58 },
+    panelGlow: { mix: "#FFFFFF", amount: 0, alpha: 0.467 },
+  },
+  metricFormats: {
+    placements: { columns: 2, colors: { first: "accent" } },
+  },
   theme: {
-    paper: "#ECE5D6", ink: "#191919", panel: "#F0B6CC",
-    panelLight: "#F5D3DF", panelGlow: "#EF92AE77",
-    accent: "#EF92AE", scoreCaption: "#000000",
+    paper: "#ECE5D6", ink: "#191919",
+    scoreCaption: "#000000",
     data: "#201E1C", dataInk: "#FFFFFF", dataMuted: "#BDB2AA",
     bridgeStart: "#E9E0D3", bridgeMiddle: "#F0E8DC", bridgeEnd: "#ECE3D6",
   },

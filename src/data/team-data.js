@@ -7,7 +7,7 @@
     }
   }
 
-  function parseTeamsJson(text) {
+  function parseTeamsJson(text, initialScores) {
     let source;
     try {
       source = JSON.parse(text);
@@ -18,6 +18,9 @@
       throw new Error("队伍数据必须恰好包含 10 支队伍");
     }
 
+    if (!initialScores || typeof initialScores !== "object" || Array.isArray(initialScores)) {
+      throw new Error("必须提供所选月份的 initialScores 月初积分快照");
+    }
     const teamNames = new Set();
     const playerTeams = new Map();
     const teams = source.teams.map((team, teamIndex) => {
@@ -30,9 +33,10 @@
       );
       if (teamNames.has(team.name)) throw new Error(`${path}.name“${team.name}”重复`);
       teamNames.add(team.name);
-      if (!Number.isFinite(team.initialScore)) {
-        throw new Error(`${path}.initialScore 必须是有限数字`);
+      if (!Object.hasOwn(initialScores, team.name) || !Number.isFinite(initialScores[team.name])) {
+        throw new Error(`initialScores.${team.name} 必须是已保存的有限数字`);
       }
+      if (team.heroColor !== undefined) assertNonEmptyString(team.heroColor, `${path}.heroColor`);
       if (!Array.isArray(team.players) || team.players.length !== 4) {
         throw new Error(`${path}.players 必须恰好包含 4 名选手`);
       }
@@ -49,11 +53,15 @@
         name: team.name,
         shortName: team.shortName,
         color: team.color,
-        initialScore: team.initialScore,
+        initialScore: initialScores[team.name],
+        ...(team.heroColor !== undefined ? { heroColor: team.heroColor } : {}),
         players: Object.freeze(players)
       });
     });
 
+    for (const name of Object.keys(initialScores)) {
+      if (!teamNames.has(name)) throw new Error(`initialScores 包含未知队伍“${name}”`);
+    }
     return Object.freeze({
       teams: Object.freeze(teams),
       playerTeams

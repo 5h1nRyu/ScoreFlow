@@ -21,7 +21,7 @@ before(async () => {
   });
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   baseURL = "http://127.0.0.1:" + server.address().port;
-  browser = await chromium.launch({ args: ["--no-sandbox", "--disable-gpu"] });
+  browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined, args: ["--no-sandbox", "--disable-gpu"] });
 });
 after(async () => {
   await browser?.close();
