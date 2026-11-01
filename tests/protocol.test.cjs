@@ -69,6 +69,10 @@ async function openExport(o = options(), modify) {
       constructor(callback) { super(callback); scheduledWork.observers++; }
     };
   }, o);
+  // 除明确覆盖的测试外，使用十月未配置特写、向九月回溯的固定场景。
+  const october = JSON.parse(await readFile(path.join(root, "data/months/2026-10/month.json"), "utf8"));
+  october.hero = null;
+  await page.route("**/data/months/2026-10/month.json", route => route.fulfill({ json: october }));
   if (modify) await modify(page);
   await page.goto(baseURL);
   await page.waitForFunction(() => window.__VIDEO_EXPORT__);
@@ -92,6 +96,44 @@ async function advance(page, from, to) {
     }, { from: start, to: Math.min(to, start + 19) });
   }
 }
+
+test("brandColor recolors the logo, signature and replay progress together", async () => {
+  for (const brandColor of ["#D63A2C", "#2864A0", "invalid-brand-color"]) {
+    const page = await openExport(options(), async page => {
+      await page.route("**/src/config/config.js", async route => {
+        const response = await route.fetch();
+        await route.fulfill({ response, body: (await response.text()).replace(/brandColor:\s*"[^"]*"/, `brandColor: "${brandColor}"`) });
+      });
+    });
+    try {
+      if (brandColor === "invalid-brand-color") {
+        await assert.rejects(() => prepare(page), /brandColor.*无效/);
+        continue;
+      }
+      await prepare(page);
+      const colors = await page.evaluate(() => {
+        const mark = document.querySelector(".creator-brand__mark");
+        const bar = document.querySelector(".mission-progress span");
+        return {
+          logo: getComputedStyle(mark).backgroundColor,
+          mask: getComputedStyle(mark).maskImage,
+          text: getComputedStyle(document.querySelector(".creator-brand__name")).color,
+          stripe: getComputedStyle(document.querySelector(".creator-brand"), "::after").backgroundColor,
+          progress: getComputedStyle(bar).backgroundImage,
+          cursor: getComputedStyle(bar, "::after").backgroundColor,
+          count: getComputedStyle(document.getElementById("missionGameCurrent")).color,
+          errorBorder: getComputedStyle(document.getElementById("dataError")).borderTopColor,
+        };
+      });
+      const expected = brandColor === "#D63A2C" ? "rgb(214, 58, 44)" : "rgb(40, 100, 160)";
+      for (const key of ["logo", "text", "stripe", "cursor", "count"]) assert.equal(colors[key], expected, key);
+      assert(colors.progress.includes(expected));
+      assert(colors.mask.includes("zhutou-shenlong.svg"));
+      assert.equal(colors.errorBorder, "rgb(214, 58, 44)");
+      assert.deepEqual(page.pageErrors, []);
+    } finally { await page.close(); }
+  }
+});
 
 test("metadata works before prepare; export startup schedules no playback; metadata-only disposal is safe", async () => {
   const page = await openExport();
@@ -249,7 +291,7 @@ test("a newly configured close-up uses its own team, assets, text and derived ch
   const september = JSON.parse(await readFile(path.join(root, "data/months/2026-09/month.json"), "utf8"));
   config.hero = september.hero;
   config.hero.team = "U-NEXT海盗";
-  config.hero.content.teamName = "U-NEXT海盗";
+  config.hero.content.teamName = ["U-NEXT", "海盗"];
   config.hero.content.label = "十月队伍积分冠军";
   config.hero.content.score = "+123.4";
   config.hero.assets = { portrait: "../2026-09/assets/portrait.png", logo: "../2026-09/assets/logo.png" };
@@ -273,7 +315,7 @@ test("a newly configured close-up uses its own team, assets, text and derived ch
     assert.equal(result.score, "+123.4");
     assert.equal(result.label, "十月队伍积分冠军");
     assert.equal(result.accent, "rgb(55, 84, 168)");
-    assert.equal(result.first, result.accent);
+    assert.equal(result.first, "rgb(255, 255, 255)");
     assert.match(result.panel, /color\(srgb/);
     assert(result.glow.includes("#3754a8"));
     assert.deepEqual(page.pageErrors, []);

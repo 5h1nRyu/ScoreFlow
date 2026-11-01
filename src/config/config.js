@@ -13,6 +13,8 @@ const APP_CONFIG = Object.freeze({
   // NASA-punk 机身底色；旧纸张背景仍可通过开关启用。
   useBackgroundImage: false,
   backgroundColor: "#ECE5D6",
+  // 图表阶段的创作者 logo、署名、装饰条、进度条及当前场次数共用颜色。
+  brandColor: "#D63A2C",
 
   layout: Object.freeze({
     // 页面外围留白分别相对于视口宽度和高度计算

@@ -2,7 +2,7 @@
 
 ## dev_v7：按月份统一导入内容
 
-修改 `data/active-month.json` 的 `month` 后刷新页面，即可切换月份。当前默认是 `2026-10`：图表显示十月，十月 `hero: null`，特写自动回溯到九月。
+修改 `data/active-month.json` 的 `month` 后刷新页面，即可切换月份。当前默认是 `2026-10`：图表和特写均使用十月配置；未配置特写的月份会自动向前回溯。
 
 ```json
 {
@@ -22,7 +22,7 @@
 `month.json` 的 `hero` 为完整特写内容，包含：
 
 - `team`：对应 `data/teams.json` 中的完整队名，用于获取该队的特征色。
-- `content`：`label`、`teamName`（可用 `\n` 手动换行）、`scoreLabel`、`score`、`unit`、`metricsNote` 和 `metrics`。指标保存 `label`、`value`、`unit`，顺位统计使用 `format: "placements"`；数值使用字符串，原样显示，不自动统计。
+- `content`：`label`、`teamName`（两项非空字符串数组，分别指定第一行和第二行，例如 `["科乐美麻将", "格斗俱乐部"]`）、`scoreLabel`、`score`、`unit`、`metricsNote` 和 `metrics`。队名不再自动断行。指标保存 `label`、`value`、`unit`，顺位统计使用 `format: "placements"`；数值使用字符串，原样显示，不自动统计。顺位统计的间距只分配在短横线两侧，`10` 等多位数字内部保持紧排。
 - `assets`：`portrait`、`logo`。完整示例见 `data/months/2026-09/month.json`。
 
 尚未制作特写时，省略 `hero` 或设置 `"hero": null`。程序只在登记表中查找不晚于当前月份的特写，按年月倒序查找，直到找到第一份已配置的内容。文字、指标、队伍、合影、队标及配色整套使用该月配置；例如十月回溯九月，特写标题仍是「九月队伍积分冠军」。图表不随特写回溯。所有更早月份也没有特写时直接报错；配置有误、文件或已配置图片缺失同样报错，不以回溯隐藏错误。
@@ -114,6 +114,8 @@ npm test
 
 在 `src/config/config.js` 中通过 `useBackgroundImage` 切换整页背景，默认 `false`：开启时使用固定图片 `assets/images/background/paper.jpg`，等比例居中铺满、不重复，允许裁切；关闭时使用 `backgroundColor` 指定的暖灰机身底色（默认 `#ECE5D6`），两个仪表面板使用独立浅色底板。轻微磨损由固定矢量图案绘制，不依赖随机数；图片加载失败时也会露出该纯色底色。
 
+图表阶段的共用强调色通过 `src/config/config.js` 中的 `brandColor` 配置，默认 `"#D63A2C"`。修改后刷新页面，会同步更新右上角 logo、署名文字、署名下方装饰条，以及下方进度条（填充与游标）和当前场次数。支持合法 CSS 颜色；无效颜色会报错。
+
 页面使用统一背景的纵向布局，顶部留白、主标题区、图表区和底部留白从上到下紧凑排列；图表区内的折线图和数据表从左到右排列，两者之间保留由 CSS 控制的间距，该间距包含在折线图区分配的宽度内。可在 `src/config/config.js` 的 `layout` 中调整：
 
 - `pageMargin.horizontal`：页面左右两侧的外围留白。
@@ -125,7 +127,7 @@ npm test
 
 比赛表退场后，队伍表开始进场；切换与重播过程中，数据表和折线图区均保持固定宽度。
 
-标题区由左对齐的原始赛事标题和右侧创作者署名组成。logo 位于 `assets/images/brand/zhutou-shenlong.svg`，嵌入上传的原图并通过 SVG 滤色保留原始轮廓与边缘，将底色透明化、主体改为 #D63A2C；CSS 仅等比例缩放。后接「豬頭神龍」，采用本地 Noto Sans SC 800 字重，与 logo 的厚实笔画搭配。logo 缩至文字的可见高度并与文字下边沿对齐；logo 直接替代原来的 @，紧接「豬頭神龍」组成署名；下方放置与整组署名等宽的 #D63A2C 实心矩形装饰条。署名字体和 logo 均在导出准备阶段等待就绪。大标题的英文和数字使用 [Roboto Condensed](https://github.com/google/fonts/blob/main/ofl/robotocondensed/METADATA.pb)，中文使用 [Noto Sans SC](https://github.com/google/fonts/blob/main/ofl/notosanssc/METADATA.pb)。两套本地可变字体都支持 100–900 字重，900 对应真实 Black，中文不再依赖系统等线的 700 字重。整行水平缩至 86%，保留窄长的航天仪表字形。字体随项目附带 SIL OFL 许可证，运行和导出不需要联网；准备阶段等待中西文字体全部就绪。图表队名和表格队名统一使用 Arial / Helvetica Neue / Microsoft YaHei；图表分数、坐标轴和表格分数统一使用 Cascadia Mono / Consolas 等宽字体，默认采用 700 字重。队伍名次使用 Roboto Condensed 900 字重，默认字号增至 26px。右下角场次文字保持加粗，仅当前场数使用 #D63A2C，斜杠和总场数使用原始墨色。可在 `title` 中调整：
+标题区由左对齐的原始赛事标题和右侧创作者署名组成。logo 位于 `assets/images/brand/zhutou-shenlong.svg`，嵌入上传的原图并通过 SVG 滤色保留原始轮廓与边缘，将底色透明化；页面以原素材的透明轮廓为遮罩，按 `brandColor` 着色并等比例缩放。后接「豬頭神龍」，采用本地 Noto Sans SC 800 字重，与 logo 的厚实笔画搭配。logo 缩至文字的可见高度并与文字下边沿对齐；logo 直接替代原来的 @，紧接「豬頭神龍」组成署名；下方放置与整组署名等宽、使用相同品牌色的实心矩形装饰条。署名字体和 logo 均在导出准备阶段等待就绪。大标题的英文和数字使用 [Roboto Condensed](https://github.com/google/fonts/blob/main/ofl/robotocondensed/METADATA.pb)，中文使用 [Noto Sans SC](https://github.com/google/fonts/blob/main/ofl/notosanssc/METADATA.pb)。两套本地可变字体都支持 100–900 字重，900 对应真实 Black，中文不再依赖系统等线的 700 字重。整行水平缩至 86%，保留窄长的航天仪表字形。字体随项目附带 SIL OFL 许可证，运行和导出不需要联网；准备阶段等待中西文字体全部就绪。图表队名和表格队名统一使用 Arial / Helvetica Neue / Microsoft YaHei；图表分数、坐标轴和表格分数统一使用 Cascadia Mono / Consolas 等宽字体，默认采用 700 字重。队伍名次使用 Roboto Condensed 900 字重，默认字号增至 26px。右下角场次文字保持加粗，仅当前场数使用 `brandColor`，斜杠和总场数使用原始墨色。可在 `title` 中调整：
 
 - 标题文字由当月 `month.json` 的 `chart.title` 提供。
 - `fontSize`：标题字号，单位为 CSS 像素，当前为 `64`；桌面和手机都直接采用该值，不再被 vw 或固定上限覆盖。

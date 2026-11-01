@@ -9,6 +9,10 @@ const baseUrl = "https://example.test/ScoreFlow/";
 const file = relative => JSON.parse(fs.readFileSync(path.join(root, relative), "utf8"));
 
 function fixture(overrides = {}) {
+  // 回溯测试明确使用未配置十月特写的场景，不依赖当前月是否已制作完成。
+  const unconfiguredOctober = file("data/months/2026-10/month.json");
+  unconfiguredOctober.hero = null;
+  overrides = { "data/months/2026-10/month.json": unconfiguredOctober, ...overrides };
   const requests = [];
   const context = vm.createContext({ URL, structuredClone });
   for (const name of ["team-data", "game-data", "month-data"]) {
@@ -70,6 +74,7 @@ test("a configured October close-up is preferred and all month-relative assets r
 test("fallback skips several unconfigured months in chronological order regardless of registry order", async () => {
   const november = file("data/months/2026-10/month.json");
   november.month = "2026-11";
+  november.hero = null;
   const { load, requests } = fixture({
     "data/active-month.json": { month: "2026-11", availableMonths: ["2026-10", "2026-09", "2026-11", "2026-12"] },
     "data/months/2026-11/month.json": november,
@@ -119,4 +124,16 @@ test("heroColor overrides chart color; omitted heroColor uses chart color and sh
   assert.equal(blue.paper, pink.paper);
   assert.throws(() => make({ color: "#3754a8", heroColor: "" }), /heroColor/);
   assert.throws(() => createTeamTheme({}, { color: "#3754a8" }, { panel: { amount: 2, mix: "#FFF" } }), /变换/);
+});
+
+test("team-name lines are independently configured and malformed line arrays are rejected", async () => {
+  const october = file("data/months/2026-10/month.json");
+  const valid = fixture({ "data/months/2026-10/month.json": october });
+  assert.deepEqual((await valid.load()).hero.content.teamName, ["科乐美麻将", "格斗俱乐部"]);
+  const { createHeroPresentation } = await import(pathToFileURL(path.join(root, "src/hero-show/integration.js")));
+  for (const teamName of ["自动换行", ["一行"], ["一", "二", "三"], ["一", ""], ["一\n二", "三"], ["一", 2]]) {
+    october.hero.content.teamName = teamName;
+    await assert.rejects(fixture({ "data/months/2026-10/month.json": october }).load, /teamName/);
+    assert.throws(() => createHeroPresentation(october.hero, { color: "#FFFFFF" }), /teamName/);
+  }
 });

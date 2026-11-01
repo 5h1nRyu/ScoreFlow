@@ -1,4 +1,4 @@
-import { SHOW_DEFAULTS } from "./show-config.js";
+import { SHOW_DEFAULTS } from "./show-config.js?v=20261101-center";
 import { createConfig } from "./config.js";
 import { createAnimation } from "./animation.js";
 import { applyContent } from "./content.js";
@@ -35,7 +35,7 @@ export function createHeroPresentation(hero, team) {
     root.innerHTML = MARKUP;
     const stylesheet = document.createElement("link");
     stylesheet.rel = "stylesheet";
-    stylesheet.href = new URL("./styles.css", import.meta.url).href;
+    stylesheet.href = new URL("./styles.css?v=20261101-center", import.meta.url).href;
     const stylesReady = new Promise((resolve, reject) => {
       stylesheet.onload = resolve;
       stylesheet.onerror = () => reject(new Error("HeroShow 样式加载失败"));

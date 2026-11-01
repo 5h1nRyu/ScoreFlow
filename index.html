@@ -7,7 +7,7 @@
     <meta name="description" content="ScoreFlow 赛事遥测终端 · M.LEAGUE 队伍积分动态回放与排名总览" />
     <title>ScoreFlow / 赛事遥测终端</title>
     <script src="src/config/config.js"></script>
-    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="assets/css/styles.css?v=20261101-center" />
   </head>
   <body>
     <div id="presentation" class="presentation" aria-busy="true">
@@ -18,18 +18,18 @@
             <h1 id="dashboardTitleText" class="dashboard__title-text"></h1>
           </div>
           <div class="creator-brand" aria-label="创作者：豬頭神龍">
-            <img class="creator-brand__logo" src="assets/images/brand/zhutou-shenlong.svg" width="277" height="235" alt="" />
+            <span class="creator-brand__mark" aria-hidden="true"><img class="creator-brand__logo" src="assets/images/brand/zhutou-shenlong.svg" width="277" height="235" alt="" /></span>
             <span class="creator-brand__name">豬頭神龍</span>
           </div>
         </div>
       </header>
       <section class="dashboard__chart-area" aria-label="赛事遥测面板">
         <section class="dashboard__region chart-instrument" aria-labelledby="trajectoryHeading">
-          <header class="panel-header"><h2 id="trajectoryHeading">积分轨迹</h2></header>
+          <header class="panel-header"><h2 id="trajectoryHeading">积分演变</h2></header>
           <div class="chart-viewport"><canvas id="scoreChart" role="img" aria-label="各队伍随比赛进度连续变化的积分折线图"></canvas></div>
         </section>
         <section class="dashboard__region table-instrument" aria-labelledby="dataPanelHeading">
-          <header class="panel-header"><h2 id="dataPanelHeading"><span id="dataPanelTitle">对局记录</span></h2></header>
+          <header class="panel-header"><h2 id="dataPanelHeading"><span id="dataPanelTitle">比赛记录</span></h2></header>
           <div id="tableStage" class="table-stage">
             <section id="gameTable" class="game-table" aria-label="当前两场比赛详情"></section>
             <section id="teamTableSlot" class="team-table-slot" aria-label="队伍排名" hidden></section>
@@ -51,7 +51,7 @@
     <script src="src/components/score-chart.js"></script>
     <script src="src/components/game-table.js"></script>
     <script src="src/components/team-table.js"></script>
-    <script src="src/app.js"></script>
+    <script src="src/app.js?v=20261101-center"></script>
     <script src="src/core/video-export.js"></script>
   </body>
 </html>

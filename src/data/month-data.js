@@ -16,8 +16,13 @@
         throw new Error(`${month}.hero 必须是特写对象，未配置时可省略或设为 null`);
       }
       string(source.hero.team, `${month}.hero.team`);
-      for (const key of ["label", "teamName", "scoreLabel", "score", "unit", "metricsNote"]) {
+      for (const key of ["label", "scoreLabel", "score", "unit", "metricsNote"]) {
         if (typeof source.hero.content?.[key] !== "string") throw new Error(`${month}.hero.content.${key} 必须是字符串`);
+      }
+      const teamName = source.hero.content.teamName;
+      if (!Array.isArray(teamName) || teamName.length !== 2
+          || !teamName.every(line => typeof line === "string" && line.trim() && !/[\r\n]/.test(line))) {
+        throw new Error(`${month}.hero.content.teamName 必须为分别配置两行非空文字的数组`);
       }
       if (!Array.isArray(source.hero.content.metrics)) throw new Error(`${month}.hero.content.metrics 必须是数组`);
       source.hero.content.metrics.forEach((metric, i) => {

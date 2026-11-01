@@ -153,6 +153,51 @@ test("all replay phases and HeroShow stay inside a centered 16:9 frame with pure
   }
 });
 
+test("close-up centers its photo before adding 30px, centers its name, keeps placements together and uses a black first rank", async () => {
+  const expectedLines = JSON.parse(await readFile(path.join(root, "data/months/2026-10/month.json"), "utf8")).hero.content.teamName;
+  for (const viewport of [{ width: 1920, height: 1080 }, { width: 390, height: 844 }]) {
+    const { page, errors } = await exportPage(viewport);
+    try {
+      const result = await page.evaluate(async () => {
+        const manifest = await __VIDEO_EXPORT__.getManifest();
+        const a = APP_CONFIG.animation;
+        const count = Number(document.getElementById("missionGameTotal").textContent);
+        const overviewEnd = a.backgroundHoldDuration + a.entranceDuration + (count + 1) * a.gameDuration + a.gameTableExitDuration + a.overviewDuration;
+        ScoreApplication.renderFrame({ timeMs: overviewEnd - 1, deltaMs: 0 });
+        const rankColor = getComputedStyle(document.querySelector(".team-table__rank--first")).color;
+        ScoreApplication.renderFrame({ timeMs: manifest.durationMs - 3001, deltaMs: 0 });
+        const root = document.getElementById("heroShow").shadowRoot;
+        const center = (selector, axis) => {
+          const rect = root.querySelector(selector).getBoundingClientRect();
+          return axis === "x" ? rect.x + rect.width / 2 : rect.y + rect.height / 2;
+        };
+        const value = root.querySelector(".metric--placements .metric-number");
+        const groups = [...value.children];
+        const ten = groups.find(node => node.textContent === "10");
+        const digitGap = ten.children[1].getBoundingClientRect().left - ten.children[0].getBoundingClientRect().right;
+        const gaps = groups.slice(1).map((node, i) => node.getBoundingClientRect().left - groups[i].getBoundingClientRect().right);
+        return {
+          photoCenter: center("#portrait", "x"), panelCenter: center(".photo-panel", "x"),
+          scale: root.getElementById("stage").getBoundingClientRect().width / 1920, rankColor,
+          nameCenter: center(".team-name", "y"), logoCenter: center(".identity", "y"),
+          lines: [...root.querySelectorAll(".name-line")].map(node => node.textContent),
+          placements: groups.map(node => node.textContent), digitGap, gaps,
+        };
+      });
+      near(result.photoCenter - result.panelCenter, 30 * result.scale);
+      assert.equal(result.rankColor, "rgb(0, 0, 0)");
+      near(result.nameCenter, result.logoCenter);
+      assert.deepEqual(result.lines, expectedLines);
+      assert.deepEqual(result.placements, ["9", "-", "10", "-", "3", "-", "8"]);
+      near(result.digitGap, 0);
+      assert(result.gaps.every(gap => gap > 0));
+      result.gaps.forEach(gap => near(gap, result.gaps[0]));
+      assert.deepEqual(errors, []);
+      if (viewport.width === 1920) await page.screenshot({ path: path.join(root, "test-results/hero-october-updated.png") });
+    } finally { await page.close(); }
+  }
+});
+
 test("resizing normal playback only scales the design, and background images never paint the bars", async () => {
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
   await page.route("**/src/config/config.js", async route => {

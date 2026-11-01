@@ -1,7 +1,7 @@
 (function startApplication() {
   "use strict";
 
-  const { animation, backgroundColor, useBackgroundImage, debug, layout } = APP_CONFIG;
+  const { animation, backgroundColor, brandColor, useBackgroundImage, debug, layout } = APP_CONFIG;
   let title;
   let chartConfig;
   // 导出器在脚本运行前注入；从启动阶段就禁止自动播放。
@@ -11,7 +11,7 @@
   let application = null;
   let initializing = null;
   let heroModulePromise = null;
-  const loadHeroModule = () => heroModulePromise ??= import("./hero-show/integration.js");
+  const loadHeroModule = () => heroModulePromise ??= import("./hero-show/integration.js?v=20261101-center");
   const dataController = new AbortController();
 
   // 先在固定设计尺寸中完成排版，再整体缩放；黑边由 body 提供。
@@ -38,6 +38,10 @@
       throw new Error(`背景颜色“${backgroundColor}”无效`);
     }
     document.documentElement.style.setProperty("--background-color", backgroundColor);
+    if (typeof brandColor !== "string" || !CSS.supports("color", brandColor)) {
+      throw new Error(`brandColor 品牌颜色“${brandColor}”无效`);
+    }
+    document.documentElement.style.setProperty("--brand-color", brandColor);
     document.body.classList.toggle("page--image-background", useBackgroundImage);
     if (typeof debug.showLayoutBorders !== "boolean") {
       throw new Error("debug.showLayoutBorders 必须是布尔值");

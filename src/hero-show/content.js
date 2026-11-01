@@ -19,15 +19,28 @@ function createMetric(data, theme) {
   const value = document.createElement("span");
   value.className = "metric-number";
   const firstSeparator = data.value.search(/[-−–]/);
-  value.replaceChildren(...Array.from(data.value).map((character, index) => {
+  const tokens = data.format === "placements"
+    ? [...data.value.matchAll(/[^-−–]+|[-−–]/g)].map(match => ({ text: match[0].trim(), index: match.index }))
+    : Array.from(data.value, (text, index) => ({ text, index }));
+  value.replaceChildren(...tokens.map(({ text: character, index }) => {
     const glyph = document.createElement("span");
     glyph.className = /[%％]/.test(character) ? "metric-suffix"
       : character === "." ? "metric-decimal"
       : /[-−–]/.test(character) ? "metric-separator" : "metric-digit";
     if (/\d/.test(character) && data.format === "placements" && (firstSeparator < 0 || index < firstSeparator))
       glyph.classList.add("metric-accent");
-    if (data.characterColors?.[index]) glyph.style.color = resolveColor(data.characterColors[index], theme);
-    glyph.textContent = character;
+    if (data.format === "placements" && !/[-−–]/.test(character)) {
+      // 同一顺位的多位数字保持紧排，间距仅分配在分隔符两侧。
+      glyph.replaceChildren(...Array.from(character, (digit, offset) => {
+        const span = document.createElement("span");
+        span.textContent = digit;
+        if (data.characterColors?.[index + offset]) span.style.color = resolveColor(data.characterColors[index + offset], theme);
+        return span;
+      }));
+    } else {
+      if (data.characterColors?.[index]) glyph.style.color = resolveColor(data.characterColors[index], theme);
+      glyph.textContent = character;
+    }
     return glyph;
   }));
   const unit = document.createElement("span");
@@ -65,11 +78,8 @@ export function applyContent(config, root = document) {
     stage.style.setProperty(`--${key}`, src ? `url(${JSON.stringify(new URL(src, document.baseURI).href)})` : "none");
   element("team-logo").style.transform = `scale(${layout.logoScale})`;
   element("portrait-motion").style.transformOrigin = layout.portrait.origin;
-  const characters = Array.from(content.teamName);
-  const split = layout.nameBreakAfter;
-  const lines = content.teamName.includes("\n") ? content.teamName.split("\n").map((line) => Array.from(line))
-    : split > 0 && split < characters.length ? [characters.slice(0, split), characters.slice(split)] : [characters];
-  element("reveal-name").textContent = content.teamName.replace(/\n/g, " ");
+  const lines = content.teamName.map(line => Array.from(line));
+  element("reveal-name").textContent = content.teamName.join(" ");
   element("team-name").replaceChildren(...lines.map((line) => {
     const row = document.createElement("span");
     row.className = "name-line";
@@ -85,7 +95,7 @@ export function applyContent(config, root = document) {
   element("metrics").style.gridTemplateColumns = `repeat(${Math.max(1, columns)}, minmax(0, 1fr))`;
   element("metrics").replaceChildren(...content.metrics.map((metric) => createMetric(metric, theme)));
   element("metrics-note").hidden = !content.metricsNote;
-  const description = `${content.label}，${content.teamName.replace(/\n/g, "")}，${content.scoreLabel} ${content.score} ${content.unit}。`;
+  const description = `${content.label}，${content.teamName.join("")}，${content.scoreLabel} ${content.score} ${content.unit}。`;
   const metricDescription = content.metrics.map((metric) => `${metric.label} ${metric.value}${metric.unit}`).join("，");
   element("viewport").setAttribute("aria-label", description + (metricDescription ? ` ${metricDescription}。` : ""));
   for (const id of ["label-mask", "team-name", "score-panel", "reveal-name"])

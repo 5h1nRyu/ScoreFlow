@@ -21,7 +21,7 @@
     "team": "角川樱花骑士",
     "content": {
       "label": "九月队伍积分冠军",
-      "teamName": "角川樱花骑士",
+      "teamName": ["角川", "樱花骑士"],
       "scoreLabel": "月间队伍得分",
       "score": "+197.2",
       "unit": "PT",

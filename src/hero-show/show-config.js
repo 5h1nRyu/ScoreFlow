@@ -9,7 +9,6 @@ export const SHOW_DEFAULTS = {
     }, // 字体 src 留空使用系统字体；替换字体时一并保留相应许可证。
   },
   layout: {
-    nameBreakAfter: 2,
     nameFontSize: 100,
     scoreFontSize: 250,
     labelFontSize: 68,
@@ -20,7 +19,7 @@ export const SHOW_DEFAULTS = {
     metricGap: 46,
     introFontSize: 380,
     introMaxWidth: 2850,
-    portrait: { x: 0, y: 0, scale: 1, origin: "50% 50%" },
+    portrait: { x: 30, y: 0, scale: 1, origin: "50% 50%" },
     logoScale: 0.84,
   },
   // 以队伍 heroColor（缺省使用 color）为基础，与目标色按比例混合。
@@ -31,7 +30,7 @@ export const SHOW_DEFAULTS = {
     panelGlow: { mix: "#FFFFFF", amount: 0, alpha: 0.467 },
   },
   metricFormats: {
-    placements: { columns: 2, colors: { first: "accent" } },
+    placements: { columns: 2, colors: { first: "dataInk" } },
   },
   theme: {
     paper: "#ECE5D6", ink: "#191919",
@@ -41,9 +40,9 @@ export const SHOW_DEFAULTS = {
   },
   // 每项指标可覆盖这些颜色；可用 theme 中的键名或 CSS 颜色。
   metricStyle: {
-    spacing: 0.5, // placements 中字符可用间隙的比例，0 紧排，1 铺满当前列。
+    spacing: 0.5, // placements 中分隔符两侧可用间隙的比例，0 紧排，1 铺满当前列；数字内部不加间隙。
     colors: {
-      label: "dataInk", number: "dataInk", decimal: "dataInk",
+      label: "paper", number: "dataInk", decimal: "dataInk",
       separator: "dataInk", suffix: "accent", unit: "accent", first: "dataInk",
     },
   },
