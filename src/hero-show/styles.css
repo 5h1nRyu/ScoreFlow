@@ -49,8 +49,8 @@ img { display:block; user-select:none; pointer-events:none; }
 .metric-decimal { color:var(--metric-decimal); }
 .metric-separator { color:var(--metric-separator); }
 .metric-accent { color:var(--metric-first); }
-.metric-suffix { color:var(--metric-suffix); }
-.metric-unit { font:800 27px/1 MatchScore,system-ui,sans-serif; color:var(--metric-unit); }
+/* .metric-suffix { color:var(--metric-suffix); }
+.metric-unit { font:800 27px/1 MatchScore,system-ui,sans-serif; color:var(--metric-unit); } */
 .reveal { z-index:10; }
 .reveal-name { position:absolute; left:0; top:277px; font:900 380px/1.1 MatchTitle,sans-serif; white-space:nowrap; letter-spacing:-6px; color:var(--ink); }
 .bridge { z-index:20; }

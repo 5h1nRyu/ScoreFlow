@@ -43,7 +43,7 @@ export const SHOW_DEFAULTS = {
     spacing: 0.5, // placements 中分隔符两侧可用间隙的比例，0 紧排，1 铺满当前列；数字内部不加间隙。
     colors: {
       label: "paper", number: "dataInk", decimal: "dataInk",
-      separator: "dataInk", suffix: "accent", unit: "accent", first: "dataInk",
+      separator: "dataInk", suffix: "dataInk", unit: "dataInk", first: "dataInk",
     },
   },
   motion: { // 毫秒；开始时间、入场完成时间和总时长由程序计算。
