@@ -46,7 +46,7 @@ after(async () => {
   await new Promise(resolve => server ? server.close(resolve) : resolve());
 });
 
-async function openExport(o = options(), modify) {
+async function openExport(o = options(), modify, { useOctoberFixture = true } = {}) {
   const page = await browser.newPage({ viewport: o.viewport, deviceScaleFactor: o.deviceScaleFactor });
   const errors = [];
   page.on("pageerror", error => errors.push(error.message));
@@ -69,10 +69,15 @@ async function openExport(o = options(), modify) {
       constructor(callback) { super(callback); scheduledWork.observers++; }
     };
   }, o);
-  // 除明确覆盖的测试外，使用十月未配置特写、向九月回溯的固定场景。
-  const october = JSON.parse(await readFile(path.join(root, "data/months/2026-10/month.json"), "utf8"));
-  october.hero = null;
-  await page.route("**/data/months/2026-10/month.json", route => route.fulfill({ json: october }));
+  // 固定旧版协议测试的月份和特写，默认月份切换后仍可复现同一场景。
+  if (useOctoberFixture) {
+    const october = JSON.parse(await readFile(path.join(root, "data/months/2026-10/month.json"), "utf8"));
+    october.hero = null;
+    await page.route("**/data/active-month.json", route => route.fulfill({
+      json: { month: "2026-10", availableMonths: ["2026-09", "2026-10"] }
+    }));
+    await page.route("**/data/months/2026-10/month.json", route => route.fulfill({ json: october }));
+  }
   if (modify) await modify(page);
   await page.goto(baseURL);
   await page.waitForFunction(() => window.__VIDEO_EXPORT__);
@@ -284,6 +289,61 @@ test("monthly selection updates chart content, opening scores, endpoint labels a
       assert.deepEqual(page.pageErrors, []);
     } finally { await page.close(); }
   }
+});
+
+test("the November preview exports 56 games and falls back to the October close-up", async () => {
+  const o = options(1, 1600, 900);
+  const page = await openExport(o, undefined, { useOctoberFixture: false });
+  try {
+    const manifest = await page.evaluate(() => __VIDEO_EXPORT__.getManifest());
+    assert.match(manifest.name, /11月.*预览/);
+    await prepare(page, o);
+    await advance(page, 0, 1);
+    assert.equal(await page.locator("#dashboardTitleText").textContent(), manifest.name);
+    assert.equal(await page.locator("#missionGameTotal").textContent(), "56");
+    const result = await page.evaluate(durationMs => {
+      const animation = APP_CONFIG.animation;
+      const lastGame = animation.backgroundHoldDuration + animation.entranceDuration + 56 * animation.gameDuration;
+      ScoreApplication.renderFrame({ timeMs: lastGame, deltaMs: 0 });
+      const lastMatchVisible = [...document.querySelectorAll(".game-table__title")]
+          .some(title => title.textContent === "11月24日 B桌 第二半庄" && title.getBoundingClientRect().height > 0);
+      const labels = [];
+      const chart = document.getElementById("scoreChart").getContext("2d");
+      const fillText = chart.fillText;
+      chart.fillText = function (label, ...args) {
+        labels.push(label);
+        return fillText.call(this, label, ...args);
+      };
+      ScoreApplication.renderFrame({
+        timeMs: lastGame + animation.gameDuration + animation.gameTableExitDuration + animation.overviewDuration - 1,
+        deltaMs: 0
+      });
+      chart.fillText = fillText;
+      const leader = document.querySelector(".team-table__rank--first").closest(".team-table__row");
+      ScoreApplication.renderFrame({ timeMs: durationMs - animation.restartDelay - 1, deltaMs: 0 });
+      const host = document.getElementById("heroShow");
+      const hero = host.shadowRoot;
+      return {
+        lastMatchVisible,
+        dateEndpoints: labels.filter(label => label === "11/1" || label === "11/24"),
+        leader: leader.querySelector(".team-table__name").textContent,
+        score: leader.querySelector(".team-table__score").textContent,
+        heroVisible: !host.hidden && hero.getElementById("board").style.visibility === "visible",
+        heroLabel: hero.getElementById("eyebrow").textContent,
+        heroPortrait: new URL(hero.getElementById("portrait").src).pathname
+      };
+    }, manifest.durationMs);
+    assert.deepEqual(result, {
+      lastMatchVisible: true,
+      dateEndpoints: ["11/1", "11/24"],
+      leader: "角川樱花骑士",
+      score: "481.3",
+      heroVisible: true,
+      heroLabel: "十月队伍积分冠军",
+      heroPortrait: "/data/months/2026-10/assets/portrait.png"
+    });
+    assert.deepEqual(page.pageErrors, []);
+  } finally { await page.close(); }
 });
 
 test("a newly configured close-up uses its own team, assets, text and derived chart-color fallback", async () => {
@@ -596,6 +656,8 @@ test("normal playback still pauses the whole page, resumes, reaches overview and
 
 
 test("simplified NASA-punk panels retain the original title, color portraits and keyboard playback", { timeout: 30000 }, async () => {
+  const { month } = JSON.parse(await readFile(path.join(root, "data/active-month.json"), "utf8"));
+  const { chart } = JSON.parse(await readFile(path.join(root, `data/months/${month}/month.json`), "utf8"));
   for (const viewport of [{ width: 1366, height: 768 }, { width: 390, height: 844 }]) {
     const page = await browser.newPage({ viewport });
     await page.route("**/src/config/config.js", async route => {
@@ -608,7 +670,7 @@ test("simplified NASA-punk panels retain the original title, color portraits and
       await page.goto(baseURL);
       await page.waitForFunction(() => document.querySelector("#dashboard").dataset.phase === "playing");
       assert.equal(await page.locator("#teamLegend, #playbackToggle, .mission-patch, .panel-code, .equipment-label").count(), 0);
-      assert.equal(await page.locator("#dashboardTitleText").textContent(), JSON.parse(await readFile(path.join(root, "data/months/2026-10/month.json"), "utf8")).chart.title);
+      assert.equal(await page.locator("#dashboardTitleText").textContent(), chart.title);
       assert.equal(await page.locator(".game-table__portrait").first().evaluate(node => getComputedStyle(node).filter), "saturate(0.8)");
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), viewport.width);
       assert.equal(await page.locator("body").evaluate(body => getComputedStyle(body).backgroundColor), "rgb(0, 0, 0)");

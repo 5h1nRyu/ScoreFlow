@@ -12,7 +12,11 @@ function fixture(overrides = {}) {
   // 回溯测试明确使用未配置十月特写的场景，不依赖当前月是否已制作完成。
   const unconfiguredOctober = file("data/months/2026-10/month.json");
   unconfiguredOctober.hero = null;
-  overrides = { "data/months/2026-10/month.json": unconfiguredOctober, ...overrides };
+  overrides = {
+    "data/active-month.json": { month: "2026-10", availableMonths: ["2026-09", "2026-10"] },
+    "data/months/2026-10/month.json": unconfiguredOctober,
+    ...overrides
+  };
   const requests = [];
   const context = vm.createContext({ URL, structuredClone });
   for (const name of ["team-data", "game-data", "month-data"]) {
@@ -129,7 +133,7 @@ test("heroColor overrides chart color; omitted heroColor uses chart color and sh
 test("team-name lines are independently configured and malformed line arrays are rejected", async () => {
   const october = file("data/months/2026-10/month.json");
   const valid = fixture({ "data/months/2026-10/month.json": october });
-  assert.deepEqual((await valid.load()).hero.content.teamName, ["科乐美麻将", "格斗俱乐部"]);
+  assert.deepEqual((await valid.load()).hero.content.teamName, ["科乐美", "麻将格斗俱乐部"]);
   const { createHeroPresentation } = await import(pathToFileURL(path.join(root, "src/hero-show/integration.js")));
   for (const teamName of ["自动换行", ["一行"], ["一", "二", "三"], ["一", ""], ["一\n二", "三"], ["一", 2]]) {
     october.hero.content.teamName = teamName;
